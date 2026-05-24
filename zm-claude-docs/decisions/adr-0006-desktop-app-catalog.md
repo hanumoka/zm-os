@@ -38,8 +38,8 @@ PRD §3 DSK-02 (데스크탑 영역 + 아이콘) 와 §7 수용 기준 1·3·4·
 - `<Desktop apps>` props override 로 테스트/v2 모킹 용이.
 
 ### Negative
-- 사용자가 새 게임 설치 불가 → PRD §7 시나리오 2·3 (스토어에서 선택 → 설치) 검증 불가. Phase 2 STR 통합 시 본격 검증.
-- `desktopApps.ts` 변경 = 코드 변경 → 데모 시점에 추가 게임 도입하려면 작업 단위 1개 소요. POC 단계 허용.
+- ~~사용자가 새 게임 설치 불가~~ **Phase 3 작업 1에서 사용자 ZIP 업로드(APP-02) 추가** (ADR-0008 신규) → 사용자 source 도입으로 해소. PRD §7 시나리오 2·3 (스토어에서 선택 → 설치) 검증 완료.
+- `desktopApps.ts` 변경 = 코드 변경. 기존 built-in 게임 도입 시 작업 단위 1개 소요. POC 단계 허용.
 - ~~IndexedDB persist 미적용~~ **Phase 2 작업 3에서 설치 상태 IDB 영속화 완료** (인터페이스 무변경, ADR-0007 idb wrapper 활용). 윈도우/아이콘 위치 persist는 별도 작업 (DSK-04 reshape 후보).
 
 ## Alternatives Considered
@@ -81,3 +81,18 @@ PRD §3 DSK-02 (데스크탑 영역 + 아이콘) 와 §7 수용 기준 1·3·4·
 - `src/components/desktop/desktopApps.ts` (snake-game 엔트리 추가, category: 'game' 최초 활성화)
 - `package.json` (phaser@^3.90.0 dependencies 추가)
 - Phaser 번들 전략: Host self origin 상대경로 `<script src="/phaser.min.js">` (Chrome 142+ CDN 차단 회피, research-analyst 결정)
+
+### Phase 3 작업 1 (APP-02 사용자 ZIP 업로드) 산출물 (2026-05-24)
+- `src/lib/apps/zip-loader.ts` (320 LOC, 신규 — ZIP 파싱 + 보안 검증 6단계)
+- `src/lib/apps/user-apps.ts` (61 LOC, 신규 — UserAppRecord 타입)
+- `src/components/store/UserAppsProvider.tsx` (155 LOC, 신규 — useUserApps hook)
+- `src/components/store/AppUploadButton.tsx` (152 LOC, 신규 — 파일 업로드 UI)
+- `src/lib/storage/indexeddb.ts` (DB_VERSION 2 추가 — STORE_USER_APPS)
+- `src/components/desktop/desktopApps.ts` (buildCatalog 함수 추가 — user source 통합)
+- `src/components/desktop/AppFrame.tsx` (source 분기 — built-in vs user HTML)
+- `src/components/desktop/Desktop.tsx` (buildCatalog 호출)
+- `src/app/store/page.tsx` (AppUploadButton 표시)
+- `src/app/layout.tsx` (UserAppsProvider 추가)
+- `package.json` (jszip@^3.10.1 dependencies 추가)
+- 정책: PROD-05 신규 등재
+- ADR-0008 신규

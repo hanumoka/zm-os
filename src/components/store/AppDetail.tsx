@@ -10,6 +10,10 @@ type AppDetailProps = {
   installed: boolean;
   onInstall: () => void;
   onUninstall: () => void;
+  /** APP-02: 사용자 업로드 앱 여부 (P8=A+B: 영구 삭제 버튼 표시 제어) */
+  isUserApp?: boolean;
+  /** APP-02: 사용자 앱 영구 삭제 핸들러 — isUserApp=true 일 때만 전달 */
+  onPermanentRemove?: () => void;
 };
 
 // ─── AppIconDisplay ───────────────────────────────────────────────────────────
@@ -47,6 +51,8 @@ export function AppDetail({
   installed,
   onInstall,
   onUninstall,
+  isUserApp = false,
+  onPermanentRemove,
 }: AppDetailProps): React.JSX.Element {
   return (
     <div className="flex flex-col h-full overflow-y-auto p-5 gap-5">
@@ -78,7 +84,7 @@ export function AppDetail({
       </div>
 
       {/* ── CTA 버튼 ──────────────────────────────────────────────────────── */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 flex-wrap">
         {installed ? (
           <>
             <button
@@ -104,6 +110,16 @@ export function AppDetail({
             className="px-4 py-2 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-400"
           >
             설치
+          </button>
+        )}
+        {/* APP-02: 사용자 업로드 앱 영구 삭제 버튼 (P8=A+B) */}
+        {isUserApp && onPermanentRemove !== undefined && (
+          <button
+            type="button"
+            onClick={onPermanentRemove}
+            className="px-4 py-2 rounded-md text-sm font-medium border border-red-300 text-red-700 bg-white hover:bg-red-50 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-red-400"
+          >
+            영구 삭제
           </button>
         )}
       </div>

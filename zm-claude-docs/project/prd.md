@@ -2,9 +2,9 @@
 
 > **Living Document**. 기능 완료 시 즉시 갱신. 버전 bump 필수.
 
-**Version**: 0.5.0
+**Version**: 0.6.0
 **Last Updated**: 2026-05-24
-**Status**: Phase 2 ✅ 완료 (4/4, 100%)
+**Status**: Phase 3 진행 중 (1/4, 25%)
 
 ---
 
@@ -55,7 +55,7 @@ zm-os는 **브라우저 안에서 동작하는 가상 데스크탑** 으로, 사
 | **STR-01** | 앱 카탈로그 UI | ✅ 완료 | `/store` 라우트 + AppCard + InstalledAppsProvider |
 | **STR-02** | 앱 상세 페이지 + 설치 | ✅ 완료 | AppDetail 패널 + install/uninstall 액션 |
 | **APP-01** | 앱 매니페스트 스키마 (Zod) | ✅ 완료 | `src/lib/apps/manifest.ts` |
-| **APP-02** | 앱 패키지 포맷 (itch.io식 ZIP) | ⏳ 계획 | |
+| **APP-02** | 앱 패키지 포맷 (itch.io식 ZIP) | ✅ 완료 | JSZip 3.10.1 + 보안 검증 6단계 (Phase 3 작업 1) |
 | **APP-03** | 설치한 앱 목록 관리 | ✅ 완료 | IndexedDB hydration + fire-and-forget persist |
 | **SBX-01** | blob: URL iframe 샌드박스 SDK | ✅ 완료 | `src/lib/apps/sandbox.ts` (srcdoc + sandbox="allow-scripts") |
 | **SBX-02** | CSP/Permissions-Policy 헤더 | ✅ 완료 | next.config.ts headers() + src/lib/security/csp.ts |
@@ -108,6 +108,25 @@ POC 완료 = 아래 시나리오가 동작:
 ---
 
 ## §8. Change Log
+
+### 0.6.0 (2026-05-24) — Phase 3 작업 1 완료 (APP-02)
+- Phase 3 작업 1 완료 ✅ (APP-02: 사용자 ZIP 앱 업로드)
+  - 신규: `src/lib/apps/zip-loader.ts` (320 LOC) — ZIP 파싱 + 보안 검증 6단계 (magic byte → 파싱 → path traversal → 압축비 → 필수 파일 → 매니페스트)
+  - 신규: `src/lib/apps/user-apps.ts` (61 LOC) — UserAppRecord 타입
+  - 신규: `src/components/store/UserAppsProvider.tsx` (155 LOC) — useUserApps hook
+  - 신규: `src/components/store/AppUploadButton.tsx` (152 LOC) — 파일 업로드 UI + drag-drop
+  - 수정: `src/lib/storage/indexeddb.ts` (DB_VERSION 2 추가) — STORE_USER_APPS
+  - 수정: `src/components/desktop/desktopApps.ts` (buildCatalog 함수) — built-in + user 통합
+  - 수정: `src/components/desktop/AppFrame.tsx` (source 분기)
+  - 수정: `src/components/desktop/Desktop.tsx` (buildCatalog 호출)
+  - 수정: `src/app/store/page.tsx` + `src/app/layout.tsx`
+  - 수정: `package.json` (jszip@^3.10.1)
+  - 자동 채택 결정: P1=JSZip 3.10.1 / P2=A 스토어 통합 / P3=α 단일 HTML / P4 임계치 10/5/1000 / P5=A srcdoc / P6 source+buildCatalog / P7=B 별도 설치 / P8=A+B / P9=DB v2 / P10=A 단순 상태
+  - 신규 결정: ADR-0008 (사용자 ZIP 업로드 모델) + PROD-05 (업로드 메타데이터 정책)
+  - 검증: build-checker ✅ / code-reviewer ✅ / app-sandbox-auditor ✅ / constraint-checker ✅ / self-verifier ✅ PASS
+  - 신규 보안 위협 등록: N-05/06/07 (CVE-2022-48285, HTML 크기, ZIP bomb)
+  - 사용자 검증 deferred: ZIP 업로드 → 설치 → 데스크탑 표시 → 실행 (e2e Playwright 권장)
+  - **Phase 3 진행률: 1/4 (25%)**
 
 ### 0.5.0 (2026-05-24) — Phase 2 작업 3 완료 + Phase 2 ✅ 완료
 - Phase 2 작업 3 완료 ✅ (APP-03: IndexedDB hydration + fire-and-forget persist)

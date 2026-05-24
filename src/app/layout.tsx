@@ -1,6 +1,7 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import './globals.css';
+import { UserAppsProvider } from '@/components/store/UserAppsProvider';
 import { InstalledAppsProvider } from '@/components/store/InstalledAppsProvider';
 import { WindowManagerProvider } from '@/components/desktop/WindowManagerProvider';
 
@@ -22,9 +23,11 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body>
-        <InstalledAppsProvider>
-          <WindowManagerProvider>{children}</WindowManagerProvider>
-        </InstalledAppsProvider>
+        <UserAppsProvider>
+          <InstalledAppsProvider>
+            <WindowManagerProvider>{children}</WindowManagerProvider>
+          </InstalledAppsProvider>
+        </UserAppsProvider>
       </body>
     </html>
   );

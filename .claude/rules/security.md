@@ -48,13 +48,88 @@ paths:
 - 메모리 quota: `navigator.storage.estimate()`로 모니터링, 임계치 초과 시 알림
 - localStorage 5MB 한도: 사용자 앱은 IndexedDB/OPFS만 사용하도록 가이드
 
+## 사용자 제출 ZIP 수신 절차 (APP-02)
+
+사용자가 `<input type="file">`로 업로드한 ZIP은 다음 순서로 검증:
+
+### 검증 단계 (순차, 모두 통과해야 함)
+
+1. **Magic byte 검증** (첫 4바이트)
+   - 허용 값: `0x50 0x4B 0x03 0x04` (local file header)
+   - 또는: `0x50 0x4B 0x05 0x06` (central directory end)
+   - 또는: `0x50 0x4B 0x07 0x08` (data descriptor)
+   - 위반 시: 즉시 거부 ("올바른 ZIP 파일이 아닙니다")
+
+2. **크기 한도**
+   - ZIP ≤ 10MB (= `MAX_ZIP_BYTES = 10_485_760`)
+   - 초과 시: 거부 ("파일이 너무 큽니다")
+
+3. **JSZip 파싱**
+   - `JSZip.loadAsync(file)` 비동기 호출
+   - 실패 시: 거부 ("ZIP 파일 읽기 실패")
+
+4. **Path traversal 차단** (각 파일 entry)
+   - 파일명에 `..` 포함 → 거부
+   - 파일명이 `/`로 시작 (절대 경로) → 거부
+   - 파일명에 `\` 포함 (Windows 경로) → 거부
+   - 위반 시: 거부 ("보안: 경로 순회 감지")
+
+5. **ZIP bomb 방어 (압축비 검증)**
+   - 각 entry마다: `compressed > 0 && uncompressed / compressed > MAX_COMPRESSION_RATIO` 확인
+   - `MAX_COMPRESSION_RATIO = 1000` (OWASP 표준)
+   - 위반 시: 거부 ("보안: 비정상적인 압축률")
+
+6. **필수 파일 확인**
+   - root 레벨에 `manifest.json` 존재 여부
+   - root 레벨에 `index.html` 존재 여부
+   - 부재 시: 거부 ("필수 파일 누락")
+
+7. **HTML 크기 한도**
+   - index.html의 UTF-8 바이트 크기 ≤ 5MB (= `MAX_HTML_BYTES = 5_242_880`)
+   - 초과 시: 거부 ("HTML 파일이 너무 큽니다")
+
+8. **매니페스트 Zod 검증**
+   - `manifest.json` 콘텐츠를 `parseManifest(content)` 호출
+   - 실패 시: 거부 ("매니페스트 형식 오류")
+
+9. **ID 중복 검사**
+   - `manifest.id`가 `reservedIds` (built-in 앱 + 기존 user apps) 에 이미 존재하는가?
+   - 존재 시: 거부 ("이미 설치된 앱입니다")
+
+10. **저장** (위 모든 검증 통과 시)
+    - UserAppRecord = { id, manifest, htmlContent, installedAt, sourceZipSize, htmlSize }
+    - IndexedDB STORE_USER_APPS에 put
+
+### 임계치 상수 (SSOT: src/lib/apps/zip-loader.ts)
+
+```typescript
+const MAX_ZIP_BYTES = 10_485_760;           // 10MB
+const MAX_HTML_BYTES = 5_242_880;           // 5MB (UTF-8 바이트)
+const MAX_COMPRESSION_RATIO = 1000;         // ZIP bomb 기준 (OWASP)
+const MAGIC_BYTES = [
+  0x50, 0x4B, 0x03, 0x04,  // Local file header
+  0x50, 0x4B, 0x05, 0x06,  // Central directory end
+  0x50, 0x4B, 0x07, 0x08,  // Data descriptor
+];
+```
+
+### 보안 근거
+
+- **Magic byte**: 파일 헤더로 위조 방지
+- **크기 한도**: IDB 저장소 quota 관리 + 메모리 오버헤드 제한
+- **Path traversal**: ZIP 자원 접근 시 상위 디렉토리 이탈 방지
+- **압축비**: ZIP bomb (무한 압축 루프) 방어
+- **필수 파일**: POC v1 단일 HTML 모델 강제
+- **매니페스트 검증**: id/version/name 형식 일관성
+
 ## 추적 대상 CVE
 
 - **CVE-2024-5691** (Firefox): iframe sandbox 우회 가능성
 - **CVE-2025-4609** (Chromium): IPC 취약점
 - **CVE-2025-54143** (Firefox iOS): 다운로드 권한 우회
+- **CVE-2022-48285** (JSZip): Path traversal — v3.8.0+에서 수정됨 (현재 3.10.1 채택)
 
-신규 CVE는 정기 점검 필요 (브라우저 보안 공지 모니터링).
+신규 CVE는 정기 점검 필요 (브라우저 보안 공지 모니터링). JSZip 의존성 변경 시 CVE 기록 검토 의무.
 
 ## 코드 리뷰 체크리스트 (app-sandbox-auditor agent와 연동)
 

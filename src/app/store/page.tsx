@@ -1,12 +1,14 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { DESKTOP_APPS } from '@/components/desktop/desktopApps';
+import { buildCatalog } from '@/components/desktop/desktopApps';
 import type { DesktopAppCategory, DesktopAppEntry } from '@/components/desktop/desktopApps';
 import { useInstalledApps } from '@/components/store/useInstalledApps';
+import { useUserApps } from '@/components/store/UserAppsProvider';
 import { AppCard } from '@/components/store/AppCard';
 import { AppDetail } from '@/components/store/AppDetail';
+import { AppUploadButton } from '@/components/store/AppUploadButton';
 
 // ─── 카테고리 필터 타입 ───────────────────────────────────────────────────────
 
@@ -31,10 +33,11 @@ const CATEGORY_FILTERS: ReadonlyArray<CategoryFilter> = [
 /**
  * 스토어 페이지 — /store 라우트 (P5=r1: 단일 라우트 + 사이드 패널).
  *
- * 레이아웃:
- *   - 헤더: "zm-os 앱 스토어" + "← 데스크탑으로" 링크
- *   - 카테고리 필터 버튼 그룹
- *   - 본문: 좌측 카드 목록 + 우측 상세 패널
+ * APP-02 통합:
+ * - UserAppsProvider에서 userApps 수신
+ * - buildCatalog(userApps)로 built-in + 사용자 앱 통합 카탈로그 생성
+ * - 헤더에 AppUploadButton 삽입 (P2=A)
+ * - user 앱 상세 패널에 "영구 삭제" 버튼 추가 (P8=A+B)
  *
  * 설치 상태: useInstalledApps() (InstalledAppsProvider 하위 — layout.tsx 옵션A)
  */
@@ -43,18 +46,25 @@ export default function StorePage(): React.JSX.Element {
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all');
 
   const { isInstalled, install, uninstall } = useInstalledApps();
+  const { userApps, removeUserApp } = useUserApps();
+
+  // built-in + 사용자 앱 통합 카탈로그 (P6)
+  const catalog = useMemo(() => buildCatalog(userApps), [userApps]);
 
   // 카테고리 필터링
   const filteredApps: ReadonlyArray<DesktopAppEntry> =
     categoryFilter === 'all'
-      ? DESKTOP_APPS
-      : DESKTOP_APPS.filter((app) => app.category === categoryFilter);
+      ? catalog
+      : catalog.filter((app) => app.category === categoryFilter);
 
   // 선택된 앱 항목
   const selectedEntry: DesktopAppEntry | undefined =
     selectedId !== null
-      ? DESKTOP_APPS.find((app) => app.id === selectedId)
+      ? catalog.find((app) => app.id === selectedId)
       : undefined;
+
+  // 선택된 앱이 사용자 업로드 앱인지 여부
+  const isUserApp = selectedEntry?.source === 'user';
 
   const handleSelect = (id: string): void => {
     setSelectedId((prev) => (prev === id ? null : id));
@@ -66,6 +76,14 @@ export default function StorePage(): React.JSX.Element {
 
   const handleUninstall = (id: string): void => {
     uninstall(id);
+  };
+
+  // P8=A+B: 사용자 앱 영구 삭제 — uninstall(설치 상태) + removeUserApp(IDB + 메모리)
+  const handlePermanentRemove = (id: string): void => {
+    uninstall(id);
+    void removeUserApp(id);
+    // 삭제 후 선택 해제
+    setSelectedId((prev) => (prev === id ? null : prev));
   };
 
   return (
@@ -84,8 +102,12 @@ export default function StorePage(): React.JSX.Element {
         <h1 className="text-base font-semibold text-neutral-900">
           zm-os 앱 스토어
         </h1>
-        <div className="ml-auto text-xs text-neutral-400">
-          {DESKTOP_APPS.length}개 앱
+        {/* APP-02: ZIP 업로드 버튼 (P2=A) */}
+        <div className="ml-auto flex items-center gap-3">
+          <AppUploadButton />
+          <span className="text-xs text-neutral-400">
+            {catalog.length}개 앱
+          </span>
         </div>
       </header>
 
@@ -148,6 +170,12 @@ export default function StorePage(): React.JSX.Element {
               installed={isInstalled(selectedEntry.id)}
               onInstall={(): void => handleInstall(selectedEntry.id)}
               onUninstall={(): void => handleUninstall(selectedEntry.id)}
+              isUserApp={isUserApp}
+              onPermanentRemove={
+                isUserApp
+                  ? (): void => handlePermanentRemove(selectedEntry.id)
+                  : undefined
+              }
             />
           ) : (
             <div className="flex flex-col items-center justify-center h-full gap-2 text-neutral-400">

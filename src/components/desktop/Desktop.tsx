@@ -1,21 +1,26 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useWindowManager } from './useWindowManager';
 import { Window } from './Window';
 import { AppFrame } from './AppFrame';
 import { DesktopIcon } from './DesktopIcon';
 import { Taskbar } from './Taskbar';
-import { DESKTOP_APPS } from './desktopApps';
+import { buildCatalog } from './desktopApps';
 import type { DesktopAppEntry } from './desktopApps';
 import type { WindowState } from './types';
 import { useInstalledApps } from '@/components/store/useInstalledApps';
+import { useUserApps } from '@/components/store/UserAppsProvider';
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
 type DesktopProps = {
-  /** 표시할 앱 목록. 기본값: DESKTOP_APPS */
+  /**
+   * 표시할 앱 목록.
+   * APP-02: undefined 시 buildCatalog(userApps) 자동 사용 (built-in + 사용자 앱 통합).
+   * 명시 전달 시 그대로 사용 (테스트 / Storybook 용도).
+   */
   apps?: ReadonlyArray<DesktopAppEntry>;
   /** "스토어" 시스템 아이콘 표시 여부. 기본값: true (P3=i+iii) */
   showStoreIcon?: boolean;
@@ -40,12 +45,19 @@ type DesktopProps = {
  * (Window → react-rnd bounds prop으로 전달되어 데스크탑 영역 내 이동 제한)
  */
 export function Desktop({
-  apps = DESKTOP_APPS,
+  apps: appsProp,
   showStoreIcon = true,
   className = '',
 }: DesktopProps): React.JSX.Element {
   const manager = useWindowManager();
   const { isInstalled } = useInstalledApps();
+  const { userApps } = useUserApps();
+
+  // APP-02: appsProp 미전달 시 buildCatalog(userApps) 사용 (P6)
+  const apps = useMemo(
+    () => appsProp ?? buildCatalog(userApps),
+    [appsProp, userApps],
+  );
   const desktopAreaRef = useRef<HTMLDivElement>(null);
   const [selectedIconId, setSelectedIconId] = useState<string | null>(null);
 
@@ -123,12 +135,11 @@ export function Desktop({
           <Link
             href="/store"
             aria-label="앱 스토어 열기"
-            style={{ position: 'absolute', right: 30, top: 30 }}
             onClick={(e): void => {
               // 이벤트 버블링으로 인한 데스크탑 선택 해제 방지
               e.stopPropagation();
             }}
-            className="block"
+            className="absolute right-[30px] top-[30px] block"
           >
             <DesktopIcon
               id="__system_store__"

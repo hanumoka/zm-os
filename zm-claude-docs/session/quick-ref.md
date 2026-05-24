@@ -2,18 +2,25 @@
 
 > 1페이지 프로젝트 컨텍스트. 세션 시작 시 필독. 수치 변경 시 즉시 갱신.
 
-## 🎉 Phase 2 ✅ 완료 (2026-05-24)
-- **Phase 1**: ✅ 완료 (7/7), Playwright e2e PASS
-- **Phase 2**: ✅ 완료 (4/4, 100%) — 작업 1 ✅ STR-01/02 + 작업 2 ✅ STG-01 + 작업 3 ✅ APP-03 + 작업 4 ✅ GAME-01
-- **마지막 커밋**: `4f3d0e3 feat(store): APP-03 IndexedDB hydration + persist`, push 완료
+## 🚀 Phase 3 진행 중 (1/4, 25%) 🔄
+- **Phase 1**: ✅ 완료 (7/7)
+- **Phase 2**: ✅ 완료 (4/4, 100%)
+- **Phase 3**: 🔄 진행 중 — 작업 1 ✅ APP-02 ZIP 업로드 (2026-05-24)
+- **마지막 커밋**: (대기) Phase 3 작업 1 doc-updater 진행 중
 
-## 🚀 Phase 3 진입 지점 (사용자 결정 대기)
+### 완료한 작업
+**작업 1 ✅ APP-02**: 사용자 ZIP 앱 업로드 (JSZip 3.10.1 + 보안 검증)
+- 신규: zip-loader.ts + user-apps.ts + UserAppsProvider.tsx + AppUploadButton.tsx
+- 저장소: IndexedDB DB_VERSION 2 STORE_USER_APPS
+- 카탈로그: buildCatalog(builtInApps, userApps) 통합
+- 검증: ✅ PASS (4명 + self-verifier)
+- ADR-0008 신규 + PROD-05 정책
 
-PRD §3 + roadmap §5 기반 후보 (사용자 우선순위 선택 필요):
-1. **APP-02 ZIP 업로드** — 사용자가 직접 ZIP 앱 패키지 업로드/설치/실행 (POC 비전 핵심)
-2. **안정화 우선** — 빌드/번들 사이즈 측정 + iframe 우회 시도 셀프 페네스트
-3. **게임 엔진 매트릭스 (A3)** — Pixi.js + Three.js 추가 게임 + 호환성 검증
-4. **STG-02 OPFS + DSK-04 윈도우 위치 영속화** — 인프라 강화
+### 다음 후보 (사용자 우선순위 대기)
+1. **안정화 우선 (A1+A2)** — 빌드/번들 사이즈 + iframe 우회 시도 (시큐리티 셀프 페네스트)
+2. **게임 엔진 호환성 (B)** — Pixi.js + Three.js + Godot 호환 매트릭스
+3. **STG-02 OPFS + DSK-04** — OPFS 어댑터 + 윈도우 위치 영속화
+4. **데모 영상 (C)** — ZIP 업로드 → 설치 → 실행 e2e 영상
 
 ## 현재 상태 (2026-05-24)
 - **저장소**: `git@github-personal:hanumoka/zm-os.git`, branch `main`
@@ -26,11 +33,12 @@ PRD §3 + roadmap §5 기반 후보 (사용자 우선순위 선택 필요):
 ## 기술 스택
 - Next.js 16 + React 19 + Tailwind v4 (단일 풀스택)
 - TypeScript strict, any 금지
-- iframe sandbox + Comlink IPC (앱 격리, IPC는 작업 2에서 도입)
+- iframe sandbox + Comlink IPC (앱 격리)
 - Zod (매니페스트 검증, 4.4.3)
 - idb (IndexedDB wrapper, 8.0.3)
+- jszip (ZIP 파싱 + 보안 검증, 3.10.1)
 - Phaser (게임 엔진, 3.90.0)
-- IndexedDB / OPFS (클라이언트 스토리지, Phase 2에서 도입)
+- IndexedDB / OPFS (클라이언트 스토리지)
 
 ## 핵심 정책
 - ARCH-01: 단일 Next.js 풀스택 (모노레포는 v2)
@@ -59,16 +67,15 @@ npm run dev
 
 설계 architect+research-analyst / 구현 lib-developer+fe-developer / 검증 build+code-reviewer+sandbox-auditor+constraint / 메타 self-verifier / 문서 doc-updater. 표준 워크플로: [`.claude/agents/_workflow.md`](../../.claude/agents/_workflow.md)
 
-## Phase 2 진행 상황 (100% — 4/4) ✅
+## Phase 3 진행 상황 (25% — 1/4) 🔄
 
 완료:
-- 작업 1 ✅: STR-01/02 스토어 UI + 설치 흐름
-- 작업 2 ✅: STG-01 IndexedDB 추상화 (idb v8.0.3 + 메모리 폴백)
-- 작업 3 ✅: APP-03 + ADR-0006 reshape (IndexedDB 영속화 + fire-and-forget persist)
-- 작업 4 ✅: GAME-01 Phaser 3 Snake
+- 작업 1 ✅: APP-02 사용자 ZIP 앱 업로드 (JSZip 3.10.1, 보안 검증, UserAppsProvider, AppUploadButton)
 
 다음:
-- Phase 3: POC 안정화 + 데모 영상
+- 작업 2: 안정화 (빌드/번들 사이즈 + iframe 우회 페네스트)
+- 작업 3: 게임 엔진 호환성 (Pixi + Three.js)
+- 작업 4: 데모 영상 + 포장
 
 ## Quick Links
 - PRD: [`project/prd.md`](../project/prd.md)

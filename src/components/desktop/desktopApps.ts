@@ -3,12 +3,22 @@
 // ADR-0006: v2 단계에서 API 기반 앱 레지스트리로 교체 예정.
 
 import type { SandboxIpcOptions } from '@/lib/apps/sandbox';
+import type { UserAppRecord } from '@/lib/storage/user-apps';
 
 // ─── AppIcon ──────────────────────────────────────────────────────────────────
 
 export type AppIcon =
   | { kind: 'emoji'; char: string }
   | { kind: 'url'; src: string; alt: string };
+
+// ─── AppSource ────────────────────────────────────────────────────────────────
+
+/**
+ * 앱 출처 구분.
+ * - 'built-in': 코드에 하드코딩된 시스템/데모 앱 (DESKTOP_APPS)
+ * - 'user': 사용자가 ZIP으로 업로드한 앱 (STORE_USER_APPS)
+ */
+export type AppSource = 'built-in' | 'user';
 
 // ─── DesktopAppCategory ───────────────────────────────────────────────────────
 
@@ -21,6 +31,7 @@ export type DesktopAppCategory = 'game' | 'utility' | 'demo';
  * 데스크탑에 표시되는 앱 항목 정의.
  * ADR-0006: POC v1 — 하드코딩 배열. v2에서 API 기반으로 교체.
  * STR-01: optional 스토어 메타데이터 필드 추가 (phase-2-plan §5).
+ * APP-02: source / htmlContent 필드 추가 (사용자 업로드 앱 지원).
  */
 export type DesktopAppEntry = {
   /** 앱 고유 ID (WindowState.contentId로 사용됨) */
@@ -31,8 +42,12 @@ export type DesktopAppEntry = {
   icon: AppIcon;
   /** AppManifest 호환 raw 객체 (parseManifest에 전달됨) */
   manifest: unknown;
-  /** iframe에 로드할 정적 파일 URL (/public 기준) */
-  contentUrl: string;
+  /**
+   * iframe에 로드할 정적 파일 URL (/public 기준).
+   * source === 'user' 앱은 htmlContent를 srcdoc으로 사용하며 contentUrl은 사용 안 됨.
+   * built-in 앱만 contentUrl을 사용한다.
+   */
+  contentUrl?: string;
   /** IPC 설정 (선택적 — IPC 앱만) */
   ipc?: SandboxIpcOptions;
   /** 데스크탑 아이콘 좌상단 절대 위치 (px) */
@@ -55,6 +70,17 @@ export type DesktopAppEntry = {
   author?: string;
   /** 앱 버전 문자열 */
   version?: string;
+  // ── APP-02 사용자 업로드 앱 추가 필드 ──────────────────────────────────
+  /**
+   * 앱 출처.
+   * 'built-in': 하드코딩 시스템/데모 앱 | 'user': ZIP 업로드 사용자 앱
+   */
+  source: AppSource;
+  /**
+   * 사용자 업로드 앱의 HTML 콘텐츠 (srcdoc으로 전달).
+   * source === 'user'인 경우에만 존재. built-in 앱은 undefined.
+   */
+  htmlContent?: string;
 };
 
 // ─── DESKTOP_APPS ────────────────────────────────────────────────────────────
@@ -69,6 +95,7 @@ export const DESKTOP_APPS: ReadonlyArray<DesktopAppEntry> = [
     id: 'bouncing-ball',
     name: 'Bouncing Ball',
     icon: { kind: 'emoji', char: '🟢' },
+    source: 'built-in' as const,
     contentUrl: '/sample-game/index.html',
     iconPosition: { x: 30, y: 30 },
     windowDefaults: {
@@ -102,6 +129,7 @@ export const DESKTOP_APPS: ReadonlyArray<DesktopAppEntry> = [
     id: 'ipc-demo',
     name: 'IPC Demo',
     icon: { kind: 'emoji', char: '📡' },
+    source: 'built-in' as const,
     contentUrl: '/sample-game-ipc/index.html',
     iconPosition: { x: 30, y: 130 },
     windowDefaults: {
@@ -152,6 +180,7 @@ export const DESKTOP_APPS: ReadonlyArray<DesktopAppEntry> = [
     id: 'snake-game',
     name: 'Snake',
     icon: { kind: 'emoji', char: '🐍' },
+    source: 'built-in' as const,
     contentUrl: '/sample-game-phaser/index.html',
     iconPosition: { x: 30, y: 230 },
     windowDefaults: {
@@ -183,9 +212,60 @@ export const DESKTOP_APPS: ReadonlyArray<DesktopAppEntry> = [
 // ─── findDesktopApp ───────────────────────────────────────────────────────────
 
 /**
- * id로 DesktopAppEntry를 검색한다.
+ * id로 DesktopAppEntry를 검색한다 (built-in 앱만).
+ * 사용자 앱 포함 검색은 buildCatalog() 결과에서 Array.find를 사용하세요.
  * @returns DesktopAppEntry | undefined
  */
 export function findDesktopApp(id: string): DesktopAppEntry | undefined {
   return DESKTOP_APPS.find((app) => app.id === id);
+}
+
+// ─── buildCatalog ─────────────────────────────────────────────────────────────
+
+/**
+ * built-in 앱 + 사용자 업로드 앱을 합쳐 전체 데스크탑 카탈로그를 생성한다.
+ *
+ * @param userApps  IDB에서 로드한 사용자 앱 레코드 배열
+ * @returns         built-in 앱 앞, 사용자 앱 뒤 순서의 DesktopAppEntry 배열
+ *
+ * - 아이콘 위치는 built-in 아이콘 아래에 100px 간격으로 자동 배치
+ * - user 앱의 contentUrl은 미사용 (htmlContent를 srcdoc으로 전달)
+ * - 카테고리: 'demo' 기본값 (manifest에 카테고리 필드 없으므로)
+ */
+export function buildCatalog(
+  userApps: ReadonlyArray<UserAppRecord>,
+): ReadonlyArray<DesktopAppEntry> {
+  /** built-in 앱 중 아이콘 위치가 지정된 마지막 y 좌표 */
+  const lastBuiltInY =
+    DESKTOP_APPS.reduce<number>((maxY, app) => {
+      const y = app.iconPosition?.y ?? 0;
+      return y > maxY ? y : maxY;
+    }, 0);
+
+  const userEntries: ReadonlyArray<DesktopAppEntry> = userApps.map(
+    (u, idx): DesktopAppEntry => ({
+      id: u.manifest.id,
+      name: u.manifest.name,
+      icon: { kind: 'emoji', char: '📦' },
+      source: 'user',
+      manifest: u.manifest,
+      htmlContent: u.htmlContent,
+      // built-in 앱 마지막 y 아래에 100px 간격으로 배치
+      iconPosition: { x: 30, y: lastBuiltInY + 100 + idx * 100 },
+      windowDefaults: {
+        position: { x: 100, y: 100 },
+        size: {
+          width: u.manifest.size.defaultWidth,
+          height: u.manifest.size.defaultHeight,
+        },
+      },
+      description: u.manifest.description,
+      longDescription: u.manifest.description,
+      category: 'demo',
+      author: u.manifest.author,
+      version: u.manifest.version,
+    }),
+  );
+
+  return [...DESKTOP_APPS, ...userEntries];
 }

@@ -47,7 +47,7 @@ export function AppFrame({ entry }: AppFrameProps): React.JSX.Element {
   useEffect(() => {
     // 디버그: AppFrame mount 추적
     // eslint-disable-next-line no-console
-    console.log('[AppFrame] mount', entry.id, entry.contentUrl);
+    console.log('[AppFrame] mount', entry.id, entry.source, entry.contentUrl ?? '(srcdoc)');
 
     const container = containerRef.current;
     if (container === null) {
@@ -77,15 +77,33 @@ export function AppFrame({ entry }: AppFrameProps): React.JSX.Element {
       return;
     }
 
-    // 2. POC 예외: raw fetch — /public 정적 파일 취득 (외부 API 아님).
-    setStatus('fetching');
-    fetch(entry.contentUrl)
-      .then((r) => {
-        if (!r.ok) {
-          throw new Error(`fetch 실패: ${r.status} ${r.statusText}`);
+    /**
+     * HTML 취득: source에 따라 두 경로로 분기.
+     * - 'built-in': POC 예외 raw fetch (/public 정적 파일)
+     * - 'user': entry.htmlContent를 직접 사용 (ZIP에서 이미 추출됨)
+     */
+    const getHtml = (): Promise<string> => {
+      if (entry.source === 'user') {
+        const html = entry.htmlContent;
+        if (html === undefined || html === '') {
+          return Promise.reject(new Error('user 앱 htmlContent가 없습니다'));
         }
+        return Promise.resolve(html);
+      }
+      // built-in: raw fetch (/public 정적 파일, 외부 API 아님)
+      const url = entry.contentUrl;
+      if (url === undefined || url === '') {
+        return Promise.reject(new Error('built-in 앱 contentUrl이 없습니다'));
+      }
+      return fetch(url).then((r) => {
+        if (!r.ok) throw new Error(`fetch 실패: ${r.status} ${r.statusText}`);
         return r.text();
-      })
+      });
+    };
+
+    // 2. HTML 취득
+    setStatus('fetching');
+    getHtml()
       .then((html) => {
         if (destroyed) {
           // eslint-disable-next-line no-console
@@ -94,7 +112,7 @@ export function AppFrame({ entry }: AppFrameProps): React.JSX.Element {
         }
         // eslint-disable-next-line no-console
         console.log(
-          '[AppFrame] fetched',
+          '[AppFrame] html ready',
           entry.id,
           'html length:',
           html.length,
@@ -159,7 +177,7 @@ export function AppFrame({ entry }: AppFrameProps): React.JSX.Element {
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="rounded bg-neutral-900/70 px-3 py-1.5 text-xs text-white font-mono">
             {entry.id} — {status}
-            {status === 'fetching' && `: ${entry.contentUrl}`}
+            {status === 'fetching' && entry.source === 'built-in' && `: ${entry.contentUrl ?? ''}`}
           </div>
         </div>
       )}

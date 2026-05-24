@@ -56,6 +56,21 @@
 - `useRef` guard 적용 부적합: **비동기 fetch + DOM mount** (cleanup 의 destroyed flag 가 더 적절)
 - 핵심: StrictMode unmount→remount 시 1차의 `initRef.current=true` 가 2차 mount effect 진입을 차단
 
+### [TS-005] APP-02 사용자 ZIP 업로드 — built-in 앱 manifest.id 중복 검사 우회 (Playwright e2e 발견)
+
+**증상**: 사용자가 built-in 앱의 manifest.id (예: `com.zmos.sample.snake-game`)로 ZIP을 만들어 업로드 시 `DUPLICATE_ID` 거부 작동 안 함 → user-apps IDB store에 동일 id 저장됨. Playwright e2e (`e2e-zip-upload.mjs` C6+D1)에서 발견.
+
+**원인**: `AppUploadButton.tsx`의 `reservedIds = DESKTOP_APPS.map((e) => e.id)`. **entry.id** (예: `snake-game`)만 포함, **manifest.id** (예: `com.zmos.sample.snake-game`)는 누락. zip-loader는 `manifest.id`로 비교하므로 검사 우회.
+
+**해결**: `reservedIds`에 `DESKTOP_APPS.flatMap((e) => manifest.id가 string이면 [m.id])` 추가. type-narrowing (typeof object && 'id' in m && typeof m.id === 'string')으로 unknown manifest 타입 안전 처리.
+
+**관련 파일**: `src/components/store/AppUploadButton.tsx:46-54`
+**날짜**: 2026-05-24 (e2e 발견 + 같은 세션 fix)
+**상태**: ✅ 해소 (e2e 재검증 PASS: C6 "이미 존재하는 앱 ID입니다" + D1 IDB에 snake-game 없음)
+**관련 M-NNN**: (없음 — 1회 발생, e2e가 빠르게 발견)
+
+**핵심 교훈**: 사용자 제출 콘텐츠 중복 검사 시 **모든 id 채널**을 reservedIds에 포함해야 함. entry.id ≠ manifest.id 가능성을 고려.
+
 ### [TS-004] Snake 게임 자동 시작 후 즉시 벽 충돌 Game Over (Playwright e2e 발견)
 
 **증상**: Snake 윈도우 열리자마자 사용자 입력 없이 ~3초 후 Game Over 오버레이 표시. Playwright e2e 첫 screenshot 캡처에서 발견.

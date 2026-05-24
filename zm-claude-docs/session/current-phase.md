@@ -1,13 +1,24 @@
 # Current Phase
 
-## 🎉 Phase 2 ✅ 완료 (2026-05-24)
+## 🚀 Phase 3 진행 중 (1/4, 25%)
 - **Phase 1**: ✅ 완료 (7/7, 100%)
-- **Phase 2**: ✅ 완료 (4/4, 100%) — 작업 1 ✅ (STR-01/02), 작업 2 ✅ (STG-01), 작업 3 ✅ (APP-03), 작업 4 ✅ (GAME-01)
-- **진행률**: 100% (4/4)
-- **e2e 자동 검증**: Playwright PASS — `e2e-snake.mjs` (10 step) + `e2e-hydration.mjs` (8 step, IDB hydration/persist 확인)
-- **마지막 커밋**: `4f3d0e3 feat(store): APP-03 IndexedDB hydration + persist — Phase 2 작업 3 완료 → Phase 2 ✅ 100%`, push 완료
+- **Phase 2**: ✅ 완료 (4/4, 100%)
+- **Phase 3**: 🔄 진행 중 (1/4, 25%) — 작업 1 ✅ (APP-02 사용자 ZIP 업로드)
+- **현재 상태**: Phase 3 작업 1 검증 완료 → doc-updater 진행 중 (2026-05-24)
 
-## 🚀 Phase 3 진입 지점 (다음 세션)
+### 작업 1 — APP-02 사용자 ZIP 업로드 (✅ 완료)
+- **산출물**: 신규 4파일 + 수정 7파일 (총 11개 산출)
+- **핵심 기능**: JSZip 3.10.1 기반 ZIP 파싱 + 보안 검증 6단계 (magic byte → 파싱 → path traversal → 압축비 → 필수 파일 → 매니페스트)
+- **저장소**: IndexedDB DB_VERSION 2 + STORE_USER_APPS (UserAppRecord)
+- **카탈로그 통합**: buildCatalog(builtInApps, userApps) — source: 'built-in' | 'user'
+- **iframe 로드**: AppFrame.tsx source 분기 (built-in srcdoc vs user HTML inline)
+- **자동 채택**: 10개 정책 결정 (P1=JSZip / P2=A / P3=α / P4~P10 임계치/저장소/상태)
+- **검증**: 4명 + self-verifier ✅ PASS
+- **ADR-0008 신규** + **PROD-05 신규 정책**
+- **보안 위협 등록**: N-05/06/07 (CVE-2022-48285, HTML 크기, ZIP bomb)
+- **사용자 검증 deferred**: ZIP 업로드 → 설치 → 데스크탑 표시 → 실행 e2e 테스트 (Playwright 권장)
+
+## 🎯 Phase 3 다음 후보 (사용자 우선순위 대기)
 
 PRD §3 + roadmap §5 기반 후보 — **사용자 우선순위 결정 대기**:
 

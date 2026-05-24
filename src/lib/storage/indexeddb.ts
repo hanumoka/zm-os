@@ -18,11 +18,14 @@ import { type DBSchema, type IDBPDatabase, openDB as idbOpenDB } from 'idb';
 
 // ─── DB / Store 상수 ─────────────────────────────────────────────────────────
 export const DB_NAME = 'zm-os';
-export const DB_VERSION = 1;
+/** DB 버전. store 추가 시 bump (현재 v2: STORE_USER_APPS 추가) */
+export const DB_VERSION = 2;
 export const STORE_INSTALLED_APPS = 'installed-apps' as const;
+/** v2: 사용자 업로드 앱 store (APP-02) */
+export const STORE_USER_APPS = 'user-apps' as const;
 
 // ─── 타입 ─────────────────────────────────────────────────────────────────────
-export type IDBStoreName = typeof STORE_INSTALLED_APPS;
+export type IDBStoreName = typeof STORE_INSTALLED_APPS | typeof STORE_USER_APPS;
 
 /**
  * idb DBSchema 타입 정의 — value를 any로 두어야 idb 내부 타입 충족
@@ -32,6 +35,12 @@ export type IDBStoreName = typeof STORE_INSTALLED_APPS;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface ZmOsDBSchema extends DBSchema {
   [STORE_INSTALLED_APPS]: {
+    key: string;
+    // idb DBSchemaValue가 value: any를 요구하므로 불가피한 any — 외부 API는 T = unknown 제네릭으로 노출
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    value: any;
+  };
+  [STORE_USER_APPS]: {
     key: string;
     // idb DBSchemaValue가 value: any를 요구하므로 불가피한 any — 외부 API는 T = unknown 제네릭으로 노출
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -78,7 +87,12 @@ export function openDB(): Promise<IDBPDatabase<ZmOsDBSchema>> {
             db.createObjectStore(STORE_INSTALLED_APPS);
           }
         }
-        // v1 → v2 추가 시: if (oldVersion < 2) { ... }
+        // v1 → v2: STORE_USER_APPS 생성 (APP-02 사용자 업로드 앱)
+        if (oldVersion < 2) {
+          if (!db.objectStoreNames.contains(STORE_USER_APPS)) {
+            db.createObjectStore(STORE_USER_APPS);
+          }
+        }
       },
       blocked(currentVersion, blockedVersion) {
         console.warn('[zm-os IDB] open blocked — other tab has older version', {

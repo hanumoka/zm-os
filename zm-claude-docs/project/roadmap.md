@@ -2,7 +2,7 @@
 
 > **Living Document**. 항목 완료 시 즉시 갱신. PRD와 동시 갱신.
 
-**Version**: 0.5.0
+**Version**: 0.6.0
 **Last Updated**: 2026-05-24
 
 ---
@@ -14,7 +14,7 @@
 | **Phase 0** — 초기 셋팅 | ✅ 완료 | 100% | 2026-05-24 |
 | **Phase 1** — 코어 샌드박싱 + 윈도우 매니저 | ✅ 완료 | 100% (작업 7/7) | 2026-05-24 |
 | **Phase 2** — 앱 스토어 + 첫 게임 시연 | ✅ 완료 | 100% (작업 4/4) | 2026-05-24 |
-| **Phase 3** — POC 안정화 + 데모 영상 | ⏳ 대기 | 0% | 미정 |
+| **Phase 3** — POC 안정화 + 데모 영상 | 🔄 진행 중 | 25% (작업 1/4) | 미정 |
 
 POC 종료 후: v2 plan (멀티유저/클라우드) 별도 plan 필요.
 
@@ -58,16 +58,19 @@ POC 종료 후: v2 plan (멀티유저/클라우드) 별도 plan 필요.
 | ✅ IndexedDB 추상화 (STG-01) | — | ✅ 완료 | `src/lib/storage/indexeddb.ts` (idb v8.0.3 + 메모리 폴백) |
 | ✅ 설치한 앱 목록 영속화 (APP-03) | STG-01 | ✅ 완료 | IndexedDB hydration + fire-and-forget persist (InstalledAppsProvider, lib/storage/installed-apps.ts) |
 | OPFS 어댑터 (STG-02) | — | ⏳ 계획 | Safari 폴백 IndexedDB |
-| 앱 패키지 포맷 (APP-02) | — | itch.io식 ZIP (Phase 3 후보) |
+| 앱 패키지 포맷 (APP-02) | — | ✅ 완료 | JSZip 3.10.1 + 보안 검증 (Phase 3 작업 1) |
 
 ---
 
 ## §5. Phase 3 — POC 안정화
 
-- 빌드/번들 사이즈 측정
-- iframe 우회 시도 (시큐리티 셀프 페네스트)
-- 게임 엔진 호환성 매트릭스 (Phaser/Pixi/Three.js/Godot)
-- 데모 영상 1편 (3분 이내)
+| 작업 | 설명 | 상태 |
+|------|------|------|
+| ✅ 사용자 ZIP 앱 업로드 (APP-02) | JSZip 3.10.1 + 보안 검증 6단계 (magic byte → 파싱 → path traversal → 압축비 → 필수 파일 → 매니페스트) + UserAppsProvider + IDB STORE_USER_APPS | ✅ 완료 |
+| A1. 빌드/번들 사이즈 측정 | next build 시간 + bundle analyzer + 누적 번들 크기 (webpack) | ⏳ 계획 |
+| A2. iframe 우회 시도 (시큐리티 셀프 페네스트) | XSS/sandbox escape 100+ 패턴 테스트 + 보고서 | ⏳ 계획 |
+| B. 게임 엔진 호환성 매트릭스 | Pixi.js + Three.js + Godot.js 샘플 + 호환 여부 표 | ⏳ 계획 |
+| C. 데모 영상 1편 (3분 이내) | ZIP 업로드 → 설치 → 데스크탑 표시 → 실행 e2e | ⏳ 계획 |
 
 ---
 
@@ -92,6 +95,22 @@ POC 종료 후: v2 plan (멀티유저/클라우드) 별도 plan 필요.
 ---
 
 ## §8. Change Log
+
+### 0.6.0 (2026-05-24) — Phase 3 작업 1 완료
+- Phase 3 작업 1 완료 ✅ (APP-02: 사용자 ZIP 앱 업로드)
+  - JSZip 3.10.1 + 보안 검증 6단계 (magic byte → JSZip.loadAsync → path traversal → 압축비 → 필수 파일 → manifest Zod)
+  - UserAppsProvider + AppUploadButton (drag-drop + 파일 입력)
+  - IndexedDB DB_VERSION 2 + STORE_USER_APPS (UserAppRecord = id/manifest/htmlContent/installedAt/sourceZipSize/htmlSize)
+  - buildCatalog(builtInApps, userApps) 통합 (source: 'built-in' | 'user')
+  - AppFrame.tsx + Desktop.tsx source 분기 (built-in srcdoc vs user HTML)
+  - 자동 채택 결정 10개 (P1~P10)
+  - 신규 ADR-0008 + PROD-05 정책
+  - 검증: build-checker ✅ / code-reviewer ✅ / sandbox-auditor ✅ / constraint-checker ✅ / self-verifier ✅ PASS
+  - 신규 위협 N-05/06/07 등록 (CVE-2022-48285, HTML 크기, ZIP bomb)
+  - 사용자 검증 deferred: e2e Playwright (ZIP 업로드 → 설치 → 실행)
+- **Phase 3 진행률: 1/4 (25%)** — 다음 후보: 안정화 (A1/A2) 또는 게임 엔진 (B)
+
+### 0.5.0 (2026-05-24) — Phase 2 ✅ 완료
 
 ### 0.3.0 (2026-05-24) — Phase 2 작업 4 완료
 - Phase 2 작업 4 완료 ✅ (GAME-01: Phaser 3 Snake)

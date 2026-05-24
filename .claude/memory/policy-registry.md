@@ -85,6 +85,19 @@
 - **이유**: 사용자 결정 (Phase 2 코어 범위) + architect P2=α/P3=i+iii/Provider 옵션 A 추천 + ADR-0006.
 - **작업 3**: InstalledAppsProvider + lib/storage/installed-apps.ts 기반 IndexedDB hydration (2026-05-24)
 
+### PROD-05: POC v1 사용자 업로드 메타데이터 정책 (2026-05-24)
+- **결정**:
+  - 사용자 제출 ZIP 업로드 = 단일 HTML (자원 inline, v2 reshape 예정) + 보안 임계치 6단계 (magic byte → 파싱 → path traversal → 압축비 → 필수 파일 → 매니페스트)
+  - 저장소 = IndexedDB STORE_USER_APPS (DB_VERSION 2), UserAppRecord = { id, manifest, htmlContent, installedAt, sourceZipSize, htmlSize }
+  - 카탈로그 = buildCatalog(builtInApps, userApps) 통합 (source: 'built-in' | 'user')
+  - 보안 임계치 (SSOT: zip-loader.ts):
+    - MAX_ZIP_BYTES = 10MB
+    - MAX_HTML_BYTES = 5MB (UTF-8)
+    - MAX_COMPRESSION_RATIO = 1000 (ZIP bomb)
+  - iframe 로드 = 기존 srcdoc inline (AppFrame.tsx 조건부, null origin 유지)
+- **이유**: ADR-0008 — PRD §1.2 POC 비전 달성 (사용자 앱 업로드 → 설치 → 실행) + 백엔드 의존도 0 + v2 STR reshape 용이
+- **상세**: ADR-0008, `.claude/rules/security.md` §사용자 제출 ZIP 수신 절차
+
 ## Deprecated
 - (없음)
 
