@@ -2,7 +2,7 @@
 
 > **Living Document**. 항목 완료 시 즉시 갱신. PRD와 동시 갱신.
 
-**Version**: 0.1.0
+**Version**: 0.1.1
 **Last Updated**: 2026-05-24
 
 ---
@@ -11,8 +11,8 @@
 
 | Phase | 상태 | 진행률 | 목표 종료 |
 |-------|------|--------|----------|
-| **Phase 0** — 초기 셋팅 | 🔄 진행 중 | 80% | 2026-05-24 |
-| **Phase 1** — 코어 샌드박싱 + 윈도우 매니저 | ⏳ 대기 | 0% | 미정 |
+| **Phase 0** — 초기 셋팅 | ✅ 완료 | 100% | 2026-05-24 |
+| **Phase 1** — 코어 샌드박싱 + 윈도우 매니저 | 🔄 진행 중 | 약 14% (작업 1/7) | 미정 |
 | **Phase 2** — 앱 스토어 + 첫 게임 시연 | ⏳ 대기 | 0% | 미정 |
 | **Phase 3** — POC 안정화 + 데모 영상 | ⏳ 대기 | 0% | 미정 |
 
@@ -36,16 +36,16 @@ POC 종료 후: v2 plan (멀티유저/클라우드) 별도 plan 필요.
 
 > 코드의 가장 어려운 부분 먼저. 보안과 격리가 동작하지 않으면 나머지 무의미.
 
-| 작업 | 의존성 | 비고 |
-|------|--------|------|
-| 앱 매니페스트 Zod 스키마 (APP-01) | — | `src/lib/apps/manifest.ts` |
-| blob: iframe SDK (SBX-01) | APP-01 | `src/lib/apps/sandbox.ts` |
-| Comlink IPC 어댑터 (IPC-01) | SBX-01 | `src/lib/apps/ipc/` |
-| CSP/Permissions-Policy 헤더 (SBX-02) | — | `next.config.ts` |
-| 윈도우 매니저 (DSK-01) | — | react-rnd or dnd-kit (TBD) |
-| 데스크탑 영역 (DSK-02) | DSK-01 | |
-| 작업표시줄 (DSK-03) | DSK-01 | |
-| `app-sandbox-auditor` agent 1회 감사 | 위 전부 | |
+| 작업 | 의존성 | 상태 | 비고 |
+|------|--------|------|------|
+| 앱 매니페스트 Zod 스키마 (APP-01) | — | ✅ | `src/lib/apps/manifest.ts` |
+| blob: iframe SDK (SBX-01) | APP-01 | ✅ | `src/lib/apps/sandbox.ts` |
+| Comlink IPC 어댑터 (IPC-01) | SBX-01 | ⏳ | `src/lib/apps/ipc/` (다음) |
+| CSP/Permissions-Policy 헤더 (SBX-02) | — | ⏳ | `next.config.ts` |
+| 윈도우 매니저 (DSK-01) | ADR-0002 | ⏳ | react-rnd or dnd-kit (TBD) |
+| 데스크탑 영역 (DSK-02) | DSK-01 | ⏳ | |
+| 작업표시줄 (DSK-03) | DSK-01 | ⏳ | |
+| `app-sandbox-auditor` agent 1회 감사 | 위 전부 | ⏳ | |
 
 ---
 
@@ -93,6 +93,10 @@ POC 종료 후: v2 plan (멀티유저/클라우드) 별도 plan 필요.
 ---
 
 ## §8. Change Log
+
+### 0.1.1 (2026-05-24)
+- Phase 0 완료, Phase 1 진입
+- 작업 1 (iframe 샌드박싱 PoC) 완료
 
 ### 0.1.0 (2026-05-24)
 - 초기 로드맵 작성 (Phase 0~3 정의)

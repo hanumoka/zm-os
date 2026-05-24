@@ -2,13 +2,14 @@
 > 시스템 프롬프트 자동 로드 (200줄 한도). 최종 갱신: 2026-05-24 (초기 셋팅)
 
 ## 프로젝트 수치 (항상 최신 유지)
-- 현재 Phase: **Phase 0 — 초기 셋팅**
-- 코드 LOC: 0 (셋팅만)
+- 현재 Phase: **Phase 1 — 코어 샌드박싱 + 윈도우 매니저** (작업 1/7 완료)
+- 코드 LOC: 매니페스트 + sandbox SDK + sandbox-test 페이지 = ~250 LOC (TS) + sample-game ~80 LOC (HTML/JS)
 - 에이전트: 5개 (fe-developer, code-reviewer, build-checker, doc-updater, app-sandbox-auditor)
 - 스킬: 5개 (zm-commit, zm-unit-done, zm-session, zm-troubleshoot, zm-memory-save)
 - 규칙: 4개 (frontend, security, work-units, known-mistakes)
 - 훅: 4개 Python (mistake_guard, post_review, session_start, notify_done)
-- 단위 테스트: 0 | E2E: 0
+- 단위 테스트: 0 | E2E: 0 (Phase 3에서 도입 예정)
+- 의존성: next 16, react 19, tailwind 4, zod 4.4.3, typescript 5
 
 ## 기술 스택
 - **FE/풀스택**: Next.js 16 (App Router) + React 19 + Tailwind v4
@@ -44,13 +45,16 @@
 
 ## Project State
 - 빈 저장소에서 시작 (2026-05-24 git init + 첫 push to github-personal:hanumoka/zm-os.git)
-- 초기 셋팅 진행 중: Next.js 16 골격 / .claude/ 셋팅 / zm-claude-docs/ 골격
-- 다음 진입: POC 코드 구현 (가상 데스크탑 UI + 윈도우 매니저 + 앱 스토어 + 첫 샌드박스 게임 1개)
+- Phase 0 완료 (커밋 `efed152 chore(setup)`, push 완료)
+- Phase 1 작업 1 완료: iframe 샌드박싱 PoC (APP-01 매니페스트 + SBX-01 sandbox SDK + Bouncing Ball + /sandbox-test)
+- 다음 진입: 작업 2 (Comlink IPC) → 작업 3 (CSP 헤더) → ADR-0002 (윈도우 매니저 라이브러리)
 
 ## 최근 결정사항 (최대 10, FIFO)
 - 2026-05-24: ARCH-01 단일 Next.js 풀스택 (POC 단계, 모노레포는 v2)
 - 2026-05-24: ARCH-02 iframe + Comlink 샌드박싱 (blob: URL, allow-scripts만)
 - 2026-05-24: TECH-01 IndexedDB+OPFS 클라이언트 스토리지 (서버 동기화는 v2)
 - 2026-05-24: 문서/CC 셋팅 — zm-v3 골격 + sonix_docs 베스트 결합 (Python hooks, ADR frontmatter, .claudeignore)
+- 2026-05-24: Phase 0 완료 + Phase 1 진입
+- 2026-05-24: Phase 1 작업 1 완료 — srcdoc 기반 iframe (sandbox="allow-scripts", null origin) + Zod 매니페스트
 
-> **최종 갱신**: 2026-05-24 — Group A + Group B 셋팅 완료 (Next.js 골격 + .claude/ 전체)
+> **최종 갱신**: 2026-05-24 — Phase 1 작업 1 완료 (iframe 샌드박싱 PoC)

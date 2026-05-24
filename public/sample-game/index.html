@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Bouncing Ball</title>
+    <style>
+      :root { color-scheme: light; }
+      body { margin: 0; font-family: -apple-system, system-ui, sans-serif; background: #fafafa; color: #222; }
+      canvas { display: block; background: #fff; }
+      #status { padding: 8px 12px; font-size: 12px; border-top: 1px solid #eee; }
+      #status .ok { color: #16a34a; }
+      #status .fail { color: #dc2626; }
+    </style>
+  </head>
+  <body>
+    <canvas id="game" width="480" height="280"></canvas>
+    <div id="status"></div>
+    <script>
+      (function () {
+        var status = document.getElementById('status');
+
+        function send(data) {
+          if (window.parent && window.parent !== window) {
+            window.parent.postMessage(data, '*');
+          }
+        }
+
+        var canTouchParentStorage = false;
+        var canTouchParentDocument = false;
+        var canTouchParentCookies = false;
+        try { if (window.parent.localStorage) canTouchParentStorage = true; } catch (e) {}
+        try { if (window.parent.document) canTouchParentDocument = true; } catch (e) {}
+        try { if (window.parent.document && window.parent.document.cookie) canTouchParentCookies = true; } catch (e) {}
+
+        send({
+          type: 'isolation-check',
+          canTouchParentStorage: canTouchParentStorage,
+          canTouchParentDocument: canTouchParentDocument,
+          canTouchParentCookies: canTouchParentCookies,
+          origin: location.origin,
+        });
+
+        var allBlocked = !canTouchParentStorage && !canTouchParentDocument && !canTouchParentCookies;
+        status.innerHTML =
+          (allBlocked ? '<span class="ok">✅ 격리 OK</span>' : '<span class="fail">⚠ FAIL — 일부 access 가능</span>') +
+          ' / origin: <code>' + location.origin + '</code>';
+
+        var canvas = document.getElementById('game');
+        var ctx = canvas.getContext('2d');
+        var x = 60, y = 60, vx = 3.2, vy = 2.3, r = 18;
+        var hue = 215;
+
+        function tick() {
+          ctx.fillStyle = 'rgba(255,255,255,0.6)';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          x += vx; y += vy;
+          if (x < r) { x = r; vx = -vx; hue = (hue + 30) % 360; }
+          if (x > canvas.width - r) { x = canvas.width - r; vx = -vx; hue = (hue + 30) % 360; }
+          if (y < r) { y = r; vy = -vy; hue = (hue + 30) % 360; }
+          if (y > canvas.height - r) { y = canvas.height - r; vy = -vy; hue = (hue + 30) % 360; }
+          ctx.beginPath();
+          ctx.arc(x, y, r, 0, Math.PI * 2);
+          ctx.fillStyle = 'hsl(' + hue + ', 70%, 55%)';
+          ctx.fill();
+          requestAnimationFrame(tick);
+        }
+        tick();
+
+        canvas.addEventListener('click', function (e) {
+          var rect = canvas.getBoundingClientRect();
+          send({
+            type: 'click',
+            x: Math.round(e.clientX - rect.left),
+            y: Math.round(e.clientY - rect.top),
+          });
+        });
+
+        send({ type: 'ready', game: 'bouncing-ball' });
+      })();
+    </script>
+  </body>
+</html>

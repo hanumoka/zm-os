@@ -2,9 +2,9 @@
 
 > **Living Document**. 기능 완료 시 즉시 갱신. 버전 bump 필수.
 
-**Version**: 0.1.0
+**Version**: 0.1.1
 **Last Updated**: 2026-05-24
-**Status**: Phase 0 — 초기 셋팅
+**Status**: Phase 1 — 코어 샌드박싱 (작업 1/7 완료)
 
 ---
 
@@ -54,15 +54,15 @@ zm-os는 **브라우저 안에서 동작하는 가상 데스크탑** 으로, 사
 | **DSK-03** | 작업표시줄 (실행 중 앱) | ⏳ 계획 | |
 | **STR-01** | 앱 카탈로그 UI | ⏳ 계획 | |
 | **STR-02** | 앱 상세 페이지 + 설치 | ⏳ 계획 | |
-| **APP-01** | 앱 매니페스트 스키마 (Zod) | ⏳ 계획 | |
+| **APP-01** | 앱 매니페스트 스키마 (Zod) | ✅ 완료 | `src/lib/apps/manifest.ts` |
 | **APP-02** | 앱 패키지 포맷 (itch.io식 ZIP) | ⏳ 계획 | |
 | **APP-03** | 설치한 앱 목록 관리 | ⏳ 계획 | IndexedDB |
-| **SBX-01** | blob: URL iframe 샌드박스 SDK | ⏳ 계획 | sandbox="allow-scripts" |
+| **SBX-01** | blob: URL iframe 샌드박스 SDK | ✅ 완료 | `src/lib/apps/sandbox.ts` (srcdoc + sandbox="allow-scripts") |
 | **SBX-02** | CSP/Permissions-Policy 헤더 | ⏳ 계획 | |
 | **IPC-01** | Comlink 기반 RPC 어댑터 | ⏳ 계획 | postMessage origin 검증 |
 | **STG-01** | IndexedDB 추상화 | ⏳ 계획 | |
 | **STG-02** | OPFS 어댑터 (Chrome/Edge) | ⏳ 계획 | Safari는 IndexedDB 폴백 |
-| **GAME-01** | 첫 샘플 게임 (Phaser 또는 Pixi) | ⏳ 계획 | 시연용 |
+| **GAME-01** | 첫 샘플 게임 (Phaser 또는 Pixi) | 🔄 임시 | `public/sample-game/` Bouncing Ball — 격리 검증용 미니. Phaser/Pixi 도입은 Phase 2 |
 
 ---
 
@@ -108,6 +108,13 @@ POC 완료 = 아래 시나리오가 동작:
 ---
 
 ## §8. Change Log
+
+### 0.1.1 (2026-05-24)
+- Phase 1 진입, 작업 1 완료
+- APP-01 (매니페스트 Zod 스키마) ✅
+- SBX-01 (blob:/srcdoc iframe sandbox SDK) ✅
+- GAME-01 임시 구현 (Bouncing Ball, 격리 검증용)
+- `/sandbox-test` 데모 페이지
 
 ### 0.1.0 (2026-05-24)
 - 초기 PRD 작성 (Phase 0 초기 셋팅 단계)
