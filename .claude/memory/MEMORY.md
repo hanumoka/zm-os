@@ -9,8 +9,8 @@
 - 스킬: 5개 (zm-commit, zm-unit-done, zm-session, zm-troubleshoot, zm-memory-save)
 - 규칙: 4개 (frontend, security, work-units, known-mistakes)
 - 훅: 4개 Python (mistake_guard, post_review, session_start, notify_done)
-- 단위 테스트: 0 | E2E: 0 (Phase 3에서 도입 예정)
-- 의존성: next 16, react 19, tailwind 4, zod 4.4.3, typescript 5, react-rnd v10.5.3, phaser@3.90.0 (작업 4 추가)
+- 단위 테스트: 0 | E2E: Playwright POC v1 (`e2e-snake.mjs`, 10 step PASS) — Phase 3 정식 도입 예정
+- 의존성: next 16, react 19, tailwind 4, zod 4.4.3, typescript 5, react-rnd v10.5.3, phaser@3.90.0, playwright (dev)
 
 ## 기술 스택
 - **FE/풀스택**: Next.js 16 (App Router) + React 19 + Tailwind v4
@@ -55,6 +55,7 @@
 - **Phase 2 사용자 결정 (확정)**: 코어 범위 / STR-01/02 첫 / Phaser 3 / P1=A α i+iii x r1 / Provider 옵션 A
 
 ## 최근 결정사항 (최대 10, FIFO)
+- 2026-05-24: Phase 2 작업 1+4 Playwright e2e ALL PASS (10 step). TS-004 Snake 자동 벽 충돌 fix (paused 모드). D1/D2 deferred 검증 — Chrome srcdoc null origin → host /phaser.min.js 200 OK, Phaser AUTO sandbox 정상.
 - 2026-05-24: Phase 2 작업 4 완료 — GAME-01 Phaser 3 Snake (procedural, host self origin). POC v1 카탈로그 3개 엔트리 완성.
 - 2026-05-24: Phase 2 작업 1 완료 — STR-01/02 (스토어 UI + InstalledAppsProvider + 데스크탑 동기화). C-01 fix (스토어 시스템 아이콘 우상단).
 - 2026-05-24: PROD-03/04 신규 정책 — 카탈로그 메타데이터 단일 모델 + Provider scope 옵션 A + 좌표 컨벤션.

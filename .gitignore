@@ -46,3 +46,8 @@ tmp/
 
 # User-uploaded app bundles (future)
 uploads/
+
+# Playwright e2e (POC v1 — Phase 3에서 정식 도입 예정)
+e2e-out/
+test-results/
+playwright-report/

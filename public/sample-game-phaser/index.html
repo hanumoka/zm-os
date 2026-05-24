@@ -161,6 +161,7 @@
           nextDir:     null,  // 버퍼 — tick 전까지 실제 적용 대기
           food:        null,  // {x, y}
           score:       0,
+          started:     false, // 첫 키 입력 전까지 대기 (자동 벽 충돌 방지)
           gameOver:    false,
           tickTimer:   null,
           graphics:    null,
@@ -178,18 +179,23 @@
 
             // 키 이벤트 — 방향 전환 (180도 반전 방지)
             var self = this;
-            this.input.keyboard.on('keydown-UP', function () {
-              if (self.direction.dy === 0) self.nextDir = { dx: 0, dy: -1 };
-            });
-            this.input.keyboard.on('keydown-DOWN', function () {
-              if (self.direction.dy === 0) self.nextDir = { dx: 0, dy: 1 };
-            });
-            this.input.keyboard.on('keydown-LEFT', function () {
-              if (self.direction.dx === 0) self.nextDir = { dx: -1, dy: 0 };
-            });
-            this.input.keyboard.on('keydown-RIGHT', function () {
-              if (self.direction.dx === 0) self.nextDir = { dx: 1, dy: 0 };
-            });
+            function setDir(dx, dy) {
+              if (self.gameOver) return;
+              // 180도 반전 방지 (started 후에만 — 첫 입력은 항상 허용)
+              if (self.started) {
+                if (dx !== 0 && self.direction.dx !== 0) return;
+                if (dy !== 0 && self.direction.dy !== 0) return;
+              }
+              self.nextDir = { dx: dx, dy: dy };
+              if (!self.started) {
+                self.started = true;
+                hudHint.textContent = '화살표 키로 조종';
+              }
+            }
+            this.input.keyboard.on('keydown-UP',    function () { setDir(0, -1); });
+            this.input.keyboard.on('keydown-DOWN',  function () { setDir(0,  1); });
+            this.input.keyboard.on('keydown-LEFT',  function () { setDir(-1, 0); });
+            this.input.keyboard.on('keydown-RIGHT', function () { setDir( 1, 0); });
             this.input.keyboard.on('keydown-SPACE', function () {
               if (self.gameOver) self.restartGame();
             });
@@ -203,16 +209,17 @@
             var startY = Math.floor(ROWS / 2);
 
             this.snake     = [{ x: startX, y: startY }];
-            this.direction = { dx: 1, dy: 0 };
-            this.nextDir   = { dx: 1, dy: 0 };
+            this.direction = { dx: 0, dy: 0 };
+            this.nextDir   = { dx: 0, dy: 0 };
             this.food      = randFood(this.snake);
             this.score     = 0;
+            this.started   = false;
             this.gameOver  = false;
             this.lastTickTime = 0;
 
             // UI 업데이트
             scoreDisplay.textContent = '0';
-            hudHint.textContent = '화살표 키로 조종';
+            hudHint.textContent = '화살표 키로 시작';
             overlay.classList.remove('visible');
           },
 
@@ -224,6 +231,7 @@
           // ── tick — 뱀 이동 1스텝 ─────────────────────────────────────────────
           tick: function () {
             if (this.gameOver) return;
+            if (!this.started) return; // 첫 키 입력 전까지 대기 — 자동 벽 충돌 방지
 
             // 방향 적용 (버퍼)
             this.direction = this.nextDir;

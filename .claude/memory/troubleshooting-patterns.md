@@ -56,6 +56,26 @@
 - `useRef` guard 적용 부적합: **비동기 fetch + DOM mount** (cleanup 의 destroyed flag 가 더 적절)
 - 핵심: StrictMode unmount→remount 시 1차의 `initRef.current=true` 가 2차 mount effect 진입을 차단
 
+### [TS-004] Snake 게임 자동 시작 후 즉시 벽 충돌 Game Over (Playwright e2e 발견)
+
+**증상**: Snake 윈도우 열리자마자 사용자 입력 없이 ~3초 후 Game Over 오버레이 표시. Playwright e2e 첫 screenshot 캡처에서 발견.
+
+**원인**: `initGame()` 에서 `direction = { dx: 1, dy: 0 }` 으로 초기화되어 Phaser update tick 이 자동 시작. TICK_MS=120 × 14 tick = ~1.7초 후 head x 좌표가 COLS=30 도달 → 벽 충돌 → `triggerGameOver()`. 사용자 입력 받기 전에 게임이 자동 진행되어 의도되지 않은 즉시 종료.
+
+**해결**:
+1. `started: false` 상태 플래그 추가
+2. `initGame()`: `direction = { dx: 0, dy: 0 }`, `started = false`, `hudHint = '화살표 키로 시작'`
+3. `tick()`: `if (!this.started) return;` guard 추가 (paused 모드)
+4. `setDir()` 통합 함수: 첫 키 입력 시 `started = true` 토글 + 180도 반전 체크는 started 이후에만 적용
+5. Space restart 시 initGame 재호출 → started=false 복귀 (재시작 후도 paused 모드)
+
+**관련 파일**: `public/sample-game-phaser/index.html:158-222`
+**날짜**: 2026-05-24 (Playwright e2e 발견 + 같은 세션 해소)
+**상태**: ✅ 해소 (e2e 재검증 PASS: pre-input paused / ArrowRight 후 이동 + 벽 충돌 / Space restart 후 paused 복귀)
+**관련 M-NNN**: (없음 — 1회 발생, 게임 UX 일반 패턴)
+
+**핵심 교훈**: 자동 update 루프 (Phaser update / requestAnimationFrame / setInterval) 가 있는 시뮬레이션/게임에서는 **명시적 시작 트리거** 필요. 사용자 입력 전 자동 진행 금지.
+
 ---
 
 ## 사용 가이드
