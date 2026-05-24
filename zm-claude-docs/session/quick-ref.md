@@ -3,10 +3,17 @@
 > 1페이지 프로젝트 컨텍스트. 세션 시작 시 필독. 수치 변경 시 즉시 갱신.
 
 ## 🎉 Phase 2 ✅ 완료 (2026-05-24)
-- **Phase 1**: ✅ 완료 (7/7), e2e PASS
+- **Phase 1**: ✅ 완료 (7/7), Playwright e2e PASS
 - **Phase 2**: ✅ 완료 (4/4, 100%) — 작업 1 ✅ STR-01/02 + 작업 2 ✅ STG-01 + 작업 3 ✅ APP-03 + 작업 4 ✅ GAME-01
-- **다음 진입**: Phase 3 (POC 안정화)
-- **마지막 커밋**: Phase 2 작업 3 완료 후 예정
+- **마지막 커밋**: `4f3d0e3 feat(store): APP-03 IndexedDB hydration + persist`, push 완료
+
+## 🚀 Phase 3 진입 지점 (사용자 결정 대기)
+
+PRD §3 + roadmap §5 기반 후보 (사용자 우선순위 선택 필요):
+1. **APP-02 ZIP 업로드** — 사용자가 직접 ZIP 앱 패키지 업로드/설치/실행 (POC 비전 핵심)
+2. **안정화 우선** — 빌드/번들 사이즈 측정 + iframe 우회 시도 셀프 페네스트
+3. **게임 엔진 매트릭스 (A3)** — Pixi.js + Three.js 추가 게임 + 호환성 검증
+4. **STG-02 OPFS + DSK-04 윈도우 위치 영속화** — 인프라 강화
 
 ## 현재 상태 (2026-05-24)
 - **저장소**: `git@github-personal:hanumoka/zm-os.git`, branch `main`

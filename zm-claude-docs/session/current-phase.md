@@ -4,8 +4,26 @@
 - **Phase 1**: ✅ 완료 (7/7, 100%)
 - **Phase 2**: ✅ 완료 (4/4, 100%) — 작업 1 ✅ (STR-01/02), 작업 2 ✅ (STG-01), 작업 3 ✅ (APP-03), 작업 4 ✅ (GAME-01)
 - **진행률**: 100% (4/4)
-- **다음**: Phase 3 진입 가능
-- **마지막 커밋**: Phase 2 작업 3 완료 후 예정
+- **e2e 자동 검증**: Playwright PASS — `e2e-snake.mjs` (10 step) + `e2e-hydration.mjs` (8 step, IDB hydration/persist 확인)
+- **마지막 커밋**: `4f3d0e3 feat(store): APP-03 IndexedDB hydration + persist — Phase 2 작업 3 완료 → Phase 2 ✅ 100%`, push 완료
+
+## 🚀 Phase 3 진입 지점 (다음 세션)
+
+PRD §3 + roadmap §5 기반 후보 — **사용자 우선순위 결정 대기**:
+
+| 후보 | 설명 | 작업 단위 |
+|------|------|----------|
+| **APP-02 ZIP 업로드** | POC 비전 핵심 — 사용자가 직접 ZIP 앱 패키지 업로드/설치/실행. itch.io 식 ZIP + 매니페스트 검증 + IDB 저장 | 3-4 파일 |
+| **안정화 우선** | A1 빌드/번들 사이즈 측정 + A2 iframe 우회 시도 셀프 페네스트 (XSS/sandbox escape) | 1-2 파일 + 보고서 |
+| **게임 엔진 매트릭스** | Pixi.js 샘플 게임 추가 + Three.js 경계 시도 + 호환성 매트릭스 | 2-3 파일 |
+| **STG-02 OPFS + DSK-04** | OPFS 어댑터 (Chrome/Edge) + Safari IDB 폴백 + 윈도우 위치 영속화 | 3-4 파일 |
+
+### 재개 절차
+1. 본 문서 + `quick-ref.md` + MEMORY.md 자동 로드 (session_start.py)
+2. 사용자에게 Phase 3 후보 4개 선택지 제시 (`AskUserQuestion`)
+3. 선택 후 architect → research(필요 시) → 구현 → 검증 4명 → self-verifier → doc-updater 워크플로
+
+---
 
 ---
 
