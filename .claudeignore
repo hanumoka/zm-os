@@ -1,0 +1,28 @@
+# .claudeignore — Claude Code 컨텍스트 로드 시 제외할 대형/저빈도 파일
+
+# Node 모듈
+node_modules/
+
+# Next.js 빌드 산출물
+.next/
+
+# 정적 자산 (필요시 직접 Read)
+public/
+
+# 잠금 파일 (의존성 변경 시에만 검토)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# 로그
+*.log
+
+# 월별 작업 아카이브 (필요시 직접 Read)
+zm-claude-docs/archive/
+
+# 외부 리서치 보고서 (대용량, 필요시 직접 Read)
+zm-claude-docs/research/
+
+# 스크래치
+.scratch/
+tmp/
