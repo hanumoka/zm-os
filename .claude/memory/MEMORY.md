@@ -4,7 +4,8 @@
 ## 프로젝트 수치 (항상 최신 유지)
 - 현재 Phase: **Phase 1 — 코어 샌드박싱 + 윈도우 매니저** (작업 1/7 완료)
 - 코드 LOC: 매니페스트 + sandbox SDK + sandbox-test 페이지 = ~250 LOC (TS) + sample-game ~80 LOC (HTML/JS)
-- 에이전트: 5개 (fe-developer, code-reviewer, build-checker, doc-updater, app-sandbox-auditor)
+- 에이전트: 10개 (architect, research-analyst, lib-developer, fe-developer, build-checker, code-reviewer, app-sandbox-auditor, constraint-checker, self-verifier, doc-updater) + workflow 문서
+- 모델 전략: architect/self-verifier=opus / 구현·리뷰·감사=sonnet / 빌드·문서·제약검사=haiku
 - 스킬: 5개 (zm-commit, zm-unit-done, zm-session, zm-troubleshoot, zm-memory-save)
 - 규칙: 4개 (frontend, security, work-units, known-mistakes)
 - 훅: 4개 Python (mistake_guard, post_review, session_start, notify_done)
@@ -56,5 +57,6 @@
 - 2026-05-24: 문서/CC 셋팅 — zm-v3 골격 + sonix_docs 베스트 결합 (Python hooks, ADR frontmatter, .claudeignore)
 - 2026-05-24: Phase 0 완료 + Phase 1 진입
 - 2026-05-24: Phase 1 작업 1 완료 — srcdoc 기반 iframe (sandbox="allow-scripts", null origin) + Zod 매니페스트
+- 2026-05-24: 에이전트 팀 10명 재구성 — 설계/구현/검증/메타/문서 5계층. 사용자 요구(추측 금지 + 재검증 의무) 충족. workflow 표준화
 
-> **최종 갱신**: 2026-05-24 — Phase 1 작업 1 완료 (iframe 샌드박싱 PoC)
+> **최종 갱신**: 2026-05-24 — 에이전트 팀 10명 재구성 + workflow 표준화

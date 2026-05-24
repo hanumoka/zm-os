@@ -133,16 +133,29 @@ Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
 
 ---
 
-## 🤖 9. 에이전트
+## 🤖 9. 에이전트 (10명 팀)
 
-> 상세 위임 규칙 → `.claude/agents/` 디렉토리
+> 상세 위임 규칙 → `.claude/agents/` / 표준 작업 흐름 → `.claude/agents/_workflow.md`
 
-5개 에이전트:
-- **fe-developer** (sonnet, 25t): Next.js 페이지/컴포넌트/API route handler 구현
-- **code-reviewer** (sonnet, 15t, project memory): TS strict, 샌드박싱, 보안, SSR 안전 리뷰
-- **build-checker** (haiku, 5t): `npx tsc --noEmit` 검증
-- **doc-updater** (haiku, 8t): current-phase / quick-ref / archive 자동 갱신
-- **app-sandbox-auditor** (sonnet, 15t): iframe/CSP/postMessage 보안 감사 (zm-os 신규)
+**설계** (2):
+- **architect** (opus, 20t): 인터페이스/모듈 경계/확장 포인트/ADR 초안. 코드 작성 전 첫 호출.
+- **research-analyst** (sonnet, 15t): 외부 사실 확인 전담. 모든 주장에 출처 URL 필수.
+
+**구현** (2):
+- **lib-developer** (sonnet, 25t): `src/lib/` 추상화 계층 (apps/storage/api).
+- **fe-developer** (sonnet, 25t): `src/app/` + `src/components/` UI.
+
+**검증** (4, 병렬):
+- **build-checker** (haiku, 5t): tsc + 변경 파일 신규 에러 우선 (M-019 회피).
+- **code-reviewer** (sonnet, 15t, project memory): TS/SSR/패턴 + 학습 누적.
+- **app-sandbox-auditor** (sonnet, 15t): iframe/CSP/postMessage/CVE 8 항목 매트릭스.
+- **constraint-checker** (haiku, 8t): rules + policy-registry 결정론적 위반 검출.
+
+**메타 검증** (1):
+- **self-verifier** (opus, 15t): 작업 종료 직전 마지막 게이트. 추측/누락/오판 차단. PASS 시에만 doc-updater 진행 허용.
+
+**문서** (1):
+- **doc-updater** (haiku, 8t): 진행 문서 갱신 + broken link 점검.
 
 5개 스킬:
 - `/zm-commit` — 커밋 규칙 적용

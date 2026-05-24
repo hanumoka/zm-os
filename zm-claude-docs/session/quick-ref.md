@@ -42,10 +42,15 @@ npm run dev
 - `canTouchParentStorage`, `canTouchParentDocument`, `canTouchParentCookies` 모두 `false`
 - 게임 안 상태바에 "✅ 격리 OK"
 
-## 다음 작업 후보
+## 에이전트 팀 (10명 — 2026-05-24 재구성)
+
+설계 architect+research-analyst / 구현 lib-developer+fe-developer / 검증 build+code-reviewer+sandbox-auditor+constraint / 메타 self-verifier / 문서 doc-updater. 표준 워크플로: [`.claude/agents/_workflow.md`](../../.claude/agents/_workflow.md)
+
+## 다음 작업 후보 (모두 새 팀 워크플로로 진행)
+
 1. **작업 2 — Comlink IPC** (`src/lib/apps/ipc/`)
 2. **작업 3 — CSP 헤더** (`next.config.ts`)
-3. **ADR-0002 — 윈도우 매니저 라이브러리 선택** (react-rnd vs dnd-kit vs 자작)
+3. **ADR-0002 — 윈도우 매니저 라이브러리 선택** (react-rnd vs dnd-kit vs 자작) — 사용자 결정 필요
 
 ## Quick Links
 - PRD: [`project/prd.md`](../project/prd.md)

@@ -19,22 +19,30 @@
 
 ### 최근 변경 (2026-05-24)
 - **17:30**: Phase 0 완료 — 첫 커밋 `efed152 chore(setup)`, push 완료 (origin/main)
-- **19:00**: Phase 1 작업 1 완료 — iframe 샌드박싱 PoC
+- **19:00**: Phase 1 작업 1 완료 — iframe 샌드박싱 PoC (커밋 `127edcb feat(sandbox)`)
   - `npm install zod`
   - `src/lib/apps/manifest.ts` — Zod 매니페스트 스키마 (APP-01) ✅
   - `src/lib/apps/sandbox.ts` — iframe + sandbox="allow-scripts" + srcdoc 격리 (SBX-01) ✅
-  - `public/sample-game/index.html` — Bouncing Ball 미니 게임 + 격리 검증 자가 진단
+  - `public/sample-game/index.html` — Bouncing Ball + 격리 자가 진단
   - `src/app/sandbox-test/page.tsx` — `/sandbox-test` 데모 페이지
   - `npx tsc --noEmit` 통과
   - 사용자 직접 검증 권장: `npm run dev` → http://localhost:3000/sandbox-test → 메시지에서 `canTouchParentStorage/Document/Cookies` 모두 `false` 확인
+- **20:00**: 에이전트 팀 10명 재구성 (사용자 요구: 설계 안정/확장성 + 추측 금지 + 재검증 의무)
+  - 신규 5명: architect / research-analyst / lib-developer / constraint-checker / self-verifier
+  - 보강 4명: fe-developer / code-reviewer / build-checker / doc-updater
+  - 신규 문서: `.claude/agents/_workflow.md` (표준 작업 흐름)
+  - 모델 전략: architect+self-verifier=opus, 구현/리뷰/감사=sonnet, 빌드/문서/제약=haiku
 
 ### 블로커
 - 없음
 
 ### 다음 작업
-1. **작업 2 — Comlink IPC 어댑터**: 호스트-앱 간 RPC 통신 추상화 (`src/lib/apps/ipc/`). `npm install comlink` + 호스트 측 endpoint + 게임 측 클라이언트 + sandbox-test 페이지에 RPC 예시 추가.
-2. **작업 3 — CSP/Permissions-Policy 헤더 (SBX-02)**: `next.config.ts`의 `headers()`에 보안 헤더 추가.
-3. **ADR-0002 — 윈도우 매니저 라이브러리 선택**: react-rnd vs dnd-kit vs 자작. 작업 4 시작 전 필수.
+
+남은 모든 작업은 **재구성된 10명 에이전트 팀** 워크플로(`.claude/agents/_workflow.md`)로 진행:
+
+1. **작업 2 — Comlink IPC 어댑터**: architect → research-analyst(Comlink 사실) → lib-developer → 검증 4명 병렬 → self-verifier → doc-updater
+2. **작업 3 — CSP/Permissions-Policy 헤더 (SBX-02)**: architect → research-analyst(CSP/Permissions-Policy 스펙) → fe-developer(next.config.ts) → 검증 → self-verifier → doc-updater
+3. **ADR-0002 — 윈도우 매니저 라이브러리 선택**: architect → research-analyst(react-rnd/dnd-kit/자작 비교) → 사용자 결정 → 작업 4 진입
 
 ### 다음 진입 지점 (Phase 2 후보)
 - 앱 패키지 포맷 (APP-02): itch.io식 ZIP 처리
