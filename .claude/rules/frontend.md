@@ -38,14 +38,37 @@ paths:
 
 ## 자주 발생하는 위반 (code-reviewer 누적)
 
-- **StrictMode useRef guard 누락** (2026-05-24, code-reviewer W-01 발견):
-  `useEffect(fn, [])` 안에서 mount 시 1회만 실행되어야 하는 부작용 (예: store.open(), API 등록) 호출 시 `useRef` guard 필수.
+- **StrictMode useRef guard — 적용 조건 정밀화** (2026-05-24, code-reviewer W-01 + e2e TS-003):
+  `useEffect(fn, [])` 안 부작용 처리 시 use case 에 따라 두 패턴을 구분.
+
+  **(a) `useRef` guard 적용 OK — 동기적 1회 부작용**
+  예: `store.open()` / `manager.open()` 호출, 전역 리스너 등록 등 race 가 없는 즉시 종료 작업.
   ```ts
   const initRef = useRef(false);
   useEffect(() => {
     if (initRef.current) return;
     initRef.current = true;
-    // 부작용 호출
+    // 동기 부작용 호출 (1회 보장)
   }, []);
   ```
-  reducer/store 자체에 중복 guard가 있어도 dev StrictMode 노이즈를 막기 위해 명시적 권장.
+  reducer/store 자체에 중복 guard 가 있어도 dev StrictMode 노이즈 차단용으로 권장.
+
+  **(b) `useRef` guard 부적합 — 비동기 fetch + DOM mount/destroy**
+  예: `AppFrame` 의 fetch → createSandboxedFrame → handle.destroy() 같은 비동기 + lifecycle 작업.
+  StrictMode 의 mount→unmount→remount 에서 1차의 `initRef.current=true` 가 2차 mount 의 effect 를
+  차단해 fetch+iframe 생성이 누락됨 (TS-003 e2e 검증). cleanup 의 `destroyed` flag 로 race 처리:
+  ```ts
+  useEffect(() => {
+    let destroyed = false;
+    const handleRef = { current: null as Handle | null };
+    fetch(url).then(html => {
+      if (destroyed) return; // 1차 cleanup 후 도착한 응답은 skip
+      handleRef.current = createSandboxedFrame(...);
+    });
+    return () => {
+      destroyed = true;
+      handleRef.current?.destroy();
+    };
+  }, []);
+  ```
+  2차 mount 는 새 클로저 + 새 destroyed=false 로 자유롭게 실행. 1차 cleanup 이 destroyed=true 설정으로 1차의 잔여 .then 만 차단.

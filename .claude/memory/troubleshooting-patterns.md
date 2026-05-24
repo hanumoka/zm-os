@@ -36,6 +36,26 @@
 **상태**: ✅ 해소 (작업 2.5에서 즉시 수정 — code-reviewer PASS)
 **관련 M-NNN**: (없음 — 1회 발생)
 
+### [TS-003] AppFrame StrictMode `useRef` guard 가 두 번째 mount 차단 (e2e 검증 발견)
+
+**증상**: 메인 페이지 `/` 의 두 윈도우 (Bouncing Ball, IPC Demo) 본문이 모두 비어 있음. iframe 이 mount 되지 않음. 사용자 e2e 검증에서 발견.
+
+**원인**: `AppFrame.tsx` useEffect 안에 `const initRef = useRef(false); if (initRef.current) return; initRef.current = true;` guard 적용. React 19 StrictMode 의 mount → unmount → remount 사이클에서, 1차 mount 가 `initRef.current = true` 로 마킹하고 fetch 시작 → StrictMode unmount cleanup 이 `destroyed = true` 만 설정 (handle 은 아직 null) → 2차 mount effect 가 `if (initRef.current) return;` 에서 차단되어 fetch+createSandboxedFrame 미실행. 결과 iframe 없음, 화면 빈 본문.
+
+**해결**: `initRef` guard 완전 제거. cleanup 의 `let destroyed = false;` flag 만으로 race 처리.
+- 1차 mount fetch 의 .then 콜백이 cleanup 후 도착하면 `if (destroyed) return;` 으로 skip
+- 2차 mount 는 새 useEffect 클로저 + 새 destroyed=false 로 자유롭게 실행 → 정상 iframe mount
+
+**관련 파일**: `src/components/desktop/AppFrame.tsx`
+**날짜**: 2026-05-24 (발견 + 해소 같은 날, 사용자 e2e 스크린샷 검증 ✅)
+**상태**: ✅ 해소
+**관련 M-NNN**: M-001 (W-01 useRef guard 누락) 과 짝 — frontend.md 보강으로 적용 조건 정밀화
+
+**적용 조건 정밀화**:
+- `useRef` guard 적용 OK: **동기적 1회 부작용** (예: `manager.open()` 등록, 전역 리스너 등록)
+- `useRef` guard 적용 부적합: **비동기 fetch + DOM mount** (cleanup 의 destroyed flag 가 더 적절)
+- 핵심: StrictMode unmount→remount 시 1차의 `initRef.current=true` 가 2차 mount effect 진입을 차단
+
 ---
 
 ## 사용 가이드
