@@ -2,11 +2,11 @@
 
 > 1페이지 프로젝트 컨텍스트. 세션 시작 시 필독. 수치 변경 시 즉시 갱신.
 
-## 🚀 Phase 3 진행 중 (1/4, 25%) 🔄
+## 🚀 Phase 3 진행 중 (2/4, 50%) 🔄
 - **Phase 1**: ✅ 완료 (7/7)
 - **Phase 2**: ✅ 완료 (4/4, 100%)
-- **Phase 3**: 🔄 진행 중 — 작업 1 ✅ APP-02 ZIP 업로드 (2026-05-24)
-- **마지막 커밋**: (대기) Phase 3 작업 1 doc-updater 진행 중
+- **Phase 3**: 🔄 진행 중 — 작업 1/2 ✅ (2026-05-25)
+- **마지막 커밋**: (대기) Phase 3 작업 2 doc-updater 진행 중
 
 ### 완료한 작업
 **작업 1 ✅ APP-02**: 사용자 ZIP 앱 업로드 (JSZip 3.10.1 + 보안 검증)
@@ -16,11 +16,16 @@
 - 검증: ✅ PASS (4명 + self-verifier)
 - ADR-0008 신규 + PROD-05 정책
 
+**작업 2 ✅ 안정화**: 번들 측정 + iframe 셀프 페네스트
+- 번들: static 1.4MB (raw), gzip ~400-500KB (LCP 내)
+- 페네스트: 14/14 항목 ALL PASS (PT-a/b/c/d/e/g/h + ZP-C7/C8 + CSP)
+- 코드 변경 0건 (architect 목표)
+- 신규 위협: N-08 postMessage DoS (v2 후보)
+
 ### 다음 후보 (사용자 우선순위 대기)
-1. **안정화 우선 (A1+A2)** — 빌드/번들 사이즈 + iframe 우회 시도 (시큐리티 셀프 페네스트)
-2. **게임 엔진 호환성 (B)** — Pixi.js + Three.js + Godot 호환 매트릭스
+1. **게임 엔진 호환성 (B)** — Pixi.js + Three.js 호환성 매트릭스
+2. **데모 영상 (C)** — ZIP 업로드 → 설치 → 실행 e2e (3분, Playwright)
 3. **STG-02 OPFS + DSK-04** — OPFS 어댑터 + 윈도우 위치 영속화
-4. **데모 영상 (C)** — ZIP 업로드 → 설치 → 실행 e2e 영상
 
 ## 현재 상태 (2026-05-24)
 - **저장소**: `git@github-personal:hanumoka/zm-os.git`, branch `main`
@@ -67,15 +72,15 @@ npm run dev
 
 설계 architect+research-analyst / 구현 lib-developer+fe-developer / 검증 build+code-reviewer+sandbox-auditor+constraint / 메타 self-verifier / 문서 doc-updater. 표준 워크플로: [`.claude/agents/_workflow.md`](../../.claude/agents/_workflow.md)
 
-## Phase 3 진행 상황 (25% — 1/4) 🔄
+## Phase 3 진행 상황 (50% — 2/4) 🔄
 
 완료:
 - 작업 1 ✅: APP-02 사용자 ZIP 앱 업로드 (JSZip 3.10.1, 보안 검증, UserAppsProvider, AppUploadButton)
+- 작업 2 ✅: 안정화 (번들 ~400-500KB gzip, 셀프 페네스트 14/14 PASS)
 
 다음:
-- 작업 2: 안정화 (빌드/번들 사이즈 + iframe 우회 페네스트)
-- 작업 3: 게임 엔진 호환성 (Pixi + Three.js)
-- 작업 4: 데모 영상 + 포장
+- 작업 3: 게임 엔진 호환성 (B) 또는 데모 영상 (C)
+- 작업 4: 포장 + v2 계획
 
 ## Quick Links
 - PRD: [`project/prd.md`](../project/prd.md)

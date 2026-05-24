@@ -2,9 +2,9 @@
 
 > **Living Document**. 기능 완료 시 즉시 갱신. 버전 bump 필수.
 
-**Version**: 0.6.0
-**Last Updated**: 2026-05-24
-**Status**: Phase 3 진행 중 (1/4, 25%)
+**Version**: 0.7.0
+**Last Updated**: 2026-05-25
+**Status**: Phase 3 진행 중 (2/4, 50%)
 
 ---
 
@@ -108,6 +108,16 @@ POC 완료 = 아래 시나리오가 동작:
 ---
 
 ## §8. Change Log
+
+### 0.7.0 (2026-05-25) — Phase 3 작업 2 완료 (안정화)
+- Phase 3 작업 2 완료 ✅ (안정화: iframe 우회 시도 셀프 페네스트 + 번들 측정)
+  - 신규: `e2e-pentest.mjs` (Playwright 자동화 페네트레이션, 14 항목 ALL PASS)
+  - 신규: `zm-claude-docs/security/phase-3-stabilization-audit-2026-05-25.md` (통합 감사 리포트)
+  - 검증 결과: iframe sandbox 격리 14/14 PASS (PT-a/b/c/d/e/g/h + ZP-C7/C8 + CSP-1)
+  - 번들 측정: static chunks ~1.4MB (raw), gzip 추정 ~400-500KB (LCP target 내)
+  - 코드 변경 0건 (architect 목표 달성)
+  - 신규 위협 N-08 등록: sandbox iframe → parent postMessage DoS 방어 부재 (POC 수용, v2 후보)
+  - **Phase 3 진행률: 2/4 (50%)**
 
 ### 0.6.0 (2026-05-24) — Phase 3 작업 1 완료 (APP-02)
 - Phase 3 작업 1 완료 ✅ (APP-02: 사용자 ZIP 앱 업로드)

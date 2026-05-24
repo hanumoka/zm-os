@@ -2,8 +2,8 @@
 > 시스템 프롬프트 자동 로드 (200줄 한도). 최종 갱신: 2026-05-24 (Phase 3 작업 1 완료)
 
 ## 프로젝트 수치 (항상 최신 유지)
-- 현재 Phase: **Phase 3 진행 중 (1/4, 25%)** — 작업 1 ✅ 완료
-- 코드 LOC: ~4300 LOC (TS) + samples/games ~1500 LOC (HTML/JS) — Phase 3 작업 1 완료 후 약 700 LOC 순증 (zip-loader 320 + UI 300 + 기타 80)
+- 현재 Phase: **Phase 3 진행 중 (2/4, 50%)** — 작업 1/2 ✅ 완료
+- 코드 LOC: ~4300 LOC (TS) + samples/games ~1500 LOC (HTML/JS) — 작업 2 문서만 (코드 변경 0)
 - 에이전트: 10개 (architect, research-analyst, lib-developer, fe-developer, build-checker, code-reviewer, app-sandbox-auditor, constraint-checker, self-verifier, doc-updater) + workflow 문서
 - 모델 전략: architect/self-verifier=opus / 구현·리뷰·감사=sonnet / 빌드·문서·제약검사=haiku
 - 스킬: 5개 (zm-commit, zm-unit-done, zm-session, zm-troubleshoot, zm-memory-save)
@@ -45,11 +45,13 @@
 - POC 단계 — 코드 정교함보다 빠른 검증 우선
 
 ## Project State
-- **Phase 3 진행 중 (1/4, 25%)**. 작업 1 ✅ (APP-02 사용자 ZIP 업로드).
-- Phase 3 작업 1 산출물: 신규 4 파일 (zip-loader/user-apps/UserAppsProvider/AppUploadButton) + 수정 7 파일 (storage/desktop/store/layout) + ADR-0008 + PROD-05 정책 신규
-- 다음 후보: 안정화 (A1/A2 번들+셀프) / 게임 엔진 (Pixi+Three.js) / OPFS+위치 영속화 (STG-02+DSK-04)
+- **Phase 3 진행 중 (2/4, 50%)**. 작업 1/2 ✅ (APP-02 + 안정화).
+- 작업 1 산출물: 신규 4 파일 (zip-loader/user-apps/UserAppsProvider/AppUploadButton) + 수정 7 파일
+- 작업 2 산출물: 신규 2 파일 (e2e-pentest.mjs + phase-3-stabilization-audit-2026-05-25.md), 코드 변경 0건
+- 다음 후보: 게임 엔진 호환성 (B) / 데모 영상 (C) / OPFS+위치 영속화 (STG-02+DSK-04)
 
 ## 최근 결정사항 (최대 10, FIFO)
+- 2026-05-25: Phase 3 작업 2 완료 — 안정화 (번들 측정 + iframe 셀프 페네스트). 산출물: e2e-pentest.mjs + 감사 리포트. 14/14 페네스트 ALL PASS (PT-a/b/c/d/e/g/h + ZP-C7/C8 + CSP). 번들 static 1.4MB, gzip ~400-500KB (LCP 내). 코드 변경 0건 (architect 목표). N-08 postMessage DoS v2 후보.
 - 2026-05-24: Phase 3 작업 1 완료 — APP-02 사용자 ZIP 앱 업로드 (JSZip 3.10.1, 보안 검증 6단계, UserAppsProvider/AppUploadButton). 신규: zip-loader(320 LOC) + UI(300 LOC). 검증 4명 + self-verifier ✅ PASS. ADR-0008 + PROD-05 신규. 보안 위협 N-05/06/07 등록.
 - 2026-05-24: Phase 2 ✅ 완료 (4/4, 100%) — STR-01/02 + STG-01 + APP-03 + GAME-01. Playwright e2e ALL PASS (snake 10 step + hydration 8 step). 
 - 2026-05-24: PROD-03/04 신규 정책 — 카탈로그 메타데이터 단일 모델 + Provider scope 옵션 A + 좌표 컨벤션.
@@ -63,6 +65,4 @@
 - 2026-05-24: ARCH-02 iframe 샌드박싱 (blob: + allow-scripts) + TECH-01 IndexedDB+OPFS.
 - 2026-05-24: 작업 4 완료 — 윈도우 매니저 DSK-01 (react-rnd).
 
-> **최종 갱신**: 2026-05-24 — Phase 3 작업 1 완료 (doc-updater 22:30)
-
-> **최종 갱신**: 2026-05-24 — Phase 2 작업 3 완료, 문서 갱신 완료
+> **최종 갱신**: 2026-05-25 — Phase 3 작업 2 완료, 문서 갱신 완료

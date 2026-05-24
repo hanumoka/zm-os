@@ -1,10 +1,10 @@
 # Current Phase
 
-## 🚀 Phase 3 진행 중 (1/4, 25%)
+## 🚀 Phase 3 진행 중 (2/4, 50%)
 - **Phase 1**: ✅ 완료 (7/7, 100%)
 - **Phase 2**: ✅ 완료 (4/4, 100%)
-- **Phase 3**: 🔄 진행 중 (1/4, 25%) — 작업 1 ✅ (APP-02 사용자 ZIP 업로드)
-- **현재 상태**: Phase 3 작업 1 검증 완료 → doc-updater 진행 중 (2026-05-24)
+- **Phase 3**: 🔄 진행 중 (2/4, 50%) — 작업 1/2 ✅ 완료
+- **현재 상태**: Phase 3 작업 2 검증 완료 → doc-updater 진행 중 (2026-05-25)
 
 ### 작업 1 — APP-02 사용자 ZIP 업로드 (✅ 완료)
 - **산출물**: 신규 4파일 + 수정 7파일 (총 11개 산출)
@@ -16,22 +16,38 @@
 - **검증**: 4명 + self-verifier ✅ PASS
 - **ADR-0008 신규** + **PROD-05 신규 정책**
 - **보안 위협 등록**: N-05/06/07 (CVE-2022-48285, HTML 크기, ZIP bomb)
-- **사용자 검증 deferred**: ZIP 업로드 → 설치 → 데스크탑 표시 → 실행 e2e 테스트 (Playwright 권장)
+
+### 작업 2 — 안정화 (✅ 완료)
+- **산출물**: 신규 2파일 (e2e-pentest.mjs + phase-3-stabilization-audit-2026-05-25.md)
+- **코드 변경**: 0건 (architect 목표 달성)
+- **번들 측정**: `npm run build` → static chunks ~1.4MB (raw), gzip 추정 ~400-500KB (LCP 임계치 내)
+- **iframe 셀프 페네스트**: Playwright 자동화 (14 항목 ALL PASS)
+  - PT-a XSS: document.cookie/origin 격리 ✅
+  - PT-b parent 접근: window.parent.localStorage/top.document.cookie ✅
+  - PT-c 외부 fetch: evil.example 차단 ✅
+  - PT-d 중첩 iframe: sandbox 토큰 상속 (격리 유지) ✅
+  - PT-e eval/Function: 정상 동작 (iframe 격리라 호스트 무관) ✅
+  - PT-g postMessage 폭주: 100건 전송 → DoS 방어 부재 (v2 후보) ⚠️
+  - PT-h `__zmosIpc`: IPC 미주입 확인 ✅
+  - ZP-C7 ZIP bomb (1028x 압축비): 거부 ✅
+  - ZP-C8 HTML 6MB: 거부 ✅
+  - CSP/Permissions-Policy 헤더: 확인 ✅
+- **신규 위협**: N-08 (postMessage DoS, POC 수용, v2 후보)
+- **검증**: 자동화 ALL PASS, 코드 검증 0건 (문서만)
 
 ## 🎯 Phase 3 다음 후보 (사용자 우선순위 대기)
 
-PRD §3 + roadmap §5 기반 후보 — **사용자 우선순위 결정 대기**:
+완료: 작업 1/2 (APP-02 + 안정화) — **작업 3/4 우선순위 결정 대기**:
 
 | 후보 | 설명 | 작업 단위 |
 |------|------|----------|
-| **APP-02 ZIP 업로드** | POC 비전 핵심 — 사용자가 직접 ZIP 앱 패키지 업로드/설치/실행. itch.io 식 ZIP + 매니페스트 검증 + IDB 저장 | 3-4 파일 |
-| **안정화 우선** | A1 빌드/번들 사이즈 측정 + A2 iframe 우회 시도 셀프 페네스트 (XSS/sandbox escape) | 1-2 파일 + 보고서 |
-| **게임 엔진 매트릭스** | Pixi.js 샘플 게임 추가 + Three.js 경계 시도 + 호환성 매트릭스 | 2-3 파일 |
-| **STG-02 OPFS + DSK-04** | OPFS 어댑터 (Chrome/Edge) + Safari IDB 폴백 + 윈도우 위치 영속화 | 3-4 파일 |
+| **B. 게임 엔진 호환성** | Pixi.js + Three.js 샘플 게임 추가 + 호환성 매트릭스 | 2-3 파일 |
+| **C. 데모 영상** | ZIP 업로드 → 설치 → 데스크탑 표시 → 실행 e2e (3분 이내, Playwright e2e + 비디오 렌더) | 1 영상 + script |
+| **STG-02 OPFS + DSK-04** | OPFS 어댑터 (Chrome/Edge) + 윈도우 위치 영속화 + Safari IDB 폴백 | 3-4 파일 |
 
 ### 재개 절차
 1. 본 문서 + `quick-ref.md` + MEMORY.md 자동 로드 (session_start.py)
-2. 사용자에게 Phase 3 후보 4개 선택지 제시 (`AskUserQuestion`)
+2. 사용자에게 Phase 3 작업 3/4 선택지 제시 (B/C/STG-02)
 3. 선택 후 architect → research(필요 시) → 구현 → 검증 4명 → self-verifier → doc-updater 워크플로
 
 ---

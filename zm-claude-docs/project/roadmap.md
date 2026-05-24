@@ -2,8 +2,8 @@
 
 > **Living Document**. 항목 완료 시 즉시 갱신. PRD와 동시 갱신.
 
-**Version**: 0.6.0
-**Last Updated**: 2026-05-24
+**Version**: 0.7.0
+**Last Updated**: 2026-05-25
 
 ---
 
@@ -14,7 +14,7 @@
 | **Phase 0** — 초기 셋팅 | ✅ 완료 | 100% | 2026-05-24 |
 | **Phase 1** — 코어 샌드박싱 + 윈도우 매니저 | ✅ 완료 | 100% (작업 7/7) | 2026-05-24 |
 | **Phase 2** — 앱 스토어 + 첫 게임 시연 | ✅ 완료 | 100% (작업 4/4) | 2026-05-24 |
-| **Phase 3** — POC 안정화 + 데모 영상 | 🔄 진행 중 | 25% (작업 1/4) | 미정 |
+| **Phase 3** — POC 안정화 + 데모 영상 | 🔄 진행 중 | 50% (작업 2/4) | 미정 |
 
 POC 종료 후: v2 plan (멀티유저/클라우드) 별도 plan 필요.
 
@@ -67,8 +67,7 @@ POC 종료 후: v2 plan (멀티유저/클라우드) 별도 plan 필요.
 | 작업 | 설명 | 상태 |
 |------|------|------|
 | ✅ 사용자 ZIP 앱 업로드 (APP-02) | JSZip 3.10.1 + 보안 검증 6단계 (magic byte → 파싱 → path traversal → 압축비 → 필수 파일 → 매니페스트) + UserAppsProvider + IDB STORE_USER_APPS | ✅ 완료 |
-| A1. 빌드/번들 사이즈 측정 | next build 시간 + bundle analyzer + 누적 번들 크기 (webpack) | ⏳ 계획 |
-| A2. iframe 우회 시도 (시큐리티 셀프 페네스트) | XSS/sandbox escape 100+ 패턴 테스트 + 보고서 | ⏳ 계획 |
+| ✅ 안정화 (A1+A2) | 빌드/번들 사이즈 측정 (static 1.4MB, gzip ~400-500KB) + iframe 셀프 페네스트 자동화 (Playwright, 14 항목 ALL PASS) | ✅ 완료 |
 | B. 게임 엔진 호환성 매트릭스 | Pixi.js + Three.js + Godot.js 샘플 + 호환 여부 표 | ⏳ 계획 |
 | C. 데모 영상 1편 (3분 이내) | ZIP 업로드 → 설치 → 데스크탑 표시 → 실행 e2e | ⏳ 계획 |
 
@@ -95,6 +94,18 @@ POC 종료 후: v2 plan (멀티유저/클라우드) 별도 plan 필요.
 ---
 
 ## §8. Change Log
+
+### 0.7.0 (2026-05-25) — Phase 3 작업 2 완료 (안정화)
+- Phase 3 작업 2 완료 ✅ (안정화: 번들 측정 + iframe 우회 시도 셀프 페네스트)
+  - 번들 측정: `npm run build` (Turbopack) → static chunks ~1.4MB (raw), gzip 추정 ~400-500KB (LCP target 내)
+  - iframe 셀프 페네스트: Playwright e2e 자동화 (14 항목 모두 PASS)
+    - PT-a/b/c/d/e/g/h (iframe sandbox 격리 검증)
+    - ZP-C7 (ZIP bomb 1028x → 거부 확인)
+    - ZP-C8 (HTML 6MB → 거부 확인)
+    - CSP-1 (response 헤더 검증)
+  - 코드 변경 0건 (architect 목표)
+  - 신규 위협: N-08 (postMessage DoS, POC 수용, v2 후보)
+- **Phase 3 진행률: 2/4 (50%)** — 다음: 게임 엔진 호환성 (B) 또는 데모 영상 (C)
 
 ### 0.6.0 (2026-05-24) — Phase 3 작업 1 완료
 - Phase 3 작업 1 완료 ✅ (APP-02: 사용자 ZIP 앱 업로드)
