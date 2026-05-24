@@ -12,8 +12,8 @@
 | 1 | iframe 샌드박싱 PoC | manifest.ts + sandbox.ts + sample-game + sandbox-test 페이지 | ✅ 완료 |
 | 2 | Comlink IPC 어댑터 | src/lib/apps/ipc/ | ✅ 완료 |
 | 2.5 | TS-002 fix (host.ts:279 권한 게이트 결함) | host.ts | ✅ 완료 |
-| 3 | CSP / Permissions-Policy 헤더 (SBX-02) | next.config.ts | ⏳ 진행 예정 |
-| 4 | 윈도우 매니저 (DSK-01) | src/components/desktop/WindowManager.tsx | ⏳ 대기 (라이브러리 ADR-0002 필요) |
+| 3 | CSP / Permissions-Policy 헤더 (SBX-02) | next.config.ts | ✅ 완료 |
+| 4 | 윈도우 매니저 (DSK-01) | src/components/desktop/WindowManager.tsx | ⏳ 대기 (ADR-0002 확정 react-rnd) |
 | 5 | 데스크탑 영역 (DSK-02) | src/components/desktop/Desktop.tsx | ⏳ 대기 |
 | 6 | 작업표시줄 (DSK-03) | src/components/desktop/Taskbar.tsx | ⏳ 대기 |
 | 7 | `app-sandbox-auditor` agent 1회 감사 | 리포트 | ⏳ 대기 |
@@ -21,6 +21,8 @@
 ### 최근 변경 (2026-05-24)
 - **17:30**: Phase 0 완료 — 첫 커밋 `efed152 chore(setup)`, push 완료 (origin/main)
 - **19:00**: Phase 1 작업 1 완료 — iframe 샌드박싱 PoC (커밋 `127edcb feat(sandbox)`)
+- **21:00**: Phase 1 작업 3 완료 (CSP/Permissions-Policy 헤더, SBX-02): csp.ts + next.config.ts + ADR-0004. 4명 검증 + self-verifier ✅ PASS
+- **21:15**: ADR-0002 확정 (윈도우 매니저 = react-rnd v10.5.3, MIT). 작업 4 진입 조건 충족
   - `npm install zod`
   - `src/lib/apps/manifest.ts` — Zod 매니페스트 스키마 (APP-01) ✅
   - `src/lib/apps/sandbox.ts` — iframe + sandbox="allow-scripts" + srcdoc 격리 (SBX-01) ✅

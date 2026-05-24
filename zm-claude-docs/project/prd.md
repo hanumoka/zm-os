@@ -2,9 +2,9 @@
 
 > **Living Document**. 기능 완료 시 즉시 갱신. 버전 bump 필수.
 
-**Version**: 0.1.2
+**Version**: 0.1.3
 **Last Updated**: 2026-05-24
-**Status**: Phase 1 — 코어 샌드박싱 (작업 2/7 완료)
+**Status**: Phase 1 — 코어 샌드박싱 (작업 3/7 완료)
 
 ---
 
@@ -58,7 +58,7 @@ zm-os는 **브라우저 안에서 동작하는 가상 데스크탑** 으로, 사
 | **APP-02** | 앱 패키지 포맷 (itch.io식 ZIP) | ⏳ 계획 | |
 | **APP-03** | 설치한 앱 목록 관리 | ⏳ 계획 | IndexedDB |
 | **SBX-01** | blob: URL iframe 샌드박스 SDK | ✅ 완료 | `src/lib/apps/sandbox.ts` (srcdoc + sandbox="allow-scripts") |
-| **SBX-02** | CSP/Permissions-Policy 헤더 | ⏳ 계획 | |
+| **SBX-02** | CSP/Permissions-Policy 헤더 | ✅ 완료 | next.config.ts headers() + src/lib/security/csp.ts |
 | **IPC-01** | Comlink 기반 RPC 어댑터 | ✅ 완료 | `src/lib/apps/ipc/` (wire-compatible v1) |
 | **STG-01** | IndexedDB 추상화 | ⏳ 계획 | |
 | **STG-02** | OPFS 어댑터 (Chrome/Edge) | ⏳ 계획 | Safari는 IndexedDB 폴백 |
@@ -108,6 +108,13 @@ POC 완료 = 아래 시나리오가 동작:
 ---
 
 ## §8. Change Log
+
+### 0.1.3 (2026-05-24)
+- Phase 1 작업 3 완료
+- SBX-02 (CSP / Permissions-Policy 헤더) ✅
+- src/lib/security/csp.ts 신규 (dev/prod 분기)
+- ADR-0002 확정 (윈도우 매니저 = react-rnd)
+- ADR-0004 작성 (CSP/Permissions-Policy 정책)
 
 ### 0.1.2 (2026-05-24)
 - Phase 1 작업 2 완료

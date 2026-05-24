@@ -31,6 +31,12 @@
 - **결정**: Claude Code hooks는 Python 통합 (`mistake_guard.py`, `post_review.py`, `session_start.py`, `notify_done.py`). bash sub-spawn 회피로 cold ~150ms.
 - **이유**: sonix_docs 패턴 검증됨. Windows 환경에서 bash 의존도 줄임.
 
+### TECH-03: 호스트 origin CSP / Permissions-Policy — 정적 헤더 모델 (2026-05-24)
+- **결정**: next.config.ts `headers()` + `src/lib/security/csp.ts` 정적 헤더. dev/prod 분기.
+- **이유**: POC 1차 단순성, nonce middleware 회피
+- **재고 시점**: v2 nonce 도입 또는 SharedArrayBuffer 게임 엔진 (Godot 등) 도입 시 COEP/COOP 검토
+- **상세**: ADR-0004
+
 ### PROD-01: POC 1차 스코프 (2026-05-24)
 - **결정**: 게임 스토어 + 단일 사용자 데스크탑 (몽상 5번). 멀티유저는 v2.
 - **이유**: 빠른 검증 우선.

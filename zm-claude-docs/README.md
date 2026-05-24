@@ -20,6 +20,9 @@ zm-os 프로젝트 문서 색인.
 ## 결정 (ADR)
 - [decisions/index.md](decisions/index.md) — ADR 인덱스
 - [decisions/adr-0001-initial-stack.md](decisions/adr-0001-initial-stack.md) — 초기 스택
+- [decisions/adr-0002-window-manager.md](decisions/adr-0002-window-manager.md) — 윈도우 매니저 라이브러리 (react-rnd)
+- [decisions/adr-0003-ipc-surface.md](decisions/adr-0003-ipc-surface.md) — IPC 어댑터 표면
+- [decisions/adr-0004-csp-permissions-policy.md](decisions/adr-0004-csp-permissions-policy.md) — CSP/Permissions-Policy 정책
 
 ## 아카이브
 - [archive/](archive/) — 월별 작업 로그

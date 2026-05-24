@@ -2,15 +2,15 @@
 > 시스템 프롬프트 자동 로드 (200줄 한도). 최종 갱신: 2026-05-24 (초기 셋팅)
 
 ## 프로젝트 수치 (항상 최신 유지)
-- 현재 Phase: **Phase 1 — 코어 샌드박싱 + 윈도우 매니저** (작업 2/7 완료)
-- 코드 LOC: 매니페스트 + sandbox SDK + IPC 어댑터 + sandbox-test 페이지 = ~1500 LOC (TS) + sample-game/sample-game-ipc ~230 LOC (HTML/JS)
+- 현재 Phase: **Phase 1 — 코어 샌드박싱 + 윈도우 매니저** (작업 3/7 완료, 약 43%)
+- 코드 LOC: 매니페스트 + sandbox SDK + IPC 어댑터 + CSP 헤더 + sandbox-test 페이지 = ~1680 LOC (TS) + sample-game/sample-game-ipc ~230 LOC (HTML/JS)
 - 에이전트: 10개 (architect, research-analyst, lib-developer, fe-developer, build-checker, code-reviewer, app-sandbox-auditor, constraint-checker, self-verifier, doc-updater) + workflow 문서
 - 모델 전략: architect/self-verifier=opus / 구현·리뷰·감사=sonnet / 빌드·문서·제약검사=haiku
 - 스킬: 5개 (zm-commit, zm-unit-done, zm-session, zm-troubleshoot, zm-memory-save)
 - 규칙: 4개 (frontend, security, work-units, known-mistakes)
 - 훅: 4개 Python (mistake_guard, post_review, session_start, notify_done)
 - 단위 테스트: 0 | E2E: 0 (Phase 3에서 도입 예정)
-- 의존성: next 16, react 19, tailwind 4, zod 4.4.3, typescript 5 (Comlink 도입 미정 — v2 후보)
+- 의존성: next 16, react 19, tailwind 4, zod 4.4.3, typescript 5, react-rnd 도입 예정 (v10.5.3, 작업 4)
 
 ## 기술 스택
 - **FE/풀스택**: Next.js 16 (App Router) + React 19 + Tailwind v4
@@ -60,5 +60,12 @@
 - 2026-05-24: Phase 1 작업 1 완료 — srcdoc 기반 iframe (sandbox="allow-scripts", null origin) + Zod 매니페스트
 - 2026-05-24: 에이전트 팀 10명 재구성 — 설계/구현/검증/메타/문서 5계층. 사용자 요구(추측 금지 + 재검증 의무) 충족. workflow 표준화
 - 2026-05-24: Phase 1 작업 2 완료 — IPC 어댑터 (자체 RPC v1, ARCH-02 정밀화로 v2 Comlink 라이브러리 도입 미룸)
+- 2026-05-24: 작업 3 완료 — CSP/Permissions-Policy 정적 헤더 (ADR-0004 dev/prod 분기, COEP/COOP 미도입)
+- 2026-05-24: ADR-0002 확정 — 윈도우 매니저 = react-rnd v10.5.3
 
-> **최종 갱신**: 2026-05-24 — Phase 1 작업 2 완료 (IPC 어댑터)
+## Project State
+- Phase 1 작업 1+2+2.5+3 완료 (약 43%)
+- ADR-0002 확정, 작업 4 (윈도우 매니저 DSK-01) 진입 조건 충족
+- 다음: 작업 4 (윈도우 매니저 DSK-01)
+
+> **최종 갱신**: 2026-05-24 — Phase 1 작업 3 완료 (CSP/Permissions-Policy), ADR-0002 확정 (react-rnd)
