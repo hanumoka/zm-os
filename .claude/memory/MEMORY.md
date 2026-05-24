@@ -2,8 +2,8 @@
 > 시스템 프롬프트 자동 로드 (200줄 한도). 최종 갱신: 2026-05-24 (초기 셋팅)
 
 ## 프로젝트 수치 (항상 최신 유지)
-- 현재 Phase: **Phase 2 진행 중 (3/4, 75%)** — 작업 1/2/4 ✅ 완료
-- 코드 LOC: ~3800 LOC (TS) + sample-game/sample-game-ipc/sample-game-phaser/desktop ~720 LOC (HTML/JS) — Phase 2 작업 2 완료 후 약 183 LOC 순증 (storage)
+- 현재 Phase: **Phase 2 ✅ 완료 (4/4, 100%)** — Phase 3 진입 가능
+- 코드 LOC: ~3862 LOC (TS) + sample-game/sample-game-ipc/sample-game-phaser ~750 LOC (HTML/JS) — Phase 2 작업 3 완료 후 약 62 LOC 순증 (installed-apps.ts)
 - 에이전트: 10개 (architect, research-analyst, lib-developer, fe-developer, build-checker, code-reviewer, app-sandbox-auditor, constraint-checker, self-verifier, doc-updater) + workflow 문서
 - 모델 전략: architect/self-verifier=opus / 구현·리뷰·감사=sonnet / 빌드·문서·제약검사=haiku
 - 스킬: 5개 (zm-commit, zm-unit-done, zm-session, zm-troubleshoot, zm-memory-save)
@@ -55,6 +55,7 @@
 - **Phase 2 사용자 결정 (확정)**: 코어 범위 / STR-01/02 첫 / Phaser 3 / P1=A α i+iii x r1 / Provider 옵션 A
 
 ## 최근 결정사항 (최대 10, FIFO)
+- 2026-05-24: Phase 2 작업 3 완료 — APP-03 IndexedDB hydration + fire-and-forget persist (InstalledAppsProvider, lib/storage/installed-apps.ts). 인터페이스 무변경. Phase 2 ✅ 완료 (4/4, 100%).
 - 2026-05-24: Phase 2 작업 2 완료 — STG-01 IndexedDB 추상화 (idb v8.0.3, 메모리 폴백). ADR-0007 신규. 75% 진행률.
 - 2026-05-24: Phase 2 작업 1+4 Playwright e2e ALL PASS (10 step). TS-004 Snake 자동 벽 충돌 fix (paused 모드). D1/D2 deferred 검증 — Chrome srcdoc null origin → host /phaser.min.js 200 OK, Phaser AUTO sandbox 정상.
 - 2026-05-24: Phase 2 작업 4 완료 — GAME-01 Phaser 3 Snake (procedural, host self origin). POC v1 카탈로그 3개 엔트리 완성.
@@ -74,8 +75,8 @@
 - 2026-05-24: 작업 4 완료 — 윈도우 매니저 DSK-01 (react-rnd v10.5.3, Window 컴포넌트 + useWindowManager)
 
 ## Project State
-- **Phase 2 진행 중 (3/4, 75%)**. 작업 1 ✅ 완료 (STR-01/02 스토어 UI) + 작업 2 ✅ 완료 (STG-01 IndexedDB) + 작업 4 ✅ 완료 (GAME-01 Phaser 3 Snake).
-- 산출물: 작업 1 (9 파일, 신규 5 + 수정 4) + 작업 2 (2 파일, 신규 1 + 수정 1 + ADR-0007) + 작업 4 (4 파일, 신규 2 + 수정 2)
-- 다음: 작업 3 (APP-03 + ADR-0006 reshape) 진입 가능
+- **Phase 2 ✅ 완료 (4/4, 100%)**. 작업 1 ✅ (STR-01/02 스토어 UI) + 작업 2 ✅ (STG-01 IndexedDB) + 작업 3 ✅ (APP-03 hydration+persist) + 작업 4 ✅ (GAME-01 Phaser Snake).
+- 산출물: 작업 1 (9 파일, 신규 5 + 수정 4) + 작업 2 (2 파일, 신규 1 + 수정 1 + ADR-0007) + 작업 3 (2 파일, 신규 1 + 수정 1) + 작업 4 (4 파일, 신규 2 + 수정 2)
+- 다음: Phase 3 진입 가능 (POC 안정화 + 데모 영상)
 
-> **최종 갱신**: 2026-05-24 — Phase 2 작업 2 완료, doc-updater 완료
+> **최종 갱신**: 2026-05-24 — Phase 2 작업 3 완료, 문서 갱신 완료

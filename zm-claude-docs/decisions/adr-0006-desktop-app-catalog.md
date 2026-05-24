@@ -40,7 +40,7 @@ PRD §3 DSK-02 (데스크탑 영역 + 아이콘) 와 §7 수용 기준 1·3·4·
 ### Negative
 - 사용자가 새 게임 설치 불가 → PRD §7 시나리오 2·3 (스토어에서 선택 → 설치) 검증 불가. Phase 2 STR 통합 시 본격 검증.
 - `desktopApps.ts` 변경 = 코드 변경 → 데모 시점에 추가 게임 도입하려면 작업 단위 1개 소요. POC 단계 허용.
-- IndexedDB persist 미적용 → 윈도우/아이콘 위치는 매 페이지 로드마다 초기값. v2 reshape 후보.
+- ~~IndexedDB persist 미적용~~ **Phase 2 작업 3에서 설치 상태 IDB 영속화 완료** (인터페이스 무변경, ADR-0007 idb wrapper 활용). 윈도우/아이콘 위치 persist는 별도 작업 (DSK-04 reshape 후보).
 
 ## Alternatives Considered
 
@@ -68,6 +68,12 @@ PRD §3 DSK-02 (데스크탑 영역 + 아이콘) 와 §7 수용 기준 1·3·4·
 - `src/components/desktop/Desktop.tsx` (설치 필터링 + 시스템 아이콘 우상단)
 - `src/app/layout.tsx` (Provider scope 옵션 A)
 - 신규 정책: PROD-03, PROD-04
+
+### Phase 2 작업 3 (APP-03 + ADR-0006 reshape) 산출물 (2026-05-24)
+- `src/lib/storage/installed-apps.ts` (신규, 도메인 wrapper: listInstalledAppIds / persistInstalledApp / removeInstalledApp / InstalledAppRecord)
+- `src/components/store/InstalledAppsProvider.tsx` (HYDRATE action + useEffect hydration + install/uninstall fire-and-forget persist)
+- 인터페이스 무변경 (PROD-04 정합). 호출자 (Desktop.tsx, AppCard.tsx, AppDetail.tsx, useInstalledApps.ts) 무수정.
+- 정책 결정: P1=A useEffect 1회 / P2=a 빈→채우기 / P3=α fire-and-forget / P4=ㄱ silent console.error / P5=III {id, installedAt} / P6=㉠ §Consequences 갱신 / P7=A 인터페이스 무변경 / P8 HYDRATE union (race-safe)
 
 ### Phase 2 작업 4 (GAME-01) 산출물 (2026-05-24)
 - `public/sample-game-phaser/index.html` (Phaser 3 스네이크 게임, ~366 LOC)

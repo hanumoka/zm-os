@@ -3,10 +3,16 @@
 import React, {
   createContext,
   useContext,
+  useEffect,
   useReducer,
   useCallback,
   useMemo,
 } from 'react';
+import {
+  listInstalledAppIds,
+  persistInstalledApp,
+  removeInstalledApp,
+} from '@/lib/storage/installed-apps';
 
 // ─── Context Value 타입 ───────────────────────────────────────────────────────
 
@@ -25,12 +31,14 @@ export type InstalledAppsContextValue = {
 
 type InstalledAppsAction =
   | { type: 'INSTALL'; id: string }
-  | { type: 'UNINSTALL'; id: string };
+  | { type: 'UNINSTALL'; id: string }
+  | { type: 'HYDRATE'; ids: ReadonlyArray<string> }; // IDB hydration (P8: race-safe union)
 
 /**
  * immutable Set reducer.
  * 이미 존재하는 id install → 동일 참조 반환 (re-render 방지).
  * 존재하지 않는 id uninstall → 동일 참조 반환.
+ * HYDRATE: hydration 도착 전 사용자 액션 보존 — IDB ids ∪ state (union, P8).
  */
 function installedAppsReducer(
   state: ReadonlySet<string>,
@@ -56,6 +64,23 @@ function installedAppsReducer(
     return next as ReadonlySet<string>;
   }
 
+  if (action.type === 'HYDRATE') {
+    // hydration 도착 전 사용자 액션 보존 — IDB ids + 현재 state union (race-safe, P8)
+    if (action.ids.length === 0 && state.size === 0) {
+      // 둘 다 비어 있음 — 동일 참조 반환 (re-render 방지)
+      return state;
+    }
+    const next = new Set(state); // 기존 state 보존 (hydration 전 사용자 액션 유지)
+    let changed = false;
+    for (const id of action.ids) {
+      if (!next.has(id)) {
+        next.add(id);
+        changed = true;
+      }
+    }
+    return changed ? (next as ReadonlySet<string>) : state;
+  }
+
   return state;
 }
 
@@ -74,11 +99,14 @@ type InstalledAppsProviderProps = {
 /**
  * InstalledAppsProvider
  *
- * P2=α: 메모리 React Context + useReducer (POC v1).
- * 작업 3에서 IndexedDB로 reshape — 인터페이스(InstalledAppsContextValue) 무변경.
+ * P1=A: useEffect 1회 hydration (IDB → HYDRATE dispatch).
+ * P2=α: fire-and-forget IDB persist (install/uninstall 동기 dispatch + 비동기 IDB 저장).
+ * P4=ㄱ: 에러는 console.error만 (silent).
+ * P7=A: InstalledAppsContextValue 무변경.
  *
- * SSR 안전: window/document/localStorage 접근 없음 (메모리 only).
- * StrictMode 안전: useReducer + useCallback + useMemo만 사용 (부작용 없음).
+ * SSR 안전: IDB 접근은 useEffect 내부에서만 — listInstalledAppIds/persistInstalledApp/removeInstalledApp
+ *           내부에서 isIDBAvailable() 가드 자동 처리 (STG-01 lib).
+ * StrictMode 안전: useEffect cancelled flag로 비동기 race 방지 (frontend.md 비동기 패턴 b).
  */
 export function InstalledAppsProvider({
   children,
@@ -88,12 +116,37 @@ export function InstalledAppsProvider({
     new Set<string>() as ReadonlySet<string>,
   );
 
-  const install = useCallback((id: string): void => {
-    dispatch({ type: 'INSTALL', id });
+  // ── IDB hydration (P1=A, frontend.md 비동기 패턴 b — cancelled flag) ──────
+  useEffect(() => {
+    let cancelled = false;
+    listInstalledAppIds()
+      .then((ids) => {
+        if (cancelled) return;
+        dispatch({ type: 'HYDRATE', ids });
+      })
+      .catch((err: unknown) => {
+        // P4=ㄱ: silent — console.error만 (UI 블로킹 없음)
+        console.error('[InstalledAppsProvider] IDB hydration 실패', err);
+      });
+    return (): void => {
+      cancelled = true;
+    };
   }, []);
 
+  // ── install: 동기 dispatch + fire-and-forget IDB persist (P3=α, P4=ㄱ) ────
+  const install = useCallback((id: string): void => {
+    dispatch({ type: 'INSTALL', id });
+    void persistInstalledApp(id).catch((err: unknown) => {
+      console.error('[InstalledAppsProvider] IDB persist install 실패', { id, err });
+    });
+  }, []);
+
+  // ── uninstall: 동기 dispatch + fire-and-forget IDB 삭제 (P3=α, P4=ㄱ) ────
   const uninstall = useCallback((id: string): void => {
     dispatch({ type: 'UNINSTALL', id });
+    void removeInstalledApp(id).catch((err: unknown) => {
+      console.error('[InstalledAppsProvider] IDB remove uninstall 실패', { id, err });
+    });
   }, []);
 
   const isInstalled = useCallback(

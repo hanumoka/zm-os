@@ -2,11 +2,11 @@
 
 > 1페이지 프로젝트 컨텍스트. 세션 시작 시 필독. 수치 변경 시 즉시 갱신.
 
-## 🚨 재부팅 후 재개 지점 (2026-05-24)
+## 🎉 Phase 2 ✅ 완료 (2026-05-24)
 - **Phase 1**: ✅ 완료 (7/7), e2e PASS
-- **Phase 2**: 진행 중 — 75% (3/4 완료) — 작업 1 ✅ STR-01/02 + 작업 4 ✅ GAME-01 + 작업 2 ✅ STG-01
-- **다음 진입**: 작업 3 (APP-03 + ADR-0006 reshape)
-- **마지막 커밋**: Phase 2 작업 2 완료 후 예정
+- **Phase 2**: ✅ 완료 (4/4, 100%) — 작업 1 ✅ STR-01/02 + 작업 2 ✅ STG-01 + 작업 3 ✅ APP-03 + 작업 4 ✅ GAME-01
+- **다음 진입**: Phase 3 (POC 안정화)
+- **마지막 커밋**: Phase 2 작업 3 완료 후 예정
 
 ## 현재 상태 (2026-05-24)
 - **저장소**: `git@github-personal:hanumoka/zm-os.git`, branch `main`
@@ -52,15 +52,16 @@ npm run dev
 
 설계 architect+research-analyst / 구현 lib-developer+fe-developer / 검증 build+code-reviewer+sandbox-auditor+constraint / 메타 self-verifier / 문서 doc-updater. 표준 워크플로: [`.claude/agents/_workflow.md`](../../.claude/agents/_workflow.md)
 
-## Phase 2 진행 상황 (75% — 3/4)
+## Phase 2 진행 상황 (100% — 4/4) ✅
 
 완료:
 - 작업 1 ✅: STR-01/02 스토어 UI + 설치 흐름
 - 작업 2 ✅: STG-01 IndexedDB 추상화 (idb v8.0.3 + 메모리 폴백)
+- 작업 3 ✅: APP-03 + ADR-0006 reshape (IndexedDB 영속화 + fire-and-forget persist)
 - 작업 4 ✅: GAME-01 Phaser 3 Snake
 
 다음:
-- 작업 3: APP-03 + ADR-0006 reshape (IndexedDB 영속화)
+- Phase 3: POC 안정화 + 데모 영상
 
 ## Quick Links
 - PRD: [`project/prd.md`](../project/prd.md)

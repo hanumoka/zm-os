@@ -2,9 +2,9 @@
 
 > **Living Document**. 기능 완료 시 즉시 갱신. 버전 bump 필수.
 
-**Version**: 0.4.0
+**Version**: 0.5.0
 **Last Updated**: 2026-05-24
-**Status**: Phase 2 — 앱 스토어 + 첫 게임 (작업 3/4 완료 ✅)
+**Status**: Phase 2 ✅ 완료 (4/4, 100%)
 
 ---
 
@@ -56,7 +56,7 @@ zm-os는 **브라우저 안에서 동작하는 가상 데스크탑** 으로, 사
 | **STR-02** | 앱 상세 페이지 + 설치 | ✅ 완료 | AppDetail 패널 + install/uninstall 액션 |
 | **APP-01** | 앱 매니페스트 스키마 (Zod) | ✅ 완료 | `src/lib/apps/manifest.ts` |
 | **APP-02** | 앱 패키지 포맷 (itch.io식 ZIP) | ⏳ 계획 | |
-| **APP-03** | 설치한 앱 목록 관리 | ⏳ 계획 | IndexedDB |
+| **APP-03** | 설치한 앱 목록 관리 | ✅ 완료 | IndexedDB hydration + fire-and-forget persist |
 | **SBX-01** | blob: URL iframe 샌드박스 SDK | ✅ 완료 | `src/lib/apps/sandbox.ts` (srcdoc + sandbox="allow-scripts") |
 | **SBX-02** | CSP/Permissions-Policy 헤더 | ✅ 완료 | next.config.ts headers() + src/lib/security/csp.ts |
 | **IPC-01** | Comlink 기반 RPC 어댑터 | ✅ 완료 | `src/lib/apps/ipc/` (wire-compatible v1) |
@@ -108,6 +108,16 @@ POC 완료 = 아래 시나리오가 동작:
 ---
 
 ## §8. Change Log
+
+### 0.5.0 (2026-05-24) — Phase 2 작업 3 완료 + Phase 2 ✅ 완료
+- Phase 2 작업 3 완료 ✅ (APP-03: IndexedDB hydration + fire-and-forget persist)
+  - 신규: `src/lib/storage/installed-apps.ts` (~62 LOC) — 도메인 wrapper (listInstalledAppIds/persistInstalledApp/removeInstalledApp/InstalledAppRecord)
+  - 수정: `src/components/store/InstalledAppsProvider.tsx` (+44줄) — HYDRATE action + useEffect hydration + install/uninstall fire-and-forget persist
+  - 자동 채택 결정: P1=A useEffect 1회 / P2=a 빈→채우기 / P3=α fire-and-forget / P4=ㄱ silent console.error / P5=III {id, installedAt} / P6=㉠ ADR-0006 §Consequences 갱신 / P7=A 인터페이스 무변경 / P8 HYDRATE union (race-safe)
+  - 검증: build-checker ✅ / code-reviewer ✅ / sandbox-auditor ✅ / constraint-checker ✅ / self-verifier ✅ PASS
+  - W-01 주석 fix 적용
+  - 사용자 검증 deferred: install → reload → 상태 보존 (e2e 권장)
+  - **Phase 2 진행률: 4/4 (100%)** ✅ **Phase 2 완료** — Phase 3 진입 가능
 
 ### 0.4.0 (2026-05-24) — Phase 2 작업 2 완료
 - Phase 2 작업 2 완료 ✅ (STG-01: IndexedDB 추상화)
