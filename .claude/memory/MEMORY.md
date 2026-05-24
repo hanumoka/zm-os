@@ -45,12 +45,16 @@
 - POC 단계 — 코드 정교함보다 빠른 검증 우선
 
 ## Project State
-- **Phase 3 진행 중 (2/4, 50%)**. 작업 1/2 ✅ (APP-02 + 안정화).
-- 작업 1 산출물: 신규 4 파일 (zip-loader/user-apps/UserAppsProvider/AppUploadButton) + 수정 7 파일
-- 작업 2 산출물: 신규 2 파일 (e2e-pentest.mjs + phase-3-stabilization-audit-2026-05-25.md), 코드 변경 0건
-- 다음 후보: 게임 엔진 호환성 (B) / 데모 영상 (C) / OPFS+위치 영속화 (STG-02+DSK-04)
+- **Phase 3 진행 중 (2/4, 50%)**. 작업 1 ✅ (APP-02 ZIP 업로드), 작업 2 ✅ (안정화).
+- **POC 종료 게이트 ✅ 통과** — 보안 14 페네스트 + 번들 임계치 PASS, 데모/시연 가능.
+- 마지막 커밋: `d1c391a test(security): Phase 3 작업 2 안정화`, push 완료.
+- **🛑 세션 종료 (2026-05-25)**. 다음 세션 진입 시 Phase 3 남은 3 후보 중 사용자 선택:
+  - 게임 엔진 호환성 (Pixi.js + Three.js + Godot)
+  - STG-02 OPFS + DSK-04 윈도우 위치 영속화
+  - 데모 영상 (e2e end-to-end)
 
 ## 최근 결정사항 (최대 10, FIFO)
+- 2026-05-25: **🛑 세션 종료 (오늘 분량 마무리)**. Phase 3 50% (2/4) + POC 종료 게이트 통과. 누적 일정: Phase 2 4/4 + Phase 3 2/4 + e2e Playwright 4개 도입 (snake/hydration/zip-upload/pentest) + TS-004/005 발견&fix + ADR-0007/0008 + PROD-05 + N-05~N-08 위협. 다음 세션: 게임 엔진 매트릭스 / STG-02+DSK-04 / 데모 영상 중 선택.
 - 2026-05-25: Phase 3 작업 2 완료 — 안정화 (번들 측정 + iframe 셀프 페네스트). 산출물: e2e-pentest.mjs + 감사 리포트. 14/14 페네스트 ALL PASS (PT-a/b/c/d/e/g/h + ZP-C7/C8 + CSP). 번들 static 1.4MB, gzip ~400-500KB (LCP 내). 코드 변경 0건 (architect 목표). N-08 postMessage DoS v2 후보.
 - 2026-05-24: Phase 3 작업 1 완료 — APP-02 사용자 ZIP 앱 업로드 (JSZip 3.10.1, 보안 검증 6단계, UserAppsProvider/AppUploadButton). 신규: zip-loader(320 LOC) + UI(300 LOC). 검증 4명 + self-verifier ✅ PASS. ADR-0008 + PROD-05 신규. 보안 위협 N-05/06/07 등록.
 - 2026-05-24: Phase 2 ✅ 완료 (4/4, 100%) — STR-01/02 + STG-01 + APP-03 + GAME-01. Playwright e2e ALL PASS (snake 10 step + hydration 8 step). 
