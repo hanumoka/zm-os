@@ -60,6 +60,21 @@
 - **재고 시점**: STR-01/02 작업 진입 시 → useInstalledApps + IndexedDB로 reshape (인터페이스 무변경)
 - **상세**: ADR-0006
 
+### PROD-03: 앱 카탈로그 메타데이터 모델 (2026-05-24)
+- **결정**: `DesktopAppEntry` 단일 확장 (description, longDescription, category enum, screenshots, author, version). 별도 StoreCatalogEntry 분리 X.
+- **이유**: ADR-0006 prefigure — v2 STR 백엔드 reshape 시 인터페이스 무변경 + Phase 2 작업 1 자동 채택 (P1=A).
+- **카테고리 enum**: `'game' | 'utility' | 'demo'` (POC v1). v2 tag[] reshape 가능.
+- **재고 시점**: STR 백엔드(클라우드) 도입 시 ADR-0007 신규.
+
+### PROD-04: 설치 상태 storage + 데스크탑 아이콘 정책 (2026-05-24)
+- **결정**:
+  - 설치 상태 = POC v1 **메모리 React Context + useReducer** (immutable Set). 작업 3에서 IndexedDB reshape (인터페이스 무변경).
+  - 데스크탑 아이콘 = 설치된 앱만 표시 + "스토어" 시스템 아이콘 우상단 항상 표시.
+  - Provider scope = layout.tsx 옵션 A → / 와 /store이 같은 Context 공유.
+  - 좌표 컨벤션: 좌측 column (`x ≤ 30`) = 앱 아이콘 / 우상단 = 시스템 아이콘.
+- **이유**: 사용자 결정 (Phase 2 코어 범위) + architect P2=α/P3=i+iii/Provider 옵션 A 추천 + ADR-0006.
+- **재고 시점**: 작업 3 진입 시 IndexedDB hydration 추가 (Provider 내부만 reshape).
+
 ## Deprecated
 - (없음)
 

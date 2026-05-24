@@ -2,9 +2,9 @@
 
 > **Living Document**. 기능 완료 시 즉시 갱신. 버전 bump 필수.
 
-**Version**: 0.1.6
+**Version**: 0.2.0
 **Last Updated**: 2026-05-24
-**Status**: Phase 1 — 코어 샌드박싱 + 윈도우 매니저 (작업 7/7 완료 ✅)
+**Status**: Phase 2 — 앱 스토어 + 첫 게임 (작업 1/4 완료 ✅)
 
 ---
 
@@ -52,8 +52,8 @@ zm-os는 **브라우저 안에서 동작하는 가상 데스크탑** 으로, 사
 | **DSK-01** | 윈도우 매니저 (드래그/리사이즈/포커스) | ✅ 완료 | `src/components/desktop/Window.tsx + useWindowManager (react-rnd v10.5.3)` |
 | **DSK-02** | 데스크탑 영역 + 아이콘 | ✅ 완료 | `src/components/desktop/Desktop.tsx + DesktopIcon.tsx + desktopApps.ts` |
 | **DSK-03** | 작업표시줄 (실행 중 앱) | ✅ 완료 | `src/components/desktop/Taskbar.tsx + TaskbarButton.tsx + Clock.tsx` |
-| **STR-01** | 앱 카탈로그 UI | ⏳ 계획 | |
-| **STR-02** | 앱 상세 페이지 + 설치 | ⏳ 계획 | |
+| **STR-01** | 앱 카탈로그 UI | ✅ 완료 | `/store` 라우트 + AppCard + InstalledAppsProvider |
+| **STR-02** | 앱 상세 페이지 + 설치 | ✅ 완료 | AppDetail 패널 + install/uninstall 액션 |
 | **APP-01** | 앱 매니페스트 스키마 (Zod) | ✅ 완료 | `src/lib/apps/manifest.ts` |
 | **APP-02** | 앱 패키지 포맷 (itch.io식 ZIP) | ⏳ 계획 | |
 | **APP-03** | 설치한 앱 목록 관리 | ⏳ 계획 | IndexedDB |
@@ -108,6 +108,18 @@ POC 완료 = 아래 시나리오가 동작:
 ---
 
 ## §8. Change Log
+
+### 0.2.0 (2026-05-24) — Phase 2 진입
+- Phase 2 작업 1 완료 ✅ (STR-01/02: 스토어 UI + 설치 흐름)
+  - 신규: `src/app/store/page.tsx` + `src/components/store/{InstalledAppsProvider,useInstalledApps,AppCard,AppDetail}.tsx/ts`
+  - 수정: `src/components/desktop/{desktopApps.ts, Desktop.tsx}` + `src/app/{layout.tsx, page.tsx}`
+  - DesktopAppEntry STR 메타데이터 확장 (description, longDescription, category, screenshots, author, version)
+  - InstalledAppsProvider (메모리 Context 설치 상태, 작업 3에서 IndexedDB reshape)
+  - /store 단일 라우트 + 사이드 패널 (P5=r1)
+  - 데스크탑: 설치된 앱만 표시 + "스토어" 시스템 아이콘 우상단 (P3=i+iii)
+  - C-01 fix: 스토어 시스템 아이콘 좌표 우상단 분리 (left:30 top:30 → right:30 top:30)
+- 신규 정책: PROD-03 (카탈로그 메타데이터 모델), PROD-04 (설치 상태 + 데스크탑 아이콘 규칙)
+- **Phase 2 진행률: 1/4 (25%)** — 작업 2/4 진입 가능
 
 ### 0.1.6 (2026-05-24)
 - Phase 1 작업 7 완료 (보안 감사) ✅ PASS

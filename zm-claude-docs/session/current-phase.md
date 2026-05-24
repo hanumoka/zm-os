@@ -2,10 +2,10 @@
 
 ## 🚨 재부팅 후 재개 (2026-05-24)
 - **Phase 1**: ✅ 완료 (7/7, 100%)
-- **Phase 2**: 진입 — 작업 1 architect 보고 완료, **fe-developer 호출 직전 중단** (사용자 재부팅 예정)
-- **재개 지점**: [`../project/phase-2-plan.md`](../project/phase-2-plan.md) §7 — fe-developer 호출 (architect 명세 그대로)
+- **Phase 2**: 진행 중 — 작업 1 ✅ 완료 (STR-01/02), 작업 2/4 진입 가능
+- **재개 지점**: [`../project/phase-2-plan.md`](../project/phase-2-plan.md) §7 — 작업 2 (STG-01) 또는 작업 4 (GAME-01) 진입
 - **사용자 결정 (확정)**: 코어 범위 / 첫 작업 STR-01/02 / Phaser 3 / P1=A P2=α P3=i+iii P4=x P5=r1 / Provider 옵션 A
-- **마지막 커밋**: `7d3fd32 fix(desktop): AppFrame StrictMode (TS-003)`
+- **마지막 커밋**: Phase 2 작업 1 완료 후 예정
 
 ---
 
@@ -28,6 +28,15 @@
 | 7 | `app-sandbox-auditor` agent 1회 감사 | zm-claude-docs/security/phase-1-audit-2026-05-24.md | ✅ 완료 |
 
 ### 최근 변경 (2026-05-24)
+- **20:30**: Phase 2 작업 1 완료 — STR-01/02 (스토어 UI + 설치 흐름) ✅ PASS
+  - 산출물: 9 파일 (신규 5 + 수정 4)
+  - DesktopAppEntry STR 메타데이터 확장 (description, longDescription, category, screenshots, author, version)
+  - InstalledAppsProvider (메모리 Context, 작업 3 IndexedDB reshape)
+  - `/store` 라우트 + AppCard + AppDetail + 데스크탑 동기화
+  - C-01 fix: 스토어 시스템 아이콘 좌표 우상단 분리 (left → right)
+  - 검증: build-checker ✅ / code-reviewer ✅ / sandbox-auditor ✅ / constraint-checker ✅ / self-verifier ✅ PASS
+  - **Phase 2 진행률: 1/4 (25%)**
+  - 다음: 작업 2 (STG-01) 또는 작업 4 (GAME-01) 진입 가능
 - **23:00**: Phase 1 작업 7 완료 — app-sandbox-auditor 전체 감사 ✅ PASS
   - 감사 범위: 25 파일 (코드 14, ADR 6, 정책/규칙 5)
   - 매트릭스: 8 항목 (7 PASS + 1 PARTIAL)

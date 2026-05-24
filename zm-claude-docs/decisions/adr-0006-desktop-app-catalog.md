@@ -60,3 +60,11 @@ PRD §3 DSK-02 (데스크탑 영역 + 아이콘) 와 §7 수용 기준 1·3·4·
 - ADR-0005 (윈도우 상태 관리 = Context + useReducer)
 - 사용자 피드백 (2026-05-24): "OS면 데스크탑 처럼 바탕화면, 작업표시줄, 바탕화면 아이콘이 있어야"
 - architect 설계 보고 (Phase 1 작업 5+6 통합, 본 세션 컨텍스트)
+
+### Phase 2 작업 1 (STR-01/02) 산출물 (2026-05-24)
+- `src/components/store/{InstalledAppsProvider.tsx, useInstalledApps.ts, AppCard.tsx, AppDetail.tsx}`
+- `src/app/store/page.tsx` (/store 라우트)
+- `src/components/desktop/desktopApps.ts` (DesktopAppEntry STR 메타데이터 확장: description, longDescription, category, screenshots, author, version)
+- `src/components/desktop/Desktop.tsx` (설치 필터링 + 시스템 아이콘 우상단)
+- `src/app/layout.tsx` (Provider scope 옵션 A)
+- 신규 정책: PROD-03, PROD-04

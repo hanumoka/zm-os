@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useRef, useState } from 'react';
+import Link from 'next/link';
 import { useWindowManager } from './useWindowManager';
 import { Window } from './Window';
 import { AppFrame } from './AppFrame';
@@ -9,12 +10,15 @@ import { Taskbar } from './Taskbar';
 import { DESKTOP_APPS } from './desktopApps';
 import type { DesktopAppEntry } from './desktopApps';
 import type { WindowState } from './types';
+import { useInstalledApps } from '@/components/store/useInstalledApps';
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
 type DesktopProps = {
   /** 표시할 앱 목록. 기본값: DESKTOP_APPS */
   apps?: ReadonlyArray<DesktopAppEntry>;
+  /** "스토어" 시스템 아이콘 표시 여부. 기본값: true (P3=i+iii) */
+  showStoreIcon?: boolean;
   className?: string;
 };
 
@@ -37,11 +41,16 @@ type DesktopProps = {
  */
 export function Desktop({
   apps = DESKTOP_APPS,
+  showStoreIcon = true,
   className = '',
 }: DesktopProps): React.JSX.Element {
   const manager = useWindowManager();
+  const { isInstalled } = useInstalledApps();
   const desktopAreaRef = useRef<HTMLDivElement>(null);
   const [selectedIconId, setSelectedIconId] = useState<string | null>(null);
+
+  // P3=i: 설치된 앱만 아이콘 표시
+  const visibleApps = apps.filter((a) => isInstalled(a.id));
 
   // ── onLaunch 핸들러 ────────────────────────────────────────────────────────
   const handleLaunch = (entry: DesktopAppEntry): void => {
@@ -87,8 +96,8 @@ export function Desktop({
           setSelectedIconId(null);
         }}
       >
-        {/* ── 데스크탑 아이콘 ─────────────────────────────────────────────────── */}
-        {apps.map((entry) => (
+        {/* ── 데스크탑 아이콘 (설치된 앱만 — P3=i) ──────────────────────────── */}
+        {visibleApps.map((entry) => (
           <DesktopIcon
             key={entry.id}
             id={entry.id}
@@ -100,6 +109,42 @@ export function Desktop({
             onSelect={(): void => setSelectedIconId(entry.id)}
           />
         ))}
+
+        {/* ── "스토어" 시스템 아이콘 (P3=iii) ─────────────────────────────── */}
+        {/*
+         * 좌표 컨벤션 (code-reviewer C-01 fix, 2026-05-24):
+         * - 데스크탑 좌측 column 좌표 = { x: 30, y: 30, 130, 230, ... } (앱 아이콘용)
+         * - 스토어 시스템 아이콘 = 데스크탑 우상단 고정 (right:30, top:30)
+         *   → 일반 앱 아이콘과 시각적/공간적 분리
+         *   → 좌측 column 아이콘이 N개여도 충돌 없음
+         * desktopApps.ts 의 iconPosition 은 `x ≤ 30, y < 1000` 좌측 column 만 사용 권장.
+         */}
+        {showStoreIcon && (
+          <Link
+            href="/store"
+            aria-label="앱 스토어 열기"
+            style={{ position: 'absolute', right: 30, top: 30 }}
+            onClick={(e): void => {
+              // 이벤트 버블링으로 인한 데스크탑 선택 해제 방지
+              e.stopPropagation();
+            }}
+            className="block"
+          >
+            <DesktopIcon
+              id="__system_store__"
+              label="스토어"
+              icon={{ kind: 'emoji', char: '🛒' }}
+              position={undefined}
+              selected={selectedIconId === '__system_store__'}
+              onLaunch={(): void => {
+                // Link의 href가 네비게이션 처리 — 추가 동작 불필요.
+                // 일반 앱 아이콘은 single-click=select / double-click=launch 이나
+                // 스토어 시스템 아이콘은 Link 래핑으로 모든 클릭이 navigate 됨 (의도된 UX).
+              }}
+              onSelect={(): void => setSelectedIconId('__system_store__')}
+            />
+          </Link>
+        )}
 
         {/* ── 윈도우 목록 ────────────────────────────────────────────────────── */}
         {manager.windows.map((win) => {

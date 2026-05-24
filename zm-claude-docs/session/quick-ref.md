@@ -3,11 +3,11 @@
 > 1페이지 프로젝트 컨텍스트. 세션 시작 시 필독. 수치 변경 시 즉시 갱신.
 
 ## 🚨 재부팅 후 재개 지점 (2026-05-24)
-- **Phase 1**: ✅ 완료 (7/7), e2e PASS (TS-003 fix 포함)
-- **Phase 2**: 진입 — 작업 1 architect 완료, **fe-developer 호출 직전 중단**
-- **재개**: [`../project/phase-2-plan.md`](../project/phase-2-plan.md) §7 → fe-developer 호출
+- **Phase 1**: ✅ 완료 (7/7), e2e PASS
+- **Phase 2**: 진행 중 — 작업 1 ✅ 완료 (STR-01/02), 작업 2/4 진입 가능
+- **재개**: [`../project/phase-2-plan.md`](../project/phase-2-plan.md) §7 → 작업 2 (STG-01) 또는 작업 4 (GAME-01) 진입
 - **확정 결정**: 코어 / STR-01/02 첫 / Phaser 3 / P1=A α i+iii x r1 / Provider 옵션 A
-- **마지막 커밋**: `7d3fd32 fix(desktop): TS-003 AppFrame StrictMode`
+- **마지막 커밋**: Phase 2 작업 1 완료 후 예정
 
 ## 현재 상태 (2026-05-24)
 - **저장소**: `git@github-personal:hanumoka/zm-os.git`, branch `main`
@@ -51,12 +51,12 @@ npm run dev
 
 설계 architect+research-analyst / 구현 lib-developer+fe-developer / 검증 build+code-reviewer+sandbox-auditor+constraint / 메타 self-verifier / 문서 doc-updater. 표준 워크플로: [`.claude/agents/_workflow.md`](../../.claude/agents/_workflow.md)
 
-## 다음 Phase 2 (Phase 1 100% 완료 후)
+## Phase 2 진행 상황 (25% — 1/4)
 
-Phase 2 진입 가능. 앱 스토어 + 패키지 포맷 + 첫 게임 시연 (별도 plan 필요)
-- STR-01/02: 앱 카탈로그 UI
-- APP-02/03: 앱 패키지 포맷 + 설치 관리
-- GAME-01: 첫 샘플 게임
+작업 1 ✅ 완료. 다음:
+- 작업 2: STG-01 IndexedDB 추상화
+- 작업 3: APP-03 + ADR-0006 reshape (IndexedDB 영속화)
+- 작업 4: GAME-01 Phaser 3 게임 (작업 1 후 언제든 가능)
 
 ## Quick Links
 - PRD: [`project/prd.md`](../project/prd.md)

@@ -2,7 +2,7 @@
 
 **Version**: 0.1.0
 **Created**: 2026-05-24
-**Status**: 작업 1 진입 — architect 보고 완료, fe-developer 호출 대기 (재부팅 후 재개)
+**Status**: 작업 1 ✅ 완료 — 작업 2/4 진입 가능
 
 ---
 
@@ -20,10 +20,10 @@
 
 | # | 작업 | 산출 | 의존성 | 상태 |
 |---|------|------|--------|------|
-| 1 | **STR-01/02**: 스토어 UI + 설치 흐름 | `/store` 라우트 + 카탈로그 카드 + 설치 Context + 데스크탑 아이콘 동기화 | — | 🔄 architect 보고 완료, fe-developer 대기 |
+| 1 | **STR-01/02**: 스토어 UI + 설치 흐름 | `/store` 라우트 + 카탈로그 카드 + 설치 Context + 데스크탑 아이콘 동기화 | — | ✅ 완료 |
 | 2 | **STG-01**: IndexedDB 추상화 | `src/lib/storage/indexeddb.ts` (CRUD + Safari 폴백 검토) | — | ⏳ 대기 |
 | 3 | **APP-03 + ADR-0006 reshape**: 설치 영속화 | `useInstalledApps()` IndexedDB hydration + ADR-0007 신규 | 작업 2 | ⏳ 대기 |
-| 4 | **GAME-01**: Phaser 3 게임 | `public/sample-game-phaser/` + desktopApps 엔트리 추가 | 작업 1 (스토어에 등재) | ⏳ 대기 |
+| 4 | **GAME-01**: Phaser 3 게임 | `public/sample-game-phaser/` + desktopApps 엔트리 추가 | 작업 1 (스토어에 등재) | ⏳ 진입 가능 |
 
 순서: 1 → 2 → 3 → 4 (4는 1 완료 후 언제든 진입 가능)
 

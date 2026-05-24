@@ -2,8 +2,8 @@
 > 시스템 프롬프트 자동 로드 (200줄 한도). 최종 갱신: 2026-05-24 (초기 셋팅)
 
 ## 프로젝트 수치 (항상 최신 유지)
-- 현재 Phase: **Phase 1 완료 (7/7, 100%)** — Phase 2 진입 대기
-- 코드 LOC: ~3070 LOC (TS) + sample-game/sample-game-ipc/desktop ~350 LOC (HTML/JS) — 작업 7 fix 2건만 미세 변화
+- 현재 Phase: **Phase 2 진행 중 (1/4, 25%)** — 작업 1 ✅ 완료
+- 코드 LOC: ~3600 LOC (TS) + sample-game/sample-game-ipc/desktop ~350 LOC (HTML/JS) — Phase 2 작업 1 완료 후 약 500 LOC 순증
 - 에이전트: 10개 (architect, research-analyst, lib-developer, fe-developer, build-checker, code-reviewer, app-sandbox-auditor, constraint-checker, self-verifier, doc-updater) + workflow 문서
 - 모델 전략: architect/self-verifier=opus / 구현·리뷰·감사=sonnet / 빌드·문서·제약검사=haiku
 - 스킬: 5개 (zm-commit, zm-unit-done, zm-session, zm-troubleshoot, zm-memory-save)
@@ -55,6 +55,8 @@
 - **Phase 2 사용자 결정 (확정)**: 코어 범위 / STR-01/02 첫 / Phaser 3 / P1=A α i+iii x r1 / Provider 옵션 A
 
 ## 최근 결정사항 (최대 10, FIFO)
+- 2026-05-24: Phase 2 작업 1 완료 — STR-01/02 (스토어 UI + InstalledAppsProvider + 데스크탑 동기화). C-01 fix (스토어 시스템 아이콘 우상단).
+- 2026-05-24: PROD-03/04 신규 정책 — 카탈로그 메타데이터 단일 모델 + Provider scope 옵션 A + 좌표 컨벤션.
 - 2026-05-24: Phase 1 작업 7 보안 감사 ✅ PASS. H-1 + SANDBOX_ORIGIN fix. Phase 2 진입 가능.
 - 2026-05-24: 작업 5+6 통합 완료 — DSK-02 데스크탑 + DSK-03 작업표시줄. 메인 페이지 / 가상 데스크탑.
 - 2026-05-24: ADR-0006 — 데스크탑 앱 카탈로그 = POC v1 하드코딩 (v2 STR 전환)
@@ -70,9 +72,9 @@
 - 2026-05-24: 작업 4 완료 — 윈도우 매니저 DSK-01 (react-rnd v10.5.3, Window 컴포넌트 + useWindowManager)
 
 ## Project State
-- **Phase 1 완료 (7/7, 100%)**. 보안 감사 PASS, Phase 2 진입 대기.
-- 작업 7: app-sandbox-auditor 전체 감사 ✅ PASS (8 항목 매트릭스 + ADR 정합 + CVE 매핑)
-- 산출물: zm-claude-docs/security/phase-1-audit-2026-05-24.md (감사 리포트)
-- 다음: Phase 2 plan (앱 스토어 + 패키지 포맷 + 첫 게임 시연)
+- **Phase 2 진행 중 (1/4, 25%)**. 작업 1 ✅ 완료 (STR-01/02 스토어 UI + 설치 흐름).
+- 작업 1: fe-developer 호출 → 검증 4명 → self-verifier ✅ PASS → doc-updater (진행 중)
+- 산출물: 9 파일 (신규 5 + 수정 4)
+- 다음: 작업 2 (STG-01 IndexedDB) 또는 작업 4 (GAME-01 Phaser) 진입 가능
 
-> **최종 갱신**: 2026-05-24 — Phase 1 완료 (작업 7 보안 감사) ✅ PASS (23:00)
+> **최종 갱신**: 2026-05-24 — Phase 2 작업 1 완료 (20:30) doc-updater 진행 중
