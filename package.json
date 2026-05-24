@@ -10,6 +10,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "idb": "^8.0.3",
     "next": "^16.1.1",
     "phaser": "^3.90.0",
     "react": "^19.2.3",

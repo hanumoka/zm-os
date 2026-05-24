@@ -10,13 +10,14 @@
 | [ADR-0004](adr-0004-csp-permissions-policy.md) | 호스트 origin CSP / Permissions-Policy 정책 — POC 1차 정적 헤더 모델 | accepted | 2026-05-24 |
 | [ADR-0005](adr-0005-window-state-management.md) | 윈도우 상태 관리 방식 — React Context + useReducer (POC v1) | accepted | 2026-05-24 |
 | [ADR-0006](adr-0006-desktop-app-catalog.md) | 데스크탑 앱 카탈로그 모델 — POC v1 하드코딩 + v2 STR 전환 | accepted | 2026-05-24 |
+| [ADR-0007](adr-0007-client-storage-indexeddb.md) | 클라이언트 스토리지 추상화 — IndexedDB (idb library) + 메모리 폴백 | accepted | 2026-05-24 |
 
 ## 다음 번호 가이드
 
-- ADR-0007 후보:
+- ADR-0008 후보:
   - IPC 권한 모델 v2 (manifest.permissions 매핑)
-  - Comlink 라이브러리 도입
-  - STR 백엔드 (APP-02/03)
+  - Comlink 라이브러리 도입 (v2 향상)
+  - 윈도우 상태 persist (OPFS 또는 IndexedDB)
   - 윈도우 매니저 v2 reshape
 
 ## 작성 규칙

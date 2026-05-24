@@ -2,7 +2,7 @@
 
 > **Living Document**. 항목 완료 시 즉시 갱신. PRD와 동시 갱신.
 
-**Version**: 0.3.0
+**Version**: 0.4.0
 **Last Updated**: 2026-05-24
 
 ---
@@ -13,7 +13,7 @@
 |-------|------|--------|----------|
 | **Phase 0** — 초기 셋팅 | ✅ 완료 | 100% | 2026-05-24 |
 | **Phase 1** — 코어 샌드박싱 + 윈도우 매니저 | ✅ 완료 | 100% (작업 7/7) | 2026-05-24 |
-| **Phase 2** — 앱 스토어 + 첫 게임 시연 | 🔄 진행 중 | 50% (2/4) | 미정 |
+| **Phase 2** — 앱 스토어 + 첫 게임 시연 | 🔄 진행 중 | 75% (3/4) | 미정 |
 | **Phase 3** — POC 안정화 + 데모 영상 | ⏳ 대기 | 0% | 미정 |
 
 POC 종료 후: v2 plan (멀티유저/클라우드) 별도 plan 필요.
@@ -51,13 +51,13 @@ POC 종료 후: v2 plan (멀티유저/클라우드) 별도 plan 필요.
 
 ## §4. Phase 2 — 앱 스토어 + 첫 게임
 
-| 작업 | 의존성 | 비고 |
-|------|--------|------|
-| ✅ 앱 카탈로그 UI + 설치 (STR-01/02) | — | 스토어 라우트 + InstalledAppsProvider + 데스크탑 동기화 |
-| ✅ 첫 샘플 게임 (GAME-01) | STR-02 | Phaser 3 Snake (host self origin, IPC 미사용) |
-| IndexedDB 추상화 (STG-01) | — | |
-| 설치한 앱 목록 영속화 (APP-03) | STG-01 | IndexedDB hydration + ADR-0007 신규 |
-| OPFS 어댑터 (STG-02) | — | Safari 폴백 IndexedDB |
+| 작업 | 의존성 | 상태 | 비고 |
+|------|--------|------|------|
+| ✅ 앱 카탈로그 UI + 설치 (STR-01/02) | — | ✅ 완료 | 스토어 라우트 + InstalledAppsProvider + 데스크탑 동기화 |
+| ✅ 첫 샘플 게임 (GAME-01) | STR-02 | ✅ 완료 | Phaser 3 Snake (host self origin, IPC 미사용) |
+| ✅ IndexedDB 추상화 (STG-01) | — | ✅ 완료 | `src/lib/storage/indexeddb.ts` (idb v8.0.3 + 메모리 폴백) |
+| 설치한 앱 목록 영속화 (APP-03) | STG-01 | ⏳ 계획 | IndexedDB hydration + useInstalledApps reshape |
+| OPFS 어댑터 (STG-02) | — | ⏳ 계획 | Safari 폴백 IndexedDB |
 | 앱 패키지 포맷 (APP-02) | — | itch.io식 ZIP (Phase 3 후보) |
 
 ---

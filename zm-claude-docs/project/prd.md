@@ -2,9 +2,9 @@
 
 > **Living Document**. 기능 완료 시 즉시 갱신. 버전 bump 필수.
 
-**Version**: 0.3.0
+**Version**: 0.4.0
 **Last Updated**: 2026-05-24
-**Status**: Phase 2 — 앱 스토어 + 첫 게임 (작업 2/4 완료 ✅)
+**Status**: Phase 2 — 앱 스토어 + 첫 게임 (작업 3/4 완료 ✅)
 
 ---
 
@@ -60,7 +60,7 @@ zm-os는 **브라우저 안에서 동작하는 가상 데스크탑** 으로, 사
 | **SBX-01** | blob: URL iframe 샌드박스 SDK | ✅ 완료 | `src/lib/apps/sandbox.ts` (srcdoc + sandbox="allow-scripts") |
 | **SBX-02** | CSP/Permissions-Policy 헤더 | ✅ 완료 | next.config.ts headers() + src/lib/security/csp.ts |
 | **IPC-01** | Comlink 기반 RPC 어댑터 | ✅ 완료 | `src/lib/apps/ipc/` (wire-compatible v1) |
-| **STG-01** | IndexedDB 추상화 | ⏳ 계획 | |
+| **STG-01** | IndexedDB 추상화 | ✅ 완료 | `src/lib/storage/indexeddb.ts` (idb v8.0.3 + 메모리 폴백) |
 | **STG-02** | OPFS 어댑터 (Chrome/Edge) | ⏳ 계획 | Safari는 IndexedDB 폴백 |
 | **GAME-01** | 첫 샘플 게임 (Phaser 또는 Pixi) | ✅ 완료 | `public/sample-game-phaser/` Phaser 3 Snake — Phase 2 작업 4. Bouncing Ball은 `public/sample-game/` 유지 |
 
@@ -108,6 +108,18 @@ POC 완료 = 아래 시나리오가 동작:
 ---
 
 ## §8. Change Log
+
+### 0.4.0 (2026-05-24) — Phase 2 작업 2 완료
+- Phase 2 작업 2 완료 ✅ (STG-01: IndexedDB 추상화)
+  - 신규: `src/lib/storage/indexeddb.ts` (~183 LOC) — idb library v8.0.3 wrapper + 메모리 폴백
+  - 수정: `package.json` (idb@^8.0.3 dependencies 추가)
+  - 자동 채택 결정: P1=B idb library / P2 단일 DB/store / P3=A 메서드별 자동 트랜잭션 / P4=A v1 버전 / P5=B 메모리 폴백 / P6 structured clone / P7 표준 Error
+  - 신규 결정: ADR-0007 (클라이언트 스토리지 IndexedDB + 메모리 폴백)
+  - 검증: build-checker ✅ / code-reviewer ✅ / sandbox-auditor ✅ / constraint-checker ✅ / self-verifier ✅ PASS
+  - W-01 fix 적용 (blocking callback race condition)
+  - W-02/W-03 [WARN] POC 수용
+  - 사용자 검증 deferred: 작업 3 통합 검증 후 e2e (설치 앱 목록 persist + 메모리 폴백 Safari)
+  - **Phase 2 진행률: 3/4 (75%)** — 작업 3 진입 가능
 
 ### 0.3.0 (2026-05-24) — Phase 2 작업 4 완료
 - Phase 2 작업 4 완료 ✅ (GAME-01: Phaser 3 Snake)

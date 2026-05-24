@@ -22,10 +22,20 @@
 - **금지**: `allow-same-origin`, `allow-top-navigation`, `allow-popups-to-escape-sandbox`
 - **상세 규칙**: `.claude/rules/security.md`
 
-### TECH-01: 클라이언트 스토리지 — IndexedDB + OPFS (2026-05-24)
-- **결정**: POC는 IndexedDB(폴백) + OPFS(Chrome/Edge). 멀티디바이스 동기화는 v2.
-- **이유**: 단일 사용자 POC. 서버 동기화 인프라 후순위.
+### TECH-01: 클라이언트 스토리지 — IndexedDB (idb library) + 메모리 폴백 + OPFS (2026-05-24, 정밀화 2026-05-24)
+- **결정**: 
+  - **저수준 추상화 계층**: `src/lib/storage/indexeddb.ts` (idb library v8.0.3 wrapper)
+    - DB: 단일 `zm-os` v1, store `installed-apps`
+    - CRUD: idbGet/idbPut/idbDelete/idbList/idbClear (메서드별 자동 트랜잭션)
+    - 폴백: isIDBAvailable() → 메모리 Map (page reload 휘발)
+    - 타입: 제네릭 `<T>` + SSR 안전 (호출자 책임 Zod 검증)
+  - **고수준 도메인 계층**: 작업 3 APP-03 (useInstalledApps hook + IndexedDB hydration)
+  - OPFS: 크롬/엣지 지원 (Safari는 IndexedDB 폴백). v2 이상 reshape 가능.
+  - 멀티디바이스 동기화: v2에서 서버 연동 검토.
+- **이유**: ADR-0007 — idb 라이브러리 (1.19KB brotli, Safari 14 워라운드, DBSchema 제네릭). POC 범위 (설치 앱 목록) 메모리도 충분.
+- **W-02/W-03 [WARN]**: 메모리 폴백 휘발 — 호출자가 localStorage sync 또는 사용자 알림 책임 (작업 3).
 - **재고 시점**: 멀티유저 도입 시 S3 호환 스토리지 + CRDT 동기화 검토.
+- **상세**: ADR-0007
 
 ### TECH-02: Python hooks (2026-05-24)
 - **결정**: Claude Code hooks는 Python 통합 (`mistake_guard.py`, `post_review.py`, `session_start.py`, `notify_done.py`). bash sub-spawn 회피로 cold ~150ms.
