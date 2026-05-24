@@ -4,9 +4,9 @@
 
 ## 현재 상태 (2026-05-24)
 - **Phase**: Phase 1 — 코어 샌드박싱 + 윈도우 매니저
-- **진행률**: 작업 1/7 완료 (iframe 샌드박싱 PoC)
+- **진행률**: 작업 2/7 완료 (약 28%)
 - **저장소**: `git@github-personal:hanumoka/zm-os.git`, branch `main`
-- **마지막 커밋**: `efed152 chore(setup)` (Phase 0)
+- **마지막 커밋**: `127edcb feat(sandbox)` (Phase 1 작업 1)
 - **빌드**: `npm install` 완료, `npx tsc --noEmit` 통과
 
 ## 한 줄 요약

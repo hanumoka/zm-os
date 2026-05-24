@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>IPC Demo</title>
+    <style>
+      :root { color-scheme: light; }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: -apple-system, system-ui, sans-serif;
+        background: #f8fafc;
+        color: #1e293b;
+        padding: 16px;
+      }
+      h1 {
+        font-size: 18px;
+        font-weight: 700;
+        margin: 0 0 4px;
+        color: #0f172a;
+      }
+      .subtitle {
+        font-size: 11px;
+        color: #64748b;
+        margin: 0 0 16px;
+      }
+      .status-bar {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        margin-bottom: 14px;
+        padding: 6px 10px;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+      }
+      .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #94a3b8;
+        flex-shrink: 0;
+      }
+      .dot.connecting { background: #f59e0b; }
+      .dot.ready      { background: #22c55e; }
+      .dot.error      { background: #ef4444; }
+      .dot.closed     { background: #94a3b8; }
+      .counter {
+        margin-left: auto;
+        font-size: 11px;
+        color: #475569;
+      }
+      .btn-row {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 14px;
+      }
+      button {
+        padding: 7px 14px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        background: #fff;
+        color: #334155;
+        font-size: 13px;
+        cursor: pointer;
+        transition: background 0.1s;
+      }
+      button:hover:not(:disabled) { background: #f1f5f9; }
+      button:disabled { opacity: 0.45; cursor: not-allowed; }
+      .btn-ping  { border-color: #6366f1; color: #4f46e5; }
+      .btn-ping:hover:not(:disabled)  { background: #eef2ff; }
+      .btn-time  { border-color: #0ea5e9; color: #0284c7; }
+      .btn-time:hover:not(:disabled)  { background: #f0f9ff; }
+      .btn-echo  { border-color: #10b981; color: #059669; }
+      .btn-echo:hover:not(:disabled)  { background: #ecfdf5; }
+      .result-area {
+        min-height: 80px;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        padding: 10px 12px;
+        font-size: 12px;
+        font-family: ui-monospace, monospace;
+        overflow-y: auto;
+        max-height: 160px;
+      }
+      .result-area p { margin: 0 0 4px; }
+      .result-entry {
+        padding: 3px 6px;
+        border-radius: 4px;
+        margin-bottom: 3px;
+        word-break: break-all;
+      }
+      .result-ok    { background: #f0fdf4; color: #166534; }
+      .result-err   { background: #fef2f2; color: #991b1b; }
+      .result-info  { background: #f8fafc; color: #475569; }
+      .divider {
+        border: none;
+        border-top: 1px solid #e2e8f0;
+        margin: 14px 0;
+      }
+      .hint { font-size: 11px; color: #64748b; }
+    </style>
+  </head>
+  <body>
+    <h1>IPC Demo</h1>
+    <p class="subtitle">window.__zmosIpc 를 통한 호스트 RPC 데모</p>
+
+    <!-- 연결 상태 바 -->
+    <div class="status-bar">
+      <span class="dot" id="dot"></span>
+      <span id="status-label">초기화 중...</span>
+      <span class="counter">호스트 RPC 횟수: <strong id="rpc-count">0</strong></span>
+    </div>
+
+    <!-- RPC 버튼 -->
+    <div class="btn-row">
+      <button class="btn-ping" id="btn-ping" disabled>ping</button>
+      <button class="btn-time" id="btn-time" disabled>getTime</button>
+      <button class="btn-echo" id="btn-echo" disabled>echo("hello from app")</button>
+    </div>
+
+    <!-- 응답 영역 -->
+    <div class="result-area" id="result-area">
+      <div class="result-entry result-info">호스트 연결 대기 중...</div>
+    </div>
+
+    <hr class="divider" />
+
+    <p class="hint">
+      이 앱은 <code>window.__zmosIpc.call(method, args)</code>로 호스트에 RPC를 전송합니다.<br />
+      호스트가 노출한 메서드: <code>ping</code> · <code>getTime</code> · <code>echo</code>
+    </p>
+
+    <script>
+      (function () {
+        'use strict';
+
+        // ── DOM 참조 ────────────────────────────────────────────────────────────
+        var dot         = document.getElementById('dot');
+        var statusLabel = document.getElementById('status-label');
+        var rpcCount    = document.getElementById('rpc-count');
+        var resultArea  = document.getElementById('result-area');
+        var btnPing     = document.getElementById('btn-ping');
+        var btnTime     = document.getElementById('btn-time');
+        var btnEcho     = document.getElementById('btn-echo');
+
+        var _callCount = 0;
+
+        // ── UI 헬퍼 ─────────────────────────────────────────────────────────────
+        function updateStatusUI(status) {
+          dot.className = 'dot ' + status;
+          var labels = {
+            idle:       '대기',
+            connecting: '연결 중...',
+            ready:      '연결됨',
+            closed:     '닫힘',
+            error:      '연결 오류',
+          };
+          statusLabel.textContent = labels[status] || status;
+        }
+
+        function enableButtons(enabled) {
+          btnPing.disabled = !enabled;
+          btnTime.disabled = !enabled;
+          btnEcho.disabled = !enabled;
+        }
+
+        function appendResult(text, type) {
+          // 첫 번째 "대기 중" 메시지 제거
+          var first = resultArea.querySelector('.result-info');
+          if (first && first.textContent === '호스트 연결 대기 중...') {
+            first.remove();
+          }
+          var div = document.createElement('div');
+          div.className = 'result-entry result-' + (type || 'ok');
+          div.textContent = text;
+          resultArea.appendChild(div);
+          resultArea.scrollTop = resultArea.scrollHeight;
+        }
+
+        // ── IPC 준비 대기 ────────────────────────────────────────────────────────
+        function waitForIpc() {
+          if (typeof window.__zmosIpc === 'undefined') {
+            // IPC 런타임이 아직 초기화 전 (발생 가능성 낮지만 방어)
+            appendResult('⚠ window.__zmosIpc 없음 — IPC 런타임 미주입', 'err');
+            return;
+          }
+
+          var ipc = window.__zmosIpc;
+
+          function pollStatus() {
+            var s = ipc.status;
+            updateStatusUI(s);
+            if (s === 'ready') {
+              enableButtons(true);
+              appendResult('✅ 호스트와 연결됨 (status: ready)', 'ok');
+            } else if (s === 'error') {
+              appendResult('❌ 핸드셰이크 타임아웃 또는 오류', 'err');
+            } else if (s === 'connecting') {
+              setTimeout(pollStatus, 100);
+            }
+          }
+          pollStatus();
+        }
+
+        // ── RPC 호출 헬퍼 ────────────────────────────────────────────────────────
+        function rpcCall(method, args) {
+          var ipc = window.__zmosIpc;
+          _callCount++;
+          rpcCount.textContent = String(_callCount);
+
+          ipc.call(method, args || []).then(function (result) {
+            appendResult('[' + method + '] ✓ ' + JSON.stringify(result), 'ok');
+          }).catch(function (err) {
+            var msg = (err && err.message) ? err.message : String(err);
+            appendResult('[' + method + '] ✗ ' + msg, 'err');
+          });
+        }
+
+        // ── 버튼 이벤트 ──────────────────────────────────────────────────────────
+        btnPing.addEventListener('click', function () { rpcCall('ping'); });
+        btnTime.addEventListener('click', function () { rpcCall('getTime'); });
+        btnEcho.addEventListener('click', function () { rpcCall('echo', ['hello from app']); });
+
+        // ── 초기화 ────────────────────────────────────────────────────────────────
+        // DOMContentLoaded 후 IPC 런타임이 INIT을 전송하므로 약간 뒤에 폴링 시작
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', waitForIpc);
+        } else {
+          waitForIpc();
+        }
+      })();
+    </script>
+  </body>
+</html>

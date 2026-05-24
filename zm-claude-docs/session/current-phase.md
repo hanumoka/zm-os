@@ -10,7 +10,7 @@
 | # | 작업 | 산출물 | 상태 |
 |---|------|--------|------|
 | 1 | iframe 샌드박싱 PoC | manifest.ts + sandbox.ts + sample-game + sandbox-test 페이지 | ✅ 완료 |
-| 2 | Comlink 기반 IPC 어댑터 | src/lib/apps/ipc/ | ⏳ 대기 |
+| 2 | Comlink IPC 어댑터 | src/lib/apps/ipc/ | ✅ 완료 |
 | 3 | CSP / Permissions-Policy 헤더 (SBX-02) | next.config.ts | ⏳ 대기 |
 | 4 | 윈도우 매니저 (DSK-01) | src/components/desktop/WindowManager.tsx | ⏳ 대기 (라이브러리 ADR-0002 필요) |
 | 5 | 데스크탑 영역 (DSK-02) | src/components/desktop/Desktop.tsx | ⏳ 대기 |
@@ -32,6 +32,18 @@
   - 보강 4명: fe-developer / code-reviewer / build-checker / doc-updater
   - 신규 문서: `.claude/agents/_workflow.md` (표준 작업 흐름)
   - 모델 전략: architect+self-verifier=opus, 구현/리뷰/감사=sonnet, 빌드/문서/제약=haiku
+- **20:30**: Phase 1 작업 2 완료 — Comlink IPC 어댑터 (예정 커밋)
+  - `src/lib/apps/ipc/{types,protocol,host,app,runtime-iife,index}.ts` (6 신규)
+  - `src/lib/apps/sandbox.ts` (확장, IPC 옵션 추가, onMessage @deprecated)
+  - `src/app/sandbox-test/page.tsx` (확장, 섹션 2 IPC 데모)
+  - `public/sample-game-ipc/index.html` (신규, ping/getTime/echo)
+  - `zm-claude-docs/decisions/adr-0003-ipc-surface.md` (신규)
+  - `zm-claude-docs/decisions/index.md` (수정, ADR-0003 등재)
+  - POC v1 = 자체 wire-compatible RPC (srcdoc inline 호환, esbuild 회피)
+  - 권한 v1 = allowedMethods 화이트리스트 (manifest 매핑은 v2)
+  - 검증: build-checker ✅ / code-reviewer 재리뷰 ✅ / app-sandbox-auditor 재감사 ✅ / constraint-checker ✅ / self-verifier ✅ (조건부, 사용자 검증 deferred)
+  - 사용자 직접 검증 deferred: `npm run dev` → `/sandbox-test` 섹션 2 핸드셰이크 + ping/getTime/echo 6단계 확인
+  - **다음 작업 시작 시 우선 처리**: `src/lib/apps/ipc/host.ts:279` `_appMethods.length > 0` 게이트 결함 (앱 announce 없을 시 우회 가능, 보안 임팩트 0이나 명세 불일치)
 
 ### 블로커
 - 없음

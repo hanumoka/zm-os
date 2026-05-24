@@ -2,9 +2,9 @@
 
 > **Living Document**. 기능 완료 시 즉시 갱신. 버전 bump 필수.
 
-**Version**: 0.1.1
+**Version**: 0.1.2
 **Last Updated**: 2026-05-24
-**Status**: Phase 1 — 코어 샌드박싱 (작업 1/7 완료)
+**Status**: Phase 1 — 코어 샌드박싱 (작업 2/7 완료)
 
 ---
 
@@ -59,7 +59,7 @@ zm-os는 **브라우저 안에서 동작하는 가상 데스크탑** 으로, 사
 | **APP-03** | 설치한 앱 목록 관리 | ⏳ 계획 | IndexedDB |
 | **SBX-01** | blob: URL iframe 샌드박스 SDK | ✅ 완료 | `src/lib/apps/sandbox.ts` (srcdoc + sandbox="allow-scripts") |
 | **SBX-02** | CSP/Permissions-Policy 헤더 | ⏳ 계획 | |
-| **IPC-01** | Comlink 기반 RPC 어댑터 | ⏳ 계획 | postMessage origin 검증 |
+| **IPC-01** | Comlink 기반 RPC 어댑터 | ✅ 완료 | `src/lib/apps/ipc/` (wire-compatible v1) |
 | **STG-01** | IndexedDB 추상화 | ⏳ 계획 | |
 | **STG-02** | OPFS 어댑터 (Chrome/Edge) | ⏳ 계획 | Safari는 IndexedDB 폴백 |
 | **GAME-01** | 첫 샘플 게임 (Phaser 또는 Pixi) | 🔄 임시 | `public/sample-game/` Bouncing Ball — 격리 검증용 미니. Phaser/Pixi 도입은 Phase 2 |
@@ -108,6 +108,13 @@ POC 완료 = 아래 시나리오가 동작:
 ---
 
 ## §8. Change Log
+
+### 0.1.2 (2026-05-24)
+- Phase 1 작업 2 완료
+- IPC-01 (Comlink wire-compatible RPC 어댑터) ✅
+- sandbox.ts에 IPC 옵션 추가 (onMessage @deprecated)
+- 첫 IPC 데모 sample-game-ipc + /sandbox-test 섹션 2
+- ADR-0003 작성 (호스트-앱 IPC 어댑터 표면)
 
 ### 0.1.1 (2026-05-24)
 - Phase 1 진입, 작업 1 완료

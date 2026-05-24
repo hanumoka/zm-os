@@ -14,8 +14,10 @@
 - **이유**: POC 빠른 검증. 멀티유저 미도입 단계라 BE 분리 불필요.
 - **재고 시점**: 멀티유저/클라우드 동기화 도입 시 packages/ 분리 검토.
 
-### ARCH-02: iframe 샌드박싱 (2026-05-24)
-- **결정**: 사용자 제출 앱은 **blob: URL iframe + `sandbox="allow-scripts"`** 에서만 실행. 호스트-앱 통신은 Comlink 기반 RPC.
+### ARCH-02: iframe 샌드박싱 (2026-05-24, 정밀화 2026-05-24)
+- **결정**: 사용자 제출 앱은 **blob: URL iframe + `sandbox="allow-scripts"`** 에서만 실행. 호스트-앱 통신은 Comlink-style RPC.
+  - POC v1: 자체 wire-compatible 어댑터 (`src/lib/apps/ipc/`), srcdoc inline 호환, esbuild 불필요
+  - v2: Comlink 라이브러리 도입 검토 — ADR-0003 정밀화 참조
 - **이유**: 게임 엔진 호환성(Phaser/Pixi/Godot/Three.js), 구현 단순성, 검증된 보안 모델(Figma/itch.io 사용).
 - **금지**: `allow-same-origin`, `allow-top-navigation`, `allow-popups-to-escape-sandbox`
 - **상세 규칙**: `.claude/rules/security.md`
