@@ -2,7 +2,7 @@
 
 > **Living Document**. 항목 완료 시 즉시 갱신. PRD와 동시 갱신.
 
-**Version**: 0.2.0
+**Version**: 0.3.0
 **Last Updated**: 2026-05-24
 
 ---
@@ -13,7 +13,7 @@
 |-------|------|--------|----------|
 | **Phase 0** — 초기 셋팅 | ✅ 완료 | 100% | 2026-05-24 |
 | **Phase 1** — 코어 샌드박싱 + 윈도우 매니저 | ✅ 완료 | 100% (작업 7/7) | 2026-05-24 |
-| **Phase 2** — 앱 스토어 + 첫 게임 시연 | 🔄 진행 중 | 25% (1/4) | 미정 |
+| **Phase 2** — 앱 스토어 + 첫 게임 시연 | 🔄 진행 중 | 50% (2/4) | 미정 |
 | **Phase 3** — POC 안정화 + 데모 영상 | ⏳ 대기 | 0% | 미정 |
 
 POC 종료 후: v2 plan (멀티유저/클라우드) 별도 plan 필요.
@@ -54,10 +54,10 @@ POC 종료 후: v2 plan (멀티유저/클라우드) 별도 plan 필요.
 | 작업 | 의존성 | 비고 |
 |------|--------|------|
 | ✅ 앱 카탈로그 UI + 설치 (STR-01/02) | — | 스토어 라우트 + InstalledAppsProvider + 데스크탑 동기화 |
+| ✅ 첫 샘플 게임 (GAME-01) | STR-02 | Phaser 3 Snake (host self origin, IPC 미사용) |
 | IndexedDB 추상화 (STG-01) | — | |
 | 설치한 앱 목록 영속화 (APP-03) | STG-01 | IndexedDB hydration + ADR-0007 신규 |
 | OPFS 어댑터 (STG-02) | — | Safari 폴백 IndexedDB |
-| 첫 샘플 게임 (GAME-01) | STR-02 | Phaser 3 (작업 1 후 언제든 진입 가능) |
 | 앱 패키지 포맷 (APP-02) | — | itch.io식 ZIP (Phase 3 후보) |
 
 ---
@@ -93,7 +93,17 @@ POC 종료 후: v2 plan (멀티유저/클라우드) 별도 plan 필요.
 
 ## §8. Change Log
 
-### 0.2.0 (2026-05-24) — Phase 2 진입
+### 0.3.0 (2026-05-24) — Phase 2 작업 4 완료
+- Phase 2 작업 4 완료 ✅ (GAME-01: Phaser 3 Snake)
+  - `public/sample-game-phaser/index.html` (~366 LOC) + `public/phaser.min.js` (v3.90.0, ~1.2MB)
+  - `src/components/desktop/desktopApps.ts` (snake-game 엔트리 추가) + `package.json` (phaser@^3.90.0)
+  - 자동 채택 결정: P1=A / P2=Host self origin / P3=A / P4=A / P5=auto
+  - 검증 4명 + self-verifier ✅ PASS
+  - POC v1 카탈로그: 3개 엔트리 (Bouncing Ball + IPC Demo + Snake)
+- **Phase 2 진행률: 2/4 (50%)**
+- 다음: 작업 2 (STG-01) 또는 작업 3 (APP-03) 진입 가능
+
+### 0.2.0 (2026-05-24) — Phase 2 진입 / 작업 1 완료
 - Phase 2 작업 1 완료 ✅ (STR-01/02: 스토어 UI + 설치 흐름)
   - `/store` 라우트 + AppCard + AppDetail + InstalledAppsProvider
   - 데스크탑 필터링 (설치된 앱만) + 스토어 시스템 아이콘 우상단

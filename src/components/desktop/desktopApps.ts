@@ -146,6 +146,38 @@ export const DESKTOP_APPS: ReadonlyArray<DesktopAppEntry> = [
       },
     },
   },
+
+  // ── Snake Game (Phaser 3) ──────────────────────────────────────────────────
+  {
+    id: 'snake-game',
+    name: 'Snake',
+    icon: { kind: 'emoji', char: '🐍' },
+    contentUrl: '/sample-game-phaser/index.html',
+    iconPosition: { x: 30, y: 230 },
+    windowDefaults: {
+      position: { x: 320, y: 80 },
+      size: { width: 660, height: 520 },
+    },
+    manifest: {
+      schemaVersion: 1,
+      id: 'com.zmos.sample.snake-game',
+      name: 'Snake',
+      version: '1.0.0',
+      author: 'zm-os team',
+      description: 'Phaser 3 기반 클래식 스네이크 게임',
+      entryPoint: 'index.html',
+      size: { defaultWidth: 600, defaultHeight: 440 },
+    },
+    description: 'Phaser 3 게임 엔진으로 만든 클래식 스네이크',
+    longDescription:
+      '화살표 키로 뱀을 조종해 음식을 먹고 길이를 늘리세요. ' +
+      '벽이나 자기 몸에 부딪히면 게임 오버. Space 키로 재시작합니다. ' +
+      'Phaser 3 게임 엔진이 sandbox iframe(null origin) 안에서 동작하며, ' +
+      '호스트 origin 스토리지/DOM에 일절 접근할 수 없습니다.',
+    category: 'game',
+    author: 'zm-os team',
+    version: '1.0.0',
+  },
 ] as const;
 
 // ─── findDesktopApp ───────────────────────────────────────────────────────────

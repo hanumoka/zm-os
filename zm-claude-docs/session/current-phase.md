@@ -2,10 +2,10 @@
 
 ## 🚨 재부팅 후 재개 (2026-05-24)
 - **Phase 1**: ✅ 완료 (7/7, 100%)
-- **Phase 2**: 진행 중 — 작업 1 ✅ 완료 (STR-01/02), 작업 2/4 진입 가능
-- **재개 지점**: [`../project/phase-2-plan.md`](../project/phase-2-plan.md) §7 — 작업 2 (STG-01) 또는 작업 4 (GAME-01) 진입
-- **사용자 결정 (확정)**: 코어 범위 / 첫 작업 STR-01/02 / Phaser 3 / P1=A P2=α P3=i+iii P4=x P5=r1 / Provider 옵션 A
-- **마지막 커밋**: Phase 2 작업 1 완료 후 예정
+- **Phase 2**: 진행 중 — 작업 1 ✅ 완료 (STR-01/02), 작업 4 ✅ 완료 (GAME-01), 작업 2/3 진입 가능
+- **진행률**: 50% (2/4)
+- **다음**: 작업 2 (STG-01 IndexedDB) 또는 작업 3 (APP-03 + ADR-0006 reshape)
+- **마지막 커밋**: Phase 2 작업 4 완료 후 예정
 
 ---
 
@@ -28,6 +28,13 @@
 | 7 | `app-sandbox-auditor` agent 1회 감사 | zm-claude-docs/security/phase-1-audit-2026-05-24.md | ✅ 완료 |
 
 ### 최근 변경 (2026-05-24)
+- **[작업 4]**: Phase 2 작업 4 완료 — GAME-01 (Phaser 3 Snake) ✅ PASS
+  - 산출물: 2 신규 (snake-game HTML + phaser.min.js) + 2 수정 (desktopApps.ts, package.json)
+  - 자동 채택: P1=A (스네이크) / P2=Host self origin / P3=A (IPC 미사용) / P4=A (procedural) / P5=auto
+  - 검증: build-checker ✅ / code-reviewer ✅ / sandbox-auditor ✅ / constraint-checker ✅ / self-verifier ✅ PASS
+  - 사용자 검증 deferred: 게임 화면 표시 + 게임플레이 + iframe 격리 (2026-05-24)
+  - **Phase 2 진행률: 2/4 (50%)**
+  - 다음: 작업 2 (STG-01) 또는 작업 3 (APP-03)
 - **20:30**: Phase 2 작업 1 완료 — STR-01/02 (스토어 UI + 설치 흐름) ✅ PASS
   - 산출물: 9 파일 (신규 5 + 수정 4)
   - DesktopAppEntry STR 메타데이터 확장 (description, longDescription, category, screenshots, author, version)

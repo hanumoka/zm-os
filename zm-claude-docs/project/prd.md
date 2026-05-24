@@ -2,9 +2,9 @@
 
 > **Living Document**. 기능 완료 시 즉시 갱신. 버전 bump 필수.
 
-**Version**: 0.2.0
+**Version**: 0.3.0
 **Last Updated**: 2026-05-24
-**Status**: Phase 2 — 앱 스토어 + 첫 게임 (작업 1/4 완료 ✅)
+**Status**: Phase 2 — 앱 스토어 + 첫 게임 (작업 2/4 완료 ✅)
 
 ---
 
@@ -62,7 +62,7 @@ zm-os는 **브라우저 안에서 동작하는 가상 데스크탑** 으로, 사
 | **IPC-01** | Comlink 기반 RPC 어댑터 | ✅ 완료 | `src/lib/apps/ipc/` (wire-compatible v1) |
 | **STG-01** | IndexedDB 추상화 | ⏳ 계획 | |
 | **STG-02** | OPFS 어댑터 (Chrome/Edge) | ⏳ 계획 | Safari는 IndexedDB 폴백 |
-| **GAME-01** | 첫 샘플 게임 (Phaser 또는 Pixi) | 🔄 임시 | `public/sample-game/` Bouncing Ball — 격리 검증용 미니. Phaser/Pixi 도입은 Phase 2 |
+| **GAME-01** | 첫 샘플 게임 (Phaser 또는 Pixi) | ✅ 완료 | `public/sample-game-phaser/` Phaser 3 Snake — Phase 2 작업 4. Bouncing Ball은 `public/sample-game/` 유지 |
 
 ---
 
@@ -109,7 +109,17 @@ POC 완료 = 아래 시나리오가 동작:
 
 ## §8. Change Log
 
-### 0.2.0 (2026-05-24) — Phase 2 진입
+### 0.3.0 (2026-05-24) — Phase 2 작업 4 완료
+- Phase 2 작업 4 완료 ✅ (GAME-01: Phaser 3 Snake)
+  - 신규: `public/sample-game-phaser/index.html` (~366 LOC) + `public/phaser.min.js` (~1.2MB, MIT v3.90.0)
+  - 수정: `src/components/desktop/desktopApps.ts` (snake-game 엔트리 추가) + `package.json` (phaser@^3.90.0)
+  - 자동 채택 결정: P1=A (스네이크) / P2=Host self origin / P3=A IPC 미사용 / P4=A procedural / P5=auto
+  - 검증: build-checker ✅ / code-reviewer ✅ / sandbox-auditor ✅ / constraint-checker ✅ / self-verifier ✅ PASS
+  - 사용자 검증 deferred: 게임 화면 표시 + 게임플레이 정상 + iframe 격리 정상 (2026-05-24)
+  - **POC v1 카탈로그**: 3개 엔트리 (Bouncing Ball + IPC Demo + Snake) — 둘다 완전 동작 검증
+- **Phase 2 진행률: 2/4 (50%)** — 작업 2/3 진입 가능
+
+### 0.2.0 (2026-05-24) — Phase 2 진입 / 작업 1 완료
 - Phase 2 작업 1 완료 ✅ (STR-01/02: 스토어 UI + 설치 흐름)
   - 신규: `src/app/store/page.tsx` + `src/components/store/{InstalledAppsProvider,useInstalledApps,AppCard,AppDetail}.tsx/ts`
   - 수정: `src/components/desktop/{desktopApps.ts, Desktop.tsx}` + `src/app/{layout.tsx, page.tsx}`

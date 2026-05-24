@@ -2,15 +2,15 @@
 > 시스템 프롬프트 자동 로드 (200줄 한도). 최종 갱신: 2026-05-24 (초기 셋팅)
 
 ## 프로젝트 수치 (항상 최신 유지)
-- 현재 Phase: **Phase 2 진행 중 (1/4, 25%)** — 작업 1 ✅ 완료
-- 코드 LOC: ~3600 LOC (TS) + sample-game/sample-game-ipc/desktop ~350 LOC (HTML/JS) — Phase 2 작업 1 완료 후 약 500 LOC 순증
+- 현재 Phase: **Phase 2 진행 중 (2/4, 50%)** — 작업 1/4 ✅ 완료
+- 코드 LOC: ~3600 LOC (TS) + sample-game/sample-game-ipc/sample-game-phaser/desktop ~720 LOC (HTML/JS) — Phase 2 작업 4 완료 후 약 370 LOC 순증 (Phaser 함께)
 - 에이전트: 10개 (architect, research-analyst, lib-developer, fe-developer, build-checker, code-reviewer, app-sandbox-auditor, constraint-checker, self-verifier, doc-updater) + workflow 문서
 - 모델 전략: architect/self-verifier=opus / 구현·리뷰·감사=sonnet / 빌드·문서·제약검사=haiku
 - 스킬: 5개 (zm-commit, zm-unit-done, zm-session, zm-troubleshoot, zm-memory-save)
 - 규칙: 4개 (frontend, security, work-units, known-mistakes)
 - 훅: 4개 Python (mistake_guard, post_review, session_start, notify_done)
 - 단위 테스트: 0 | E2E: 0 (Phase 3에서 도입 예정)
-- 의존성: next 16, react 19, tailwind 4, zod 4.4.3, typescript 5, react-rnd v10.5.3 (작업 4 완료)
+- 의존성: next 16, react 19, tailwind 4, zod 4.4.3, typescript 5, react-rnd v10.5.3, phaser@3.90.0 (작업 4 추가)
 
 ## 기술 스택
 - **FE/풀스택**: Next.js 16 (App Router) + React 19 + Tailwind v4
@@ -55,6 +55,7 @@
 - **Phase 2 사용자 결정 (확정)**: 코어 범위 / STR-01/02 첫 / Phaser 3 / P1=A α i+iii x r1 / Provider 옵션 A
 
 ## 최근 결정사항 (최대 10, FIFO)
+- 2026-05-24: Phase 2 작업 4 완료 — GAME-01 Phaser 3 Snake (procedural, host self origin). POC v1 카탈로그 3개 엔트리 완성.
 - 2026-05-24: Phase 2 작업 1 완료 — STR-01/02 (스토어 UI + InstalledAppsProvider + 데스크탑 동기화). C-01 fix (스토어 시스템 아이콘 우상단).
 - 2026-05-24: PROD-03/04 신규 정책 — 카탈로그 메타데이터 단일 모델 + Provider scope 옵션 A + 좌표 컨벤션.
 - 2026-05-24: Phase 1 작업 7 보안 감사 ✅ PASS. H-1 + SANDBOX_ORIGIN fix. Phase 2 진입 가능.
@@ -72,9 +73,8 @@
 - 2026-05-24: 작업 4 완료 — 윈도우 매니저 DSK-01 (react-rnd v10.5.3, Window 컴포넌트 + useWindowManager)
 
 ## Project State
-- **Phase 2 진행 중 (1/4, 25%)**. 작업 1 ✅ 완료 (STR-01/02 스토어 UI + 설치 흐름).
-- 작업 1: fe-developer 호출 → 검증 4명 → self-verifier ✅ PASS → doc-updater (진행 중)
-- 산출물: 9 파일 (신규 5 + 수정 4)
-- 다음: 작업 2 (STG-01 IndexedDB) 또는 작업 4 (GAME-01 Phaser) 진입 가능
+- **Phase 2 진행 중 (2/4, 50%)**. 작업 1 ✅ 완료 (STR-01/02 스토어 UI) + 작업 4 ✅ 완료 (GAME-01 Phaser 3 Snake).
+- 산출물: 작업 1 (9 파일, 신규 5 + 수정 4) + 작업 4 (4 파일, 신규 2 + 수정 2)
+- 다음: 작업 2 (STG-01 IndexedDB) 또는 작업 3 (APP-03 + ADR-0006 reshape) 진입 가능
 
-> **최종 갱신**: 2026-05-24 — Phase 2 작업 1 완료 (20:30) doc-updater 진행 중
+> **최종 갱신**: 2026-05-24 — Phase 2 작업 4 완료, doc-updater 진행 중

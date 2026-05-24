@@ -68,3 +68,10 @@ PRD §3 DSK-02 (데스크탑 영역 + 아이콘) 와 §7 수용 기준 1·3·4·
 - `src/components/desktop/Desktop.tsx` (설치 필터링 + 시스템 아이콘 우상단)
 - `src/app/layout.tsx` (Provider scope 옵션 A)
 - 신규 정책: PROD-03, PROD-04
+
+### Phase 2 작업 4 (GAME-01) 산출물 (2026-05-24)
+- `public/sample-game-phaser/index.html` (Phaser 3 스네이크 게임, ~366 LOC)
+- `public/phaser.min.js` (Phaser 3.90.0 MIT, host self origin 정적 자원, ~1.2MB)
+- `src/components/desktop/desktopApps.ts` (snake-game 엔트리 추가, category: 'game' 최초 활성화)
+- `package.json` (phaser@^3.90.0 dependencies 추가)
+- Phaser 번들 전략: Host self origin 상대경로 `<script src="/phaser.min.js">` (Chrome 142+ CDN 차단 회피, research-analyst 결정)
