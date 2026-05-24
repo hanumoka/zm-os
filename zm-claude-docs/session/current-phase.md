@@ -13,12 +13,18 @@
 | 2 | Comlink IPC 어댑터 | src/lib/apps/ipc/ | ✅ 완료 |
 | 2.5 | TS-002 fix (host.ts:279 권한 게이트 결함) | host.ts | ✅ 완료 |
 | 3 | CSP / Permissions-Policy 헤더 (SBX-02) | next.config.ts | ✅ 완료 |
-| 4 | 윈도우 매니저 (DSK-01) | src/components/desktop/WindowManager.tsx | ⏳ 대기 (ADR-0002 확정 react-rnd) |
+| 4 | 윈도우 매니저 (DSK-01) | src/components/desktop/{types, Window, useWindowManager, WindowManagerProvider, windowReducer} | ✅ 완료 |
 | 5 | 데스크탑 영역 (DSK-02) | src/components/desktop/Desktop.tsx | ⏳ 대기 |
 | 6 | 작업표시줄 (DSK-03) | src/components/desktop/Taskbar.tsx | ⏳ 대기 |
 | 7 | `app-sandbox-auditor` agent 1회 감사 | 리포트 | ⏳ 대기 |
 
 ### 최근 변경 (2026-05-24)
+- **22:00**: Phase 1 작업 4 완료 (윈도우 매니저 DSK-01 + ADR-0005)
+  - 산출물: 10개 파일 (신규 5 + 수정 4 + ADR 1)
+  - 검증: build/code-reviewer/sandbox-auditor/constraint ✅ PASS + self-verifier ✅ PASS 조건부
+  - Warning 2건 메인 직접 수정 (W-01 useRef guard, W-02 'use client' 제거)
+  - 사용자 검증 deferred: 6항목 (드래그/리사이즈/포커스 동작, iframe 격리, z-index, close 순서, minimize)
+  - 다음 작업: 작업 5 (데스크탑 영역 DSK-02)
 - **17:30**: Phase 0 완료 — 첫 커밋 `efed152 chore(setup)`, push 완료 (origin/main)
 - **19:00**: Phase 1 작업 1 완료 — iframe 샌드박싱 PoC (커밋 `127edcb feat(sandbox)`)
 - **21:00**: Phase 1 작업 3 완료 (CSP/Permissions-Policy 헤더, SBX-02): csp.ts + next.config.ts + ADR-0004. 4명 검증 + self-verifier ✅ PASS

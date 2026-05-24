@@ -52,6 +52,16 @@
 - **PostCSS plugin은 `@tailwindcss/postcss`** (별도 패키지)
 - **CSS 변수 기반 테마** — `@theme` 디렉티브
 
+## react-rnd / re-resizable SSR
+- **`'use client'` 방어 필수**: re-resizable 내부가 `document.body.getBoundingClientRect()`, `window.innerWidth/Height` 를 SSR guard 없이 직접 호출.
+- 본 컴포넌트(`Window.tsx`)에 `'use client'` 명시. Next.js App Router server component에서 import 금지.
+- 향후 라이브러리 교체 시 SSR 호환성 직접 확인 필요.
+
+## 순수 타입/순수 함수 모듈 `'use client'` 금지
+- 타입 정의만 있는 파일 (`types.ts`), reducer 같은 순수 함수 모듈에는 `'use client'` 추가 금지.
+- 이유: server component에서 `import type` 시에도 client 전이를 트리거 가능. 빌드 성능 + 코드 분할 영향.
+- 검증: 모듈에 `window`/`document`/`localStorage`/`React 훅` 사용 없음 → `'use client'` 불필요.
+
 ## Windows + Git
 
 - **CRLF 경고**: `.gitattributes`에 `* text=auto eol=lf` 명시하면 차단

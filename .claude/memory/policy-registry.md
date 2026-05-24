@@ -42,6 +42,18 @@
 - **이유**: 빠른 검증 우선.
 - **명시적 비목표**: 사용자 인증, 클라우드 동기화, 모바일, Electron 패키징.
 
+### TECH-04: 윈도우 매니저 라이브러리 — react-rnd (2026-05-24)
+- **결정**: src/components/desktop/Window.tsx가 react-rnd v10.5.3을 래핑. 드래그 핸들은 `dragHandleClassName='window-titlebar'` 고정.
+- **이유**: ADR-0002 — 드래그+리사이즈+z-index 통합 / React 19 호환 / MIT / daedalOS 사용 사례
+- **재고 시점**: 키보드 접근성 요구 시 dnd-kit 또는 자작으로 이주 검토 (v2)
+- **상세**: ADR-0002
+
+### TECH-05: 윈도우 상태 관리 — React Context + useReducer (2026-05-24)
+- **결정**: useWindowManager 훅 + WindowManagerProvider (Context) + windowReducer (useReducer). Zustand 미도입.
+- **이유**: ADR-0005 — POC 단순성 + 외부 의존성 0 + React 19 표준 API
+- **재고 시점**: 윈도우 20개 이상 또는 persist/undo 요구 시 Zustand 전환 검토 (인터페이스 §3.2 동일)
+- **상세**: ADR-0005
+
 ## Deprecated
 - (없음)
 

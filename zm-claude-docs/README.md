@@ -23,6 +23,7 @@ zm-os 프로젝트 문서 색인.
 - [decisions/adr-0002-window-manager.md](decisions/adr-0002-window-manager.md) — 윈도우 매니저 라이브러리 (react-rnd)
 - [decisions/adr-0003-ipc-surface.md](decisions/adr-0003-ipc-surface.md) — IPC 어댑터 표면
 - [decisions/adr-0004-csp-permissions-policy.md](decisions/adr-0004-csp-permissions-policy.md) — CSP/Permissions-Policy 정책
+- [decisions/adr-0005-window-state-management.md](decisions/adr-0005-window-state-management.md) — 윈도우 상태 관리 (React Context + useReducer)
 
 ## 아카이브
 - [archive/](archive/) — 월별 작업 로그

@@ -37,4 +37,15 @@ paths:
 - Promise는 `use()` hook + Suspense
 
 ## 자주 발생하는 위반 (code-reviewer 누적)
-- (현재 없음 — 추후 반복 발견 시 여기에 추가)
+
+- **StrictMode useRef guard 누락** (2026-05-24, code-reviewer W-01 발견):
+  `useEffect(fn, [])` 안에서 mount 시 1회만 실행되어야 하는 부작용 (예: store.open(), API 등록) 호출 시 `useRef` guard 필수.
+  ```ts
+  const initRef = useRef(false);
+  useEffect(() => {
+    if (initRef.current) return;
+    initRef.current = true;
+    // 부작용 호출
+  }, []);
+  ```
+  reducer/store 자체에 중복 guard가 있어도 dev StrictMode 노이즈를 막기 위해 명시적 권장.
