@@ -11,7 +11,8 @@
 |---|------|--------|------|
 | 1 | iframe 샌드박싱 PoC | manifest.ts + sandbox.ts + sample-game + sandbox-test 페이지 | ✅ 완료 |
 | 2 | Comlink IPC 어댑터 | src/lib/apps/ipc/ | ✅ 완료 |
-| 3 | CSP / Permissions-Policy 헤더 (SBX-02) | next.config.ts | ⏳ 대기 |
+| 2.5 | TS-002 fix (host.ts:279 권한 게이트 결함) | host.ts | ✅ 완료 |
+| 3 | CSP / Permissions-Policy 헤더 (SBX-02) | next.config.ts | ⏳ 진행 예정 |
 | 4 | 윈도우 매니저 (DSK-01) | src/components/desktop/WindowManager.tsx | ⏳ 대기 (라이브러리 ADR-0002 필요) |
 | 5 | 데스크탑 영역 (DSK-02) | src/components/desktop/Desktop.tsx | ⏳ 대기 |
 | 6 | 작업표시줄 (DSK-03) | src/components/desktop/Taskbar.tsx | ⏳ 대기 |

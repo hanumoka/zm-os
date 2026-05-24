@@ -30,10 +30,10 @@
 
 **증상**: `!_grantedMethods.includes(method) && _appMethods.length > 0` 게이트에서 `_appMethods=[]` (앱이 INIT에서 메서드 미announce) 시 게이트가 우회되어 임의 호출 통과.
 **원인**: AND 조건의 두 번째 가드(`length > 0`)가 의도와 반대로 게이트를 무력화.
-**해결**: 다음 작업 단위에서 `_appMethods.length > 0` 조건 제거 또는 `_grantedMethods.includes(method)` 단독 사용.
-**관련 파일**: `src/lib/apps/ipc/host.ts:279`
-**날짜**: 2026-05-24 (발견)
-**상태**: 다음 작업 단위 우선 처리 예정
+**해결**: `_appMethods.length > 0` 조건 제거. `_status === 'ready' && !_grantedMethods.includes(method)` 단일 조건으로 변경. 앱이 메서드를 announce 안 한 경우 `_grantedMethods=[]` → 모든 호출이 `denied`로 정상 거부됨.
+**관련 파일**: `src/lib/apps/ipc/host.ts:279-289`
+**날짜**: 2026-05-24 (발견 + 해소 모두 같은 날)
+**상태**: ✅ 해소 (작업 2.5에서 즉시 수정 — code-reviewer PASS)
 **관련 M-NNN**: (없음 — 1회 발생)
 
 ---

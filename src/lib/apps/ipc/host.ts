@@ -276,13 +276,15 @@ export function createHostEndpoint(options: HostEndpointOptions): HostEndpoint {
       }
 
       // 권한 검증: 호스트가 앱 메서드를 호출할 때
-      if (!_grantedMethods.includes(method) && _appMethods.length > 0) {
-        // 아직 핸드셰이크 전이면 grantedMethods가 비어 있을 수 있음 → ready 후 재시도 유도
-        if (_status === 'ready') {
-          return Promise.reject(
-            new IpcError('denied', `메서드 '${method}'는 허용되지 않습니다`),
-          );
-        }
+      // ready 상태에서 _grantedMethods 화이트리스트에 없으면 거부.
+      // 앱이 INIT 에서 메서드를 announce 안 한 경우 _grantedMethods=[] → 모든 호출 거부 (의도된 동작).
+      // connecting 상태에서는 메시지를 전송하고 타임아웃으로 자연 차단 (큐잉은 v2).
+      // 이전 구현은 `_appMethods.length > 0` 보조 조건으로 게이트가 우회되는 결함이 있었음
+      // (TS-002 참조).
+      if (_status === 'ready' && !_grantedMethods.includes(method)) {
+        return Promise.reject(
+          new IpcError('denied', `메서드 '${method}'는 허용되지 않습니다`),
+        );
       }
 
       const callId = newCallId();
