@@ -26,6 +26,9 @@ zm-os 프로젝트 문서 색인.
 - [decisions/adr-0005-window-state-management.md](decisions/adr-0005-window-state-management.md) — 윈도우 상태 관리 (React Context + useReducer)
 - [decisions/adr-0006-desktop-app-catalog.md](decisions/adr-0006-desktop-app-catalog.md) — 데스크탑 앱 카탈로그 (POC v1 하드코딩)
 
+## 보안 감사
+- [security/phase-1-audit-2026-05-24.md](security/phase-1-audit-2026-05-24.md) — Phase 1 전체 감사 리포트
+
 ## 아카이브
 - [archive/](archive/) — 월별 작업 로그
 

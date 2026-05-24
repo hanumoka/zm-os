@@ -3,7 +3,7 @@
  *
  * 책임:
  * - iframe과의 핸드셰이크 (INIT → READY)
- * - origin 검증 (event.origin === "null" + event.source === iframe.contentWindow)
+ * - origin 검증 (event.origin === SANDBOX_ORIGIN + event.source === iframe.contentWindow)
  * - 권한 화이트리스트 검증 (allowedMethods)
  * - 앱 메서드 RPC 호출 (call)
  * - 호스트 API 노출 (expose → 앱이 CALL 메시지로 호출 가능)
@@ -32,6 +32,17 @@ import type { IpcStatus } from './types';
 
 const DEFAULT_TIMEOUT_MS = 5000;
 const HANDSHAKE_TIMEOUT_MS = 5000;
+
+/**
+ * srcdoc/blob iframe의 event.origin 값 ("null" 문자열).
+ *
+ * (작업 7 audit 권고) `sandbox.ts` 의 SANDBOX_ORIGIN 과 동일 값.
+ * `sandbox.ts → host.ts` 가 이미 존재하므로 역방향 import 시 순환 위험 →
+ * inline 정의로 SSOT 일관성 + 순환 회피를 모두 만족.
+ *
+ * v2 reshape: `src/lib/apps/ipc/constants.ts` 분리 권고.
+ */
+const SANDBOX_ORIGIN = 'null' as const;
 
 // ─── 유틸 ─────────────────────────────────────────────────────────────────────
 
@@ -159,7 +170,9 @@ export function createHostEndpoint(options: HostEndpointOptions): HostEndpoint {
     if (event.source !== iframe.contentWindow) return;
 
     // 보안 검증 2: srcdoc/blob iframe의 origin은 반드시 "null" (문자열)
-    if (event.origin !== 'null') return;
+    // (작업 7 audit 권고) sandbox.ts SANDBOX_ORIGIN 과 동일 값.
+    // 순환 import 회피 위해 inline 정의. v2 에서 src/lib/apps/ipc/constants.ts 로 분리 권고.
+    if (event.origin !== SANDBOX_ORIGIN) return;
 
     const msg = parseIpcMsg(event.data);
     if (msg === null) return;

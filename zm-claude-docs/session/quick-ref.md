@@ -3,8 +3,8 @@
 > 1페이지 프로젝트 컨텍스트. 세션 시작 시 필독. 수치 변경 시 즉시 갱신.
 
 ## 현재 상태 (2026-05-24)
-- **Phase**: Phase 1 — 코어 샌드박싱 + 윈도우 매니저
-- **진행률**: 작업 6/7 완료 (약 86%)
+- **Phase**: ✅ Phase 1 완료 — 코어 샌드박싱 + 윈도우 매니저
+- **진행률**: 작업 7/7 완료 (100%)
 - **저장소**: `git@github-personal:hanumoka/zm-os.git`, branch `main`
 - **마지막 커밋**: 곧 커밋 예정 (Phase 1 작업 5+6 통합)
 - **빌드**: `npm install` 완료, `npx tsc --noEmit` 통과
@@ -46,10 +46,12 @@ npm run dev
 
 설계 architect+research-analyst / 구현 lib-developer+fe-developer / 검증 build+code-reviewer+sandbox-auditor+constraint / 메타 self-verifier / 문서 doc-updater. 표준 워크플로: [`.claude/agents/_workflow.md`](../../.claude/agents/_workflow.md)
 
-## 다음 작업 후보 (모두 새 팀 워크플로로 진행)
+## 다음 Phase 2 (Phase 1 100% 완료 후)
 
-1. **작업 7 — `app-sandbox-auditor` 1회 전체 감사 또는 작업 대기**
-2. **APP-03 — 설치한 앱 목록 IndexedDB (Phase 2 선행)**
+Phase 2 진입 가능. 앱 스토어 + 패키지 포맷 + 첫 게임 시연 (별도 plan 필요)
+- STR-01/02: 앱 카탈로그 UI
+- APP-02/03: 앱 패키지 포맷 + 설치 관리
+- GAME-01: 첫 샘플 게임
 
 ## Quick Links
 - PRD: [`project/prd.md`](../project/prd.md)

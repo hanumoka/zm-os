@@ -2,9 +2,9 @@
 
 > **Living Document**. 기능 완료 시 즉시 갱신. 버전 bump 필수.
 
-**Version**: 0.1.5
+**Version**: 0.1.6
 **Last Updated**: 2026-05-24
-**Status**: Phase 1 — 코어 샌드박싱 + 윈도우 매니저 (작업 6/7 완료)
+**Status**: Phase 1 — 코어 샌드박싱 + 윈도우 매니저 (작업 7/7 완료 ✅)
 
 ---
 
@@ -108,6 +108,13 @@ POC 완료 = 아래 시나리오가 동작:
 ---
 
 ## §8. Change Log
+
+### 0.1.6 (2026-05-24)
+- Phase 1 작업 7 완료 (보안 감사) ✅ PASS
+- app-sandbox-auditor 1회 전체 감사 (8 항목 매트릭스 + ADR 정합 + CVE 매핑)
+- 즉시 fix 2건 적용: H-1 (runtime-iife DANGEROUS_KEYS 객체 결함) + SANDBOX_ORIGIN 상수 일관성
+- 감사 리포트 보관: zm-claude-docs/security/phase-1-audit-2026-05-24.md
+- **Phase 1 7/7 (100%) 완료** — Phase 2 진입 가능
 
 ### 0.1.5 (2026-05-24)
 - Phase 1 작업 5+6 통합 완료

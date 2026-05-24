@@ -1,6 +1,6 @@
 # Current Phase
 
-## Phase 1 — 코어 샌드박싱 + 윈도우 매니저 (진행 중, 2026-05-24)
+## ✅ Phase 1 — 코어 샌드박싱 + 윈도우 매니저 (완료, 2026-05-24)
 
 ### 목표
 신뢰할 수 없는 사용자 제출 앱(게임)을 격리해서 안전하게 실행하는 인프라를 코드로 구현. 그 위에 윈도우 매니저로 데스크탑 UX를 얹는다.
@@ -16,9 +16,17 @@
 | 4 | 윈도우 매니저 (DSK-01) | src/components/desktop/{types, Window, useWindowManager, WindowManagerProvider, windowReducer} | ✅ 완료 |
 | 5 | 데스크탑 영역 (DSK-02) | src/components/desktop/Desktop.tsx + DesktopIcon.tsx + desktopApps.ts + AppFrame.tsx | ✅ 완료 |
 | 6 | 작업표시줄 (DSK-03) | src/components/desktop/Taskbar.tsx + TaskbarButton.tsx + Clock.tsx | ✅ 완료 |
-| 7 | `app-sandbox-auditor` agent 1회 감사 | 리포트 | ⏳ 대기 |
+| 7 | `app-sandbox-auditor` agent 1회 감사 | zm-claude-docs/security/phase-1-audit-2026-05-24.md | ✅ 완료 |
 
 ### 최근 변경 (2026-05-24)
+- **23:00**: Phase 1 작업 7 완료 — app-sandbox-auditor 전체 감사 ✅ PASS
+  - 감사 범위: 25 파일 (코드 14, ADR 6, 정책/규칙 5)
+  - 매트릭스: 8 항목 (7 PASS + 1 PARTIAL)
+  - 신규 위협: N-1/N-2/N-3/N-4 (Medium/Low/Low/Info)
+  - 즉시 fix 2건: src/lib/apps/ipc/runtime-iife.ts:59 (DANGEROUS_KEYS 패턴) + src/lib/apps/ipc/host.ts:162 (SANDBOX_ORIGIN 일관성)
+  - 산출물: zm-claude-docs/security/phase-1-audit-2026-05-24.md (신규 감사 리포트)
+  - **Phase 1 7/7 (100%) 완료** — Phase 2 진입 가능
+  - 다음: Phase 2 plan (앱 스토어 STR-01/02 + APP-02/03 + 첫 게임 GAME-01 시연)
 - **22:30**: Phase 1 작업 5+6 통합 완료 (데스크탑 DSK-02 + 작업표시줄 DSK-03 + ADR-0006)
   - 산출물: 9 파일 (신규 6 컴포넌트 + DesktopIcon + AppFrame + desktopApps + page.tsx 전면 교체 + tsconfig 자동 정렬 + ADR-0006)
   - 검증: build-checker ✅ / code-reviewer ✅ (Critical 0, Warning 5 비-블로커) / app-sandbox-auditor ✅ (Critical 0, High 0, AppFrame lifecycle PASS, IPC expose 순수성 PASS) / constraint-checker ✅ / self-verifier ✅ PASS

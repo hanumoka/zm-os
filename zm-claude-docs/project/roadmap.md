@@ -2,7 +2,7 @@
 
 > **Living Document**. 항목 완료 시 즉시 갱신. PRD와 동시 갱신.
 
-**Version**: 0.1.5
+**Version**: 0.1.6
 **Last Updated**: 2026-05-24
 
 ---
@@ -12,7 +12,7 @@
 | Phase | 상태 | 진행률 | 목표 종료 |
 |-------|------|--------|----------|
 | **Phase 0** — 초기 셋팅 | ✅ 완료 | 100% | 2026-05-24 |
-| **Phase 1** — 코어 샌드박싱 + 윈도우 매니저 | 🔄 진행 중 | 약 86% (작업 6/7) | 미정 |
+| **Phase 1** — 코어 샌드박싱 + 윈도우 매니저 | ✅ 완료 | 100% (작업 7/7) | 2026-05-24 |
 | **Phase 2** — 앱 스토어 + 첫 게임 시연 | ⏳ 대기 | 0% | 미정 |
 | **Phase 3** — POC 안정화 + 데모 영상 | ⏳ 대기 | 0% | 미정 |
 
@@ -45,7 +45,7 @@ POC 종료 후: v2 plan (멀티유저/클라우드) 별도 plan 필요.
 | 윈도우 매니저 (DSK-01) | ADR-0002 | ✅ | react-rnd v10.5.3 (ADR-0002 확정) + Context+useReducer (ADR-0005) |
 | 데스크탑 영역 (DSK-02) | DSK-01 | ✅ | `src/components/desktop/Desktop.tsx + DesktopIcon.tsx + desktopApps.ts + ADR-0006` |
 | 작업표시줄 (DSK-03) | DSK-01 | ✅ | `src/components/desktop/Taskbar.tsx + TaskbarButton.tsx + Clock.tsx` |
-| `app-sandbox-auditor` agent 1회 감사 | 위 전부 | ⏳ | |
+| `app-sandbox-auditor` agent 1회 감사 | 위 전부 | ✅ | 감사 리포트: security/phase-1-audit-2026-05-24.md |
 
 ---
 
@@ -93,6 +93,13 @@ POC 종료 후: v2 plan (멀티유저/클라우드) 별도 plan 필요.
 ---
 
 ## §8. Change Log
+
+### 0.1.6 (2026-05-24)
+- Phase 1 작업 7 완료 (보안 감사) ✅ PASS
+- app-sandbox-auditor 1회 전체 감사 (8 항목 매트릭스 + ADR 정합 + CVE 매핑)
+- 즉시 fix 2건 적용: H-1 (runtime-iife DANGEROUS_KEYS 객체 결함) + SANDBOX_ORIGIN 상수 일관성
+- 감사 리포트 보관: zm-claude-docs/security/phase-1-audit-2026-05-24.md
+- **Phase 1 7/7 (100%) 완료** — Phase 2 진입 가능
 
 ### 0.1.5 (2026-05-24)
 - Phase 1 작업 5+6 통합 완료

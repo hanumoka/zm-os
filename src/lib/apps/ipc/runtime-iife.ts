@@ -55,13 +55,16 @@ export const IPC_RUNTIME_IIFE: string = /* js */ `
     }
   }
 
-  // prototype pollution 방어: 위험 키 포함 객체 거부
-  var DANGEROUS_KEYS = { __proto__: true, constructor: true, prototype: true };
+  // prototype pollution 방어: 위험 키 포함 객체 거부.
+  // (H-1, 작업 7 audit) 객체 리터럴 { __proto__: true } 는 own property 가 아닌
+  // prototype slot 설정으로 해석되어 Object.prototype 모든 메서드 키가 우연히
+  // truthy 가 되는 부작용이 있다. 배열 + indexOf 패턴으로 정확한 멤버십 검사.
+  var DANGEROUS_KEYS_LIST = ['__proto__', 'constructor', 'prototype'];
   function hasDangerousKey(obj) {
     if (obj === null || typeof obj !== 'object') return false;
     var keys = Object.keys(obj);
     for (var i = 0; i < keys.length; i++) {
-      if (DANGEROUS_KEYS[keys[i]]) return true;
+      if (DANGEROUS_KEYS_LIST.indexOf(keys[i]) !== -1) return true;
     }
     return false;
   }
