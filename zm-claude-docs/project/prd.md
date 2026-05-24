@@ -2,9 +2,9 @@
 
 > **Living Document**. 기능 완료 시 즉시 갱신. 버전 bump 필수.
 
-**Version**: 0.1.4
+**Version**: 0.1.5
 **Last Updated**: 2026-05-24
-**Status**: Phase 1 — 코어 샌드박싱 + 윈도우 매니저 (작업 4/7 완료)
+**Status**: Phase 1 — 코어 샌드박싱 + 윈도우 매니저 (작업 6/7 완료)
 
 ---
 
@@ -50,8 +50,8 @@ zm-os는 **브라우저 안에서 동작하는 가상 데스크탑** 으로, 사
 | ID | 이름 | 상태 | 비고 |
 |----|------|------|------|
 | **DSK-01** | 윈도우 매니저 (드래그/리사이즈/포커스) | ✅ 완료 | `src/components/desktop/Window.tsx + useWindowManager (react-rnd v10.5.3)` |
-| **DSK-02** | 데스크탑 영역 + 아이콘 | ⏳ 계획 | |
-| **DSK-03** | 작업표시줄 (실행 중 앱) | ⏳ 계획 | |
+| **DSK-02** | 데스크탑 영역 + 아이콘 | ✅ 완료 | `src/components/desktop/Desktop.tsx + DesktopIcon.tsx + desktopApps.ts` |
+| **DSK-03** | 작업표시줄 (실행 중 앱) | ✅ 완료 | `src/components/desktop/Taskbar.tsx + TaskbarButton.tsx + Clock.tsx` |
 | **STR-01** | 앱 카탈로그 UI | ⏳ 계획 | |
 | **STR-02** | 앱 상세 페이지 + 설치 | ⏳ 계획 | |
 | **APP-01** | 앱 매니페스트 스키마 (Zod) | ✅ 완료 | `src/lib/apps/manifest.ts` |
@@ -108,6 +108,14 @@ POC 완료 = 아래 시나리오가 동작:
 ---
 
 ## §8. Change Log
+
+### 0.1.5 (2026-05-24)
+- Phase 1 작업 5+6 통합 완료
+- DSK-02 (데스크탑 영역 + 아이콘) ✅
+- DSK-03 (작업표시줄 + 시계) ✅
+- AppFrame 컴포넌트 (sandbox iframe lifecycle)
+- desktopApps 하드코딩 카탈로그 (ADR-0006)
+- 메인 페이지 / 가 진짜 가상 데스크탑 (page.tsx 전면 교체)
 
 ### 0.1.4 (2026-05-24)
 - Phase 1 작업 4 완료

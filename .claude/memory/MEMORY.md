@@ -2,8 +2,8 @@
 > 시스템 프롬프트 자동 로드 (200줄 한도). 최종 갱신: 2026-05-24 (초기 셋팅)
 
 ## 프로젝트 수치 (항상 최신 유지)
-- 현재 Phase: **Phase 1 — 코어 샌드박싱 + 윈도우 매니저** (작업 4/7 완료, 약 57%)
-- 코드 LOC: 매니페스트 + sandbox SDK + IPC 어댑터 + CSP 헤더 + Window 컴포넌트 + sandbox-test 페이지 = ~2300 LOC (TS) + sample-game/sample-game-ipc ~230 LOC (HTML/JS)
+- 현재 Phase: **Phase 1 — 코어 샌드박싱 + 윈도우 매니저** (작업 6/7 완료, 약 86%)
+- 코드 LOC: ~3050 LOC (TS) + sample-game/sample-game-ipc/desktop ~350 LOC (HTML/JS) — 작업 5+6에서 ~750 LOC 추가
 - 에이전트: 10개 (architect, research-analyst, lib-developer, fe-developer, build-checker, code-reviewer, app-sandbox-auditor, constraint-checker, self-verifier, doc-updater) + workflow 문서
 - 모델 전략: architect/self-verifier=opus / 구현·리뷰·감사=sonnet / 빌드·문서·제약검사=haiku
 - 스킬: 5개 (zm-commit, zm-unit-done, zm-session, zm-troubleshoot, zm-memory-save)
@@ -52,6 +52,8 @@
 - 다음 진입: 작업 3 (CSP 헤더) 또는 ADR-0002 (윈도우 매니저 라이브러리)
 
 ## 최근 결정사항 (최대 10, FIFO)
+- 2026-05-24: 작업 5+6 통합 완료 — DSK-02 데스크탑 + DSK-03 작업표시줄. 메인 페이지 / 가상 데스크탑.
+- 2026-05-24: ADR-0006 — 데스크탑 앱 카탈로그 = POC v1 하드코딩 (v2 STR 전환)
 - 2026-05-24: ADR-0002 확정 — 윈도우 매니저 = react-rnd v10.5.3
 - 2026-05-24: 작업 3 완료 — CSP/Permissions-Policy 정적 헤더 (ADR-0004 dev/prod 분기, COEP/COOP 미도입)
 - 2026-05-24: Phase 1 작업 2 완료 — IPC 어댑터 (자체 RPC v1, ARCH-02 정밀화로 v2 Comlink 라이브러리 도입 미룸)
@@ -64,8 +66,8 @@
 - 2026-05-24: 작업 4 완료 — 윈도우 매니저 DSK-01 (react-rnd v10.5.3, Window 컴포넌트 + useWindowManager)
 
 ## Project State
-- Phase 1 작업 1+2+2.5+3+4 완료 (약 57%)
-- 작업 4: DSK-01 (윈도우 매니저) ✅ 완료, ADR-0005 작성 (Context+useReducer)
-- 다음: 작업 5 (데스크탑 영역 DSK-02)
+- Phase 1 작업 1+2+2.5+3+4+5+6 완료 (약 86%)
+- 작업 5+6: DSK-02 데스크탑 + DSK-03 작업표시줄 ✅ 완료, ADR-0006 작성 (desktopApps 카탈로그)
+- 다음: 작업 7 (app-sandbox-auditor 전체 감사 또는 APP-03 IndexedDB)
 
-> **최종 갱신**: 2026-05-24 — Phase 1 작업 4 완료 (윈도우 매니저 DSK-01 + ADR-0005)
+> **최종 갱신**: 2026-05-24 — Phase 1 작업 5+6 통합 완료 (데스크탑 DSK-02 + 작업표시줄 DSK-03 + ADR-0006)

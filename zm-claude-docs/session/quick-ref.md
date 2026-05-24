@@ -4,9 +4,9 @@
 
 ## 현재 상태 (2026-05-24)
 - **Phase**: Phase 1 — 코어 샌드박싱 + 윈도우 매니저
-- **진행률**: 작업 3/7 완료 (약 43%)
+- **진행률**: 작업 6/7 완료 (약 86%)
 - **저장소**: `git@github-personal:hanumoka/zm-os.git`, branch `main`
-- **마지막 커밋**: 곧 커밋 예정 (Phase 1 작업 3)
+- **마지막 커밋**: 곧 커밋 예정 (Phase 1 작업 5+6 통합)
 - **빌드**: `npm install` 완료, `npx tsc --noEmit` 통과
 
 ## 한 줄 요약
@@ -48,9 +48,8 @@ npm run dev
 
 ## 다음 작업 후보 (모두 새 팀 워크플로로 진행)
 
-1. **작업 4 — 윈도우 매니저 (DSK-01)** (`src/components/desktop/WindowManager.tsx`) — react-rnd 기반
-2. **작업 5 — 데스크탑 영역 (DSK-02)**
-3. **작업 6 — 작업표시줄 (DSK-03)**
+1. **작업 7 — `app-sandbox-auditor` 1회 전체 감사 또는 작업 대기**
+2. **APP-03 — 설치한 앱 목록 IndexedDB (Phase 2 선행)**
 
 ## Quick Links
 - PRD: [`project/prd.md`](../project/prd.md)

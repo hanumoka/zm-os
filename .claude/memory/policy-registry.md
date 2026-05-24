@@ -54,6 +54,12 @@
 - **재고 시점**: 윈도우 20개 이상 또는 persist/undo 요구 시 Zustand 전환 검토 (인터페이스 §3.2 동일)
 - **상세**: ADR-0005
 
+### PROD-02: 데스크탑 앱 카탈로그 — POC v1 하드코딩 (2026-05-24)
+- **결정**: src/components/desktop/desktopApps.ts 의 DESKTOP_APPS 배열. 2 엔트리 (Bouncing Ball + IPC Demo).
+- **이유**: ADR-0006 — STR 미존재 단계에서 데스크탑 UX 즉시 검증 + DesktopAppEntry 타입이 v2 STR 인터페이스 prefigure
+- **재고 시점**: STR-01/02 작업 진입 시 → useInstalledApps + IndexedDB로 reshape (인터페이스 무변경)
+- **상세**: ADR-0006
+
 ## Deprecated
 - (없음)
 

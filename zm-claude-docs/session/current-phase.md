@@ -14,11 +14,16 @@
 | 2.5 | TS-002 fix (host.ts:279 권한 게이트 결함) | host.ts | ✅ 완료 |
 | 3 | CSP / Permissions-Policy 헤더 (SBX-02) | next.config.ts | ✅ 완료 |
 | 4 | 윈도우 매니저 (DSK-01) | src/components/desktop/{types, Window, useWindowManager, WindowManagerProvider, windowReducer} | ✅ 완료 |
-| 5 | 데스크탑 영역 (DSK-02) | src/components/desktop/Desktop.tsx | ⏳ 대기 |
-| 6 | 작업표시줄 (DSK-03) | src/components/desktop/Taskbar.tsx | ⏳ 대기 |
+| 5 | 데스크탑 영역 (DSK-02) | src/components/desktop/Desktop.tsx + DesktopIcon.tsx + desktopApps.ts + AppFrame.tsx | ✅ 완료 |
+| 6 | 작업표시줄 (DSK-03) | src/components/desktop/Taskbar.tsx + TaskbarButton.tsx + Clock.tsx | ✅ 완료 |
 | 7 | `app-sandbox-auditor` agent 1회 감사 | 리포트 | ⏳ 대기 |
 
 ### 최근 변경 (2026-05-24)
+- **22:30**: Phase 1 작업 5+6 통합 완료 (데스크탑 DSK-02 + 작업표시줄 DSK-03 + ADR-0006)
+  - 산출물: 9 파일 (신규 6 컴포넌트 + DesktopIcon + AppFrame + desktopApps + page.tsx 전면 교체 + tsconfig 자동 정렬 + ADR-0006)
+  - 검증: build-checker ✅ / code-reviewer ✅ (Critical 0, Warning 5 비-블로커) / app-sandbox-auditor ✅ (Critical 0, High 0, AppFrame lifecycle PASS, IPC expose 순수성 PASS) / constraint-checker ✅ / self-verifier ✅ PASS
+  - 사용자 직접 검증 deferred (9항목): 메인 페이지 데스크탑 표시 + 아이콘 더블클릭 + 윈도우 드래그/리사이즈 + 작업표시줄 동작 + 시계 + IPC 본문 표시 + bounds="parent" 침범 여부 등
+  - 다음 작업: 작업 7 (app-sandbox-auditor 전체 감사 또는 APP-03 IndexedDB)
 - **22:00**: Phase 1 작업 4 완료 (윈도우 매니저 DSK-01 + ADR-0005)
   - 산출물: 10개 파일 (신규 5 + 수정 4 + ADR 1)
   - 검증: build/code-reviewer/sandbox-auditor/constraint ✅ PASS + self-verifier ✅ PASS 조건부

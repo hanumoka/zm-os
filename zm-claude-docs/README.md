@@ -24,6 +24,7 @@ zm-os 프로젝트 문서 색인.
 - [decisions/adr-0003-ipc-surface.md](decisions/adr-0003-ipc-surface.md) — IPC 어댑터 표면
 - [decisions/adr-0004-csp-permissions-policy.md](decisions/adr-0004-csp-permissions-policy.md) — CSP/Permissions-Policy 정책
 - [decisions/adr-0005-window-state-management.md](decisions/adr-0005-window-state-management.md) — 윈도우 상태 관리 (React Context + useReducer)
+- [decisions/adr-0006-desktop-app-catalog.md](decisions/adr-0006-desktop-app-catalog.md) — 데스크탑 앱 카탈로그 (POC v1 하드코딩)
 
 ## 아카이브
 - [archive/](archive/) — 월별 작업 로그
