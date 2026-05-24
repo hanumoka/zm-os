@@ -2,12 +2,17 @@
 
 > 1페이지 프로젝트 컨텍스트. 세션 시작 시 필독. 수치 변경 시 즉시 갱신.
 
+## 🚨 재부팅 후 재개 지점 (2026-05-24)
+- **Phase 1**: ✅ 완료 (7/7), e2e PASS (TS-003 fix 포함)
+- **Phase 2**: 진입 — 작업 1 architect 완료, **fe-developer 호출 직전 중단**
+- **재개**: [`../project/phase-2-plan.md`](../project/phase-2-plan.md) §7 → fe-developer 호출
+- **확정 결정**: 코어 / STR-01/02 첫 / Phaser 3 / P1=A α i+iii x r1 / Provider 옵션 A
+- **마지막 커밋**: `7d3fd32 fix(desktop): TS-003 AppFrame StrictMode`
+
 ## 현재 상태 (2026-05-24)
-- **Phase**: ✅ Phase 1 완료 — 코어 샌드박싱 + 윈도우 매니저
-- **진행률**: 작업 7/7 완료 (100%)
 - **저장소**: `git@github-personal:hanumoka/zm-os.git`, branch `main`
-- **마지막 커밋**: 곧 커밋 예정 (Phase 1 작업 5+6 통합)
 - **빌드**: `npm install` 완료, `npx tsc --noEmit` 통과
+- **dev 서버**: 백그라운드 실행 중 (재부팅 시 종료)
 
 ## 한 줄 요약
 브라우저 가상 데스크탑 + JS 게임 스토어 POC. 단일 사용자, blob: iframe 샌드박싱, IndexedDB/OPFS 스토리지.

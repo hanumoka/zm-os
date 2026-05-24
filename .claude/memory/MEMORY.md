@@ -46,10 +46,13 @@
 
 ## Project State
 - 빈 저장소에서 시작 (2026-05-24 git init + 첫 push to github-personal:hanumoka/zm-os.git)
-- Phase 0 완료 (커밋 `efed152 chore(setup)`, push 완료)
-- Phase 1 작업 1 완료: iframe 샌드박싱 PoC (APP-01 매니페스트 + SBX-01 sandbox SDK + Bouncing Ball + /sandbox-test)
-- Phase 1 작업 2 완료: Comlink IPC 어댑터 (wire-compatible RPC v1 + allowedMethods 화이트리스트)
-- 다음 진입: 작업 3 (CSP 헤더) 또는 ADR-0002 (윈도우 매니저 라이브러리)
+- Phase 0 완료 (`efed152 chore(setup)`)
+- Phase 1 ✅ 완료 (7/7, 커밋 `7d3fd32 fix(desktop): TS-003 AppFrame StrictMode` 까지)
+  - e2e 사용자 검증 PASS: Bouncing Ball + IPC Demo 정상 동작
+  - 누적 사용자 검증 deferred 대부분 해소
+- **Phase 2 진입** — 작업 1 architect 보고 완료, **fe-developer 호출 직전 사용자 중단 (재부팅 예정)**
+- **재개**: `zm-claude-docs/project/phase-2-plan.md` §7 참조 → fe-developer 호출
+- **Phase 2 사용자 결정 (확정)**: 코어 범위 / STR-01/02 첫 / Phaser 3 / P1=A α i+iii x r1 / Provider 옵션 A
 
 ## 최근 결정사항 (최대 10, FIFO)
 - 2026-05-24: Phase 1 작업 7 보안 감사 ✅ PASS. H-1 + SANDBOX_ORIGIN fix. Phase 2 진입 가능.

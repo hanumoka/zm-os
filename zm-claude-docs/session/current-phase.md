@@ -1,5 +1,14 @@
 # Current Phase
 
+## 🚨 재부팅 후 재개 (2026-05-24)
+- **Phase 1**: ✅ 완료 (7/7, 100%)
+- **Phase 2**: 진입 — 작업 1 architect 보고 완료, **fe-developer 호출 직전 중단** (사용자 재부팅 예정)
+- **재개 지점**: [`../project/phase-2-plan.md`](../project/phase-2-plan.md) §7 — fe-developer 호출 (architect 명세 그대로)
+- **사용자 결정 (확정)**: 코어 범위 / 첫 작업 STR-01/02 / Phaser 3 / P1=A P2=α P3=i+iii P4=x P5=r1 / Provider 옵션 A
+- **마지막 커밋**: `7d3fd32 fix(desktop): AppFrame StrictMode (TS-003)`
+
+---
+
 ## ✅ Phase 1 — 코어 샌드박싱 + 윈도우 매니저 (완료, 2026-05-24)
 
 ### 목표
