@@ -46,16 +46,15 @@
 
 ## Project State
 - 빈 저장소에서 시작 (2026-05-24 git init + 첫 push to github-personal:hanumoka/zm-os.git)
-- Phase 0 완료 (`efed152 chore(setup)`)
-- Phase 1 ✅ 완료 (7/7, 커밋 `7d3fd32 fix(desktop): TS-003 AppFrame StrictMode` 까지)
-  - e2e 사용자 검증 PASS: Bouncing Ball + IPC Demo 정상 동작
-  - 누적 사용자 검증 deferred 대부분 해소
-- **Phase 2 진입** — 작업 1 architect 보고 완료, **fe-developer 호출 직전 사용자 중단 (재부팅 예정)**
-- **재개**: `zm-claude-docs/project/phase-2-plan.md` §7 참조 → fe-developer 호출
-- **Phase 2 사용자 결정 (확정)**: 코어 범위 / STR-01/02 첫 / Phaser 3 / P1=A α i+iii x r1 / Provider 옵션 A
+- Phase 0 ✅ 완료 (`efed152 chore(setup)`)
+- Phase 1 ✅ 완료 (7/7, `7d3fd32`까지) — Playwright e2e PASS
+- Phase 2 ✅ 완료 (4/4, 100%, `4f3d0e3`까지) — Playwright e2e PASS (snake + hydration)
+- **Phase 3 진입 대기** — 사용자 우선순위 결정 필요 (다음 세션 첫 행동)
+- **Phase 3 후보 (4개)**: APP-02 ZIP 업로드 / 안정화 (번들+셀프 페네스트) / 게임 엔진 매트릭스 (Pixi+Three.js) / STG-02 OPFS+DSK-04 윈도우 위치 영속화
 
 ## 최근 결정사항 (최대 10, FIFO)
-- 2026-05-24: Phase 2 작업 3 완료 — APP-03 IndexedDB hydration + fire-and-forget persist (InstalledAppsProvider, lib/storage/installed-apps.ts). 인터페이스 무변경. Phase 2 ✅ 완료 (4/4, 100%).
+- 2026-05-24: **Phase 2 ✅ 완료 (4/4, 100%)** 종료 정리 — quick-ref/current-phase/MEMORY 갱신 (커밋 `b609390`). 다음 세션 Phase 3 진입 — 사용자 우선순위 결정 대기 (APP-02 / 안정화 / 게임엔진 / STG-02+DSK-04).
+- 2026-05-24: Phase 2 작업 3 완료 — APP-03 IndexedDB hydration + fire-and-forget persist (InstalledAppsProvider, lib/storage/installed-apps.ts). 인터페이스 무변경. Playwright e2e PASS (e2e-hydration.mjs 8 step).
 - 2026-05-24: Phase 2 작업 2 완료 — STG-01 IndexedDB 추상화 (idb v8.0.3, 메모리 폴백). ADR-0007 신규. 75% 진행률.
 - 2026-05-24: Phase 2 작업 1+4 Playwright e2e ALL PASS (10 step). TS-004 Snake 자동 벽 충돌 fix (paused 모드). D1/D2 deferred 검증 — Chrome srcdoc null origin → host /phaser.min.js 200 OK, Phaser AUTO sandbox 정상.
 - 2026-05-24: Phase 2 작업 4 완료 — GAME-01 Phaser 3 Snake (procedural, host self origin). POC v1 카탈로그 3개 엔트리 완성.
