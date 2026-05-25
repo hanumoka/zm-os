@@ -1,9 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useWindowManager } from './useWindowManager';
 import { TaskbarButton } from './TaskbarButton';
 import { Clock } from './Clock';
+import { SettingsPanel } from './SettingsPanel';
 import { findDesktopApp } from './desktopApps';
 import type { AppIcon } from './desktopApps';
 import type { WindowState } from './types';
@@ -33,6 +34,7 @@ const FALLBACK_ICON: AppIcon = { kind: 'emoji', char: '🗔' };
  */
 export function Taskbar(): React.JSX.Element {
   const manager = useWindowManager();
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   // active 윈도우: zIndex 최대값 (minimized 제외)
   const activeWindow: WindowState | undefined = manager.windows
@@ -99,10 +101,22 @@ export function Taskbar(): React.JSX.Element {
         })}
       </div>
 
-      {/* ── 우측 Clock ───────────────────────────────────────────────────────── */}
-      <div className="flex items-center px-2 shrink-0">
+      {/* ── 우측: 설정 버튼 + Clock ─────────────────────────────────────────── */}
+      <div className="flex items-center gap-1 px-2 shrink-0">
+        <button
+          type="button"
+          onClick={(): void => setSettingsOpen(true)}
+          className="px-2 py-1 text-sm text-white/80 hover:text-white hover:bg-white/10 rounded transition-colors"
+          aria-label="데스크탑 설정"
+          title="설정"
+        >
+          ⚙️
+        </button>
         <Clock />
       </div>
+
+      {/* ── 설정 패널 ─────────────────────────────────────────────────────────── */}
+      <SettingsPanel open={settingsOpen} onClose={(): void => setSettingsOpen(false)} />
     </div>
   );
 }

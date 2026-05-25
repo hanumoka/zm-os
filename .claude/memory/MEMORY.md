@@ -3,7 +3,7 @@
 
 ## 프로젝트 수치 (항상 최신 유지)
 - 현재 Phase: **Phase 3 ✅ 완료 (4/4, 100%)** — M4 마일스톤 달성, POC 종료
-- 코드 LOC: ~4600 LOC (TS) + samples/games ~1500 LOC (HTML/JS) — STG-02/DSK-04 신규 6파일 + 수정 3파일
+- 코드 LOC: ~5200 LOC (TS) + samples/games ~1500 LOC (HTML/JS) — DSK-05 신규 4파일 + 수정 6파일 + 테스트 6파일
 - 에이전트: 13개 (architect, research-analyst, design-reviewer, lib-developer, fe-developer, build-checker, code-reviewer, app-sandbox-auditor, constraint-checker, integration-tester, perf-monitor, self-verifier, doc-updater) + workflow 문서
 - 모델 전략: architect/design-reviewer/self-verifier=opus / 구현·리뷰·감사·통합검증=sonnet / 빌드·문서·제약·성능=haiku
 - 스킬: 9개 (zm-commit, zm-unit-done, zm-session, zm-troubleshoot, zm-memory-save, zm-work-intake, zm-work-completion, zm-doc-status, zm-roadmap)
@@ -47,11 +47,12 @@
 ## Project State
 - **Phase 3 ✅ 완료 (4/4, 100%)** + **Post-POC 진행 중**
 - **POC 종료 게이트 ✅ 통과** — 보안 14 페네스트 + 번들 임계치 PASS, 데모/시연 가능.
-- **Post-POC**: APP-04 ✅ + TEST-01 ✅ 완료
-- 다음 후보: DSK-05 (데스크탑 커스터마이징) / APP-04 확장 (컨텍스트 메뉴)
+- **Post-POC**: APP-04 ✅ + TEST-01 ✅ + DSK-05 ✅ 완료
+- 다음 후보: IPC-02 (Comlink 직접 통합) / APP-04 확장 (컨텍스트 메뉴)
 
 ## 최근 결정사항 (최대 10, FIFO)
-- 2026-05-25: TEST-01 완료 — Vitest 4.1.7 도입 + 56개 단위 테스트 (version/manifest/protocol/rate-limiter/zip-loader/memory-adapter). zip-loader Node.js File 호환 수정.
+- 2026-05-25: DSK-05 완료 — 데스크탑 커스터마이징 (배경화면 8 프리셋 + URL + 라이트/다크/시스템 테마 + 컨텍스트 메뉴 + 설정 패널). ADR-0012.
+- 2026-05-25: TEST-01 완료 — Vitest 4.1.7 도입 + 56개 단위 테스트. zip-loader Node.js File 호환 수정.
 - 2026-05-25: APP-04 완료 — 사용자 앱 삭제(확인 다이얼로그) + 업데이트(semver 비교). ConfirmDialog 범용 UI. ADR-0011.
 - 2026-05-25: N-08 postMessage DoS 방어 완료 — rate-limiter.ts (고정 윈도우 카운터 60건/초 + penalty 2초). host.ts 통합.
 - 2026-05-25: STG-02 + DSK-04 완료 — StorageAdapter Strategy 패턴 (IDB/OPFS/Memory) + 윈도우 레이아웃 영속화. ADR-0009 확정.
@@ -60,6 +61,5 @@
 - 2026-05-25: Phase 3-B 게임 엔진 호환성 매트릭스 — Pixi.js 8.18.1 + Three.js r184 ALL PASS.
 - 2026-05-25: 문서 체계 고도화 — sonix_docs 패턴 도입. docs/ 번호 기반 카테고리 + 규칙 10 + 훅 10 + 스킬 9.
 - 2026-05-25: Phase 3 작업 2 완료 — 안정화 (번들 1.4MB + 14 페네스트 ALL PASS).
-- 2026-05-24: Phase 3 작업 1 완료 — APP-02 ZIP 업로드 (JSZip 3.10.1, 보안 검증 6단계). ADR-0008 + PROD-05.
 
-> **최종 갱신**: 2026-05-25 — TEST-01 Vitest 56개 단위 테스트 도입
+> **최종 갱신**: 2026-05-25 — DSK-05 데스크탑 커스터마이징 완료

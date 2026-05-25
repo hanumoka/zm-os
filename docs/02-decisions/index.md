@@ -14,10 +14,11 @@
 | [ADR-0008](adr-0008-user-zip-upload.md) | POC v1 사용자 ZIP 앱 업로드 모델 (JSZip + 단일 HTML + 보안 검증) | accepted | 2026-05-24 |
 | [ADR-0009](adr-0009-storage-abstraction.md) | 스토리지 추상화 계층 — StorageAdapter Strategy 패턴 + OPFS 어댑터 | accepted | 2026-05-25 |
 | [ADR-0011](adr-0011-user-app-lifecycle.md) | 사용자 앱 삭제 및 업데이트 UX (APP-04) | accepted | 2026-05-25 |
+| [ADR-0012](adr-0012-dark-mode-strategy.md) | 다크 모드 CSS 전략 — Tailwind v4 class 기반 dark variant | accepted | 2026-05-25 |
 
 ## 다음 번호 가이드
 
-- ADR-0012 후보:
+- ADR-0013 후보:
   - IPC 권한 모델 v2 (manifest.permissions 매핑)
   - Comlink 라이브러리 도입 (v2 향상)
   - 윈도우 매니저 v2 reshape

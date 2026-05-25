@@ -43,6 +43,10 @@ const NAMESPACE_OVERRIDES: Record<string, () => StorageAdapter> = {
     if (isIDBAdapterAvailable()) return createIDBAdapter();
     return createMemoryAdapter();
   },
+  'desktop-settings': () => {
+    if (isIDBAdapterAvailable()) return createIDBAdapter();
+    return createMemoryAdapter();
+  },
 };
 
 const _nsCache = new Map<string, StorageAdapter>();

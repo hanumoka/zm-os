@@ -7,11 +7,16 @@ import { Window } from './Window';
 import { AppFrame } from './AppFrame';
 import { DesktopIcon } from './DesktopIcon';
 import { Taskbar } from './Taskbar';
+import { ContextMenu } from './ContextMenu';
+import { SettingsPanel } from './SettingsPanel';
 import { buildCatalog } from './desktopApps';
 import type { DesktopAppEntry } from './desktopApps';
+import type { ContextMenuItem } from './ContextMenu';
 import type { WindowState } from './types';
 import { useInstalledApps } from '@/components/store/useInstalledApps';
 import { useUserApps } from '@/components/store/UserAppsProvider';
+import { useDesktopSettings } from './DesktopSettingsProvider';
+import { WALLPAPER_CLASSES } from '@/lib/storage/desktop-settings';
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
@@ -52,6 +57,7 @@ export function Desktop({
   const manager = useWindowManager();
   const { isInstalled } = useInstalledApps();
   const { userApps } = useUserApps();
+  const { wallpaper } = useDesktopSettings();
 
   // APP-02: appsProp 미전달 시 buildCatalog(userApps) 사용 (P6)
   const apps = useMemo(
@@ -60,6 +66,35 @@ export function Desktop({
   );
   const desktopAreaRef = useRef<HTMLDivElement>(null);
   const [selectedIconId, setSelectedIconId] = useState<string | null>(null);
+
+  // 컨텍스트 메뉴 상태
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
+  // 설정 패널 상태
+  const [settingsOpen, setSettingsOpen] = useState(false);
+
+  // 동적 배경 계산
+  const bgClass = wallpaper.kind === 'preset'
+    ? WALLPAPER_CLASSES[wallpaper.preset]
+    : '';
+  const bgStyle: React.CSSProperties | undefined = wallpaper.kind === 'url'
+    ? { backgroundImage: `url(${wallpaper.url})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+    : undefined;
+
+  // 우클릭 컨텍스트 메뉴 핸들러
+  const handleContextMenu = (e: React.MouseEvent): void => {
+    e.preventDefault();
+    setContextMenu({ x: e.clientX, y: e.clientY });
+  };
+
+  // 컨텍스트 메뉴 항목
+  const contextMenuItems: ContextMenuItem[] = [
+    {
+      id: 'settings',
+      label: '데스크탑 설정',
+      icon: '⚙️',
+      onClick: (): void => setSettingsOpen(true),
+    },
+  ];
 
   // APP-04: 삭제된 앱의 실행 중 윈도우 자동 닫기
   useEffect(() => {
@@ -112,11 +147,13 @@ export function Desktop({
       {/* ── 데스크탑 영역 ─────────────────────────────────────────────────────── */}
       <div
         ref={desktopAreaRef}
-        className="flex-1 relative overflow-hidden bg-gradient-to-br from-sky-100 to-indigo-200"
+        className={`flex-1 relative overflow-hidden ${bgClass}`}
+        style={bgStyle}
         onClick={(): void => {
           // 빈 영역 클릭 시 선택 해제
           setSelectedIconId(null);
         }}
+        onContextMenu={handleContextMenu}
       >
         {/* ── 데스크탑 아이콘 (설치된 앱만 — P3=i) ──────────────────────────── */}
         {visibleApps.map((entry) => (
@@ -215,6 +252,18 @@ export function Desktop({
           );
         })}
       </div>
+
+      {/* ── 컨텍스트 메뉴 ─────────────────────────────────────────────────────── */}
+      {contextMenu !== null && (
+        <ContextMenu
+          items={contextMenuItems}
+          position={contextMenu}
+          onClose={(): void => setContextMenu(null)}
+        />
+      )}
+
+      {/* ── 설정 패널 ─────────────────────────────────────────────────────────── */}
+      <SettingsPanel open={settingsOpen} onClose={(): void => setSettingsOpen(false)} />
 
       {/* ── 작업표시줄 ────────────────────────────────────────────────────────── */}
       <div className="h-12 shrink-0">

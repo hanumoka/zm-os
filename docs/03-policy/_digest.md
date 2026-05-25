@@ -16,6 +16,7 @@
 | PROD-03 | DesktopAppEntry 단일 확장 (description, category, screenshots) | 2026-05-24 |
 | PROD-04 | 설치 상태 메모리 Context → IndexedDB reshape 완료 | 2026-05-24 |
 | PROD-05 | JSZip + 단일 HTML inline + 보안 검증 6단계 | 2026-05-24 |
+| TECH-06 | Tailwind v4 class 기반 dark variant (ADR-0012) | 2026-05-25 |
 
 ## 금지 사항 (도메인 핵심)
 - iframe `allow-same-origin` **절대 금지**

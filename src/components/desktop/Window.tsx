@@ -104,8 +104,10 @@ export function Window({
     'rounded-lg',
     'shadow-xl',
     'border',
-    'border-neutral-300',
+    'border-neutral-200',
+    'dark:border-neutral-700',
     'bg-white',
+    'dark:bg-neutral-800',
     'overflow-hidden',
     'select-none',
     isMinimized ? 'hidden' : '',
@@ -156,8 +158,10 @@ export function Window({
           'px-3',
           'py-2',
           'bg-neutral-100',
+          'dark:bg-neutral-700',
           'border-b',
-          'border-neutral-300',
+          'border-neutral-200',
+          'dark:border-neutral-600',
           'cursor-grab',
           'active:cursor-grabbing',
           titleBarClassName,
@@ -169,7 +173,7 @@ export function Window({
         }}
       >
         {/* 타이틀 */}
-        <span className="text-sm font-medium text-neutral-800 truncate flex-1 select-none">
+        <span className="text-sm font-medium text-neutral-800 dark:text-neutral-100 truncate flex-1 select-none">
           {title}
         </span>
 

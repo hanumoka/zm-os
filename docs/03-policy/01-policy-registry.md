@@ -98,6 +98,12 @@
 - **이유**: ADR-0008 — PRD §1.2 POC 비전 달성 (사용자 앱 업로드 → 설치 → 실행) + 백엔드 의존도 0 + v2 STR reshape 용이
 - **상세**: ADR-0008, `.claude/rules/security.md` §사용자 제출 ZIP 수신 절차
 
+### TECH-06: 다크 모드 CSS 전략 — Tailwind v4 class 기반 dark variant (2026-05-25)
+- **결정**: `@custom-variant dark (&:where(.dark, .dark *))` + `<html class="dark">` 토글. system 모드는 `matchMedia` 리스너.
+- **이유**: ADR-0012 — 사용자 수동 토글 + 시스템 팔로우 동시 지원. POC에서 초기 로드 flash 허용.
+- **재고 시점**: v2에서 인라인 blocking 스크립트 또는 cookie 기반 SSR 힌트로 flash 제거
+- **상세**: ADR-0012
+
 ## Deprecated
 - (없음)
 
