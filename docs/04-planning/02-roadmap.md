@@ -14,7 +14,7 @@
 | **Phase 0** — 초기 셋팅 | ✅ 완료 | 100% | 2026-05-24 |
 | **Phase 1** — 코어 샌드박싱 + 윈도우 매니저 | ✅ 완료 | 100% (작업 7/7) | 2026-05-24 |
 | **Phase 2** — 앱 스토어 + 첫 게임 시연 | ✅ 완료 | 100% (작업 4/4) | 2026-05-24 |
-| **Phase 3** — POC 안정화 + 데모 영상 | 🔄 진행 중 | 75% (작업 3/4) | 미정 |
+| **Phase 3** — POC 안정화 + 데모 영상 | ✅ 완료 | 100% (작업 4/4) | 2026-05-25 |
 
 POC 종료 후: v2 plan (멀티유저/클라우드) 별도 plan 필요.
 
@@ -69,7 +69,7 @@ POC 종료 후: v2 plan (멀티유저/클라우드) 별도 plan 필요.
 | ✅ 사용자 ZIP 앱 업로드 (APP-02) | JSZip 3.10.1 + 보안 검증 6단계 (magic byte → 파싱 → path traversal → 압축비 → 필수 파일 → 매니페스트) + UserAppsProvider + IDB STORE_USER_APPS | ✅ 완료 |
 | ✅ 안정화 (A1+A2) | 빌드/번들 사이즈 측정 (static 1.4MB, gzip ~400-500KB) + iframe 셀프 페네스트 자동화 (Playwright, 14 항목 ALL PASS) | ✅ 완료 |
 | B. 게임 엔진 호환성 매트릭스 | Pixi.js 8.18.1 + Three.js r184 샘플 + 3개 엔진 ALL PASS (Godot v2) | ✅ 완료 |
-| C. 데모 영상 1편 (3분 이내) | ZIP 업로드 → 설치 → 데스크탑 표시 → 실행 e2e | ⏳ 계획 |
+| C. 데모 영상 1편 | Playwright 비디오 녹화 7 Scene (스토어→ZIP→Snake→Pixi+Three→사용자앱→피날레) | ✅ 완료 |
 
 ---
 

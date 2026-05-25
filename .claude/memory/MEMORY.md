@@ -2,7 +2,7 @@
 > 시스템 프롬프트 자동 로드 (200줄 한도). 최종 갱신: 2026-05-25 (문서 체계 고도화)
 
 ## 프로젝트 수치 (항상 최신 유지)
-- 현재 Phase: **Phase 3 진행 중 (3/4, 75%)** — 작업 1/2/3 ✅ 완료
+- 현재 Phase: **Phase 3 ✅ 완료 (4/4, 100%)** — M4 마일스톤 달성, POC 종료
 - 코드 LOC: ~4300 LOC (TS) + samples/games ~1500 LOC (HTML/JS) — 작업 2 문서만 (코드 변경 0)
 - 에이전트: 10개 (architect, research-analyst, lib-developer, fe-developer, build-checker, code-reviewer, app-sandbox-auditor, constraint-checker, self-verifier, doc-updater) + workflow 문서
 - 모델 전략: architect/self-verifier=opus / 구현·리뷰·감사=sonnet / 빌드·문서·제약검사=haiku
