@@ -23,6 +23,10 @@ export type UserAppsContextValue = {
   addUserApp: (parsed: ParsedUserApp) => Promise<void>;
   /** 사용자 앱을 제거하고 IDB에서 삭제 */
   removeUserApp: (id: string) => Promise<void>;
+  /** 기존 앱을 새 버전으로 교체하고 IDB에 영속화 */
+  updateUserApp: (parsed: ParsedUserApp) => Promise<void>;
+  /** manifest.id → manifest.version 맵 (loadUserAppFromZip existingUserApps 인자용) */
+  userAppVersions: ReadonlyMap<string, string>;
 };
 
 // ─── Reducer ──────────────────────────────────────────────────────────────────
@@ -124,15 +128,32 @@ export function UserAppsProvider({ children }: { children: React.ReactNode }): R
     }
   }, []);
 
+  // ── updateUserApp: addUserApp과 동일한 upsert이지만 의미 분리 ─────────────
+  const updateUserApp = useCallback(async (parsed: ParsedUserApp): Promise<void> => {
+    const record: UserAppRecord = { ...parsed, installedAt: Date.now() };
+    dispatch({ type: 'ADD', app: record });
+    try {
+      await saveUserApp(record);
+    } catch (err) {
+      console.error('[UserAppsProvider] IDB update 실패', { id: record.manifest.id, err });
+    }
+  }, []);
+
   const hasUserApp = useCallback(
     (id: string): boolean => userApps.some((a) => a.manifest.id === id),
     [userApps],
   );
 
+  // ── userAppVersions: id → version 맵 (zip-loader existingUserApps 인자용) ─
+  const userAppVersions = useMemo<ReadonlyMap<string, string>>(
+    () => new Map(userApps.map((a) => [a.manifest.id, a.manifest.version])),
+    [userApps],
+  );
+
   // useMemo로 stable reference — userApps 변경 시에만 새 객체 생성
   const value = useMemo<UserAppsContextValue>(
-    () => ({ userApps, hasUserApp, addUserApp, removeUserApp }),
-    [userApps, hasUserApp, addUserApp, removeUserApp],
+    () => ({ userApps, hasUserApp, addUserApp, removeUserApp, updateUserApp, userAppVersions }),
+    [userApps, hasUserApp, addUserApp, removeUserApp, updateUserApp, userAppVersions],
   );
 
   return <UserAppsContext.Provider value={value}>{children}</UserAppsContext.Provider>;

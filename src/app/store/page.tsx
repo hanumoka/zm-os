@@ -9,6 +9,7 @@ import { useUserApps } from '@/components/store/UserAppsProvider';
 import { AppCard } from '@/components/store/AppCard';
 import { AppDetail } from '@/components/store/AppDetail';
 import { AppUploadButton } from '@/components/store/AppUploadButton';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 
 // ─── 카테고리 필터 타입 ───────────────────────────────────────────────────────
 
@@ -44,6 +45,7 @@ const CATEGORY_FILTERS: ReadonlyArray<CategoryFilter> = [
 export default function StorePage(): React.JSX.Element {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all');
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
   const { isInstalled, install, uninstall } = useInstalledApps();
   const { userApps, removeUserApp } = useUserApps();
@@ -78,12 +80,22 @@ export default function StorePage(): React.JSX.Element {
     uninstall(id);
   };
 
-  // P8=A+B: 사용자 앱 영구 삭제 — uninstall(설치 상태) + removeUserApp(IDB + 메모리)
-  const handlePermanentRemove = (id: string): void => {
-    uninstall(id);
-    void removeUserApp(id);
-    // 삭제 후 선택 해제
-    setSelectedId((prev) => (prev === id ? null : prev));
+  // 삭제 확인 다이얼로그 표시
+  const handlePermanentRemoveRequest = (id: string): void => {
+    setDeleteTargetId(id);
+  };
+
+  // 삭제 확정 — uninstall(설치 상태) + removeUserApp(IDB + 메모리)
+  const handleConfirmDelete = (): void => {
+    if (deleteTargetId === null) return;
+    uninstall(deleteTargetId);
+    void removeUserApp(deleteTargetId);
+    setSelectedId((prev) => (prev === deleteTargetId ? null : prev));
+    setDeleteTargetId(null);
+  };
+
+  const handleCancelDelete = (): void => {
+    setDeleteTargetId(null);
   };
 
   return (
@@ -173,7 +185,7 @@ export default function StorePage(): React.JSX.Element {
               isUserApp={isUserApp}
               onPermanentRemove={
                 isUserApp
-                  ? (): void => handlePermanentRemove(selectedEntry.id)
+                  ? (): void => handlePermanentRemoveRequest(selectedEntry.id)
                   : undefined
               }
             />
@@ -187,6 +199,22 @@ export default function StorePage(): React.JSX.Element {
           )}
         </div>
       </div>
+
+      {/* 삭제 확인 다이얼로그 */}
+      <ConfirmDialog
+        open={deleteTargetId !== null}
+        title="앱 영구 삭제"
+        description={
+          deleteTargetId !== null
+            ? `"${catalog.find((a) => a.id === deleteTargetId)?.name ?? deleteTargetId}"을(를) 영구 삭제합니다. 이 작업은 되돌릴 수 없습니다.`
+            : ''
+        }
+        confirmLabel="영구 삭제"
+        cancelLabel="취소"
+        variant="danger"
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+      />
     </div>
   );
 }

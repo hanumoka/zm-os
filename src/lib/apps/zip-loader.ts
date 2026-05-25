@@ -21,6 +21,7 @@
 
 import JSZip from 'jszip';
 import { parseManifest, type AppManifest } from './manifest';
+import { compareSemver, type SemverCompareResult } from './version';
 
 // ─── 공개 타입 ────────────────────────────────────────────────────────────────
 
@@ -43,9 +44,16 @@ export type ZipLoadErrorCode =
   | 'BOMB'
   | 'DUPLICATE_ID';
 
+/** 업데이트 대상 감지 정보 */
+export type UpdateTarget = {
+  existingVersion: string;
+  newVersion: string;
+  comparison: SemverCompareResult;
+};
+
 /** loadUserAppFromZip 결과 (discriminated union) */
 export type ZipLoadResult =
-  | { ok: true; app: ParsedUserApp }
+  | { ok: true; app: ParsedUserApp; updateTarget: UpdateTarget | null }
   | { ok: false; code: ZipLoadErrorCode; message: string };
 
 // ─── 임계치 상수 (P4 — research-analyst 권장값) ─────────────────────────────
@@ -106,6 +114,7 @@ type JsZipObjectWithData = {
 export async function loadUserAppFromZip(
   file: File,
   reservedIds: ReadonlySet<string>,
+  existingUserApps?: ReadonlyMap<string, string>,
 ): Promise<ZipLoadResult> {
   // ── 1. ZIP 파일 크기 검사 ──────────────────────────────────────────────────
   if (file.size > MAX_ZIP_BYTES) {
@@ -133,10 +142,11 @@ export async function loadUserAppFromZip(
     };
   }
 
-  // ── 3. JSZip 로드 ─────────────────────────────────────────────────────────
+  // ── 3. JSZip 로드 (ArrayBuffer 경유 — Node.js File 호환) ────────────────
   let zip: JSZip;
   try {
-    zip = await JSZip.loadAsync(file);
+    const buf = await file.arrayBuffer();
+    zip = await JSZip.loadAsync(buf);
   } catch (err) {
     return {
       ok: false,
@@ -232,19 +242,32 @@ export async function loadUserAppFromZip(
     };
   }
 
-  // ── 9. id 중복 검사 ───────────────────────────────────────────────────────
+  // ── 9. id 중복 검사 (built-in 보호 + 사용자 앱 업데이트 감지) ─────────────
   if (reservedIds.has(manifest.id)) {
     return {
       ok: false,
       code: 'DUPLICATE_ID',
-      message: `앱 ID "${manifest.id}"가 이미 존재합니다. manifest.json의 id를 고유하게 변경하세요.`,
+      message: `앱 ID "${manifest.id}"는 시스템 앱과 충돌합니다. manifest.json의 id를 변경하세요.`,
     };
+  }
+
+  let updateTarget: UpdateTarget | null = null;
+  if (existingUserApps !== undefined) {
+    const existingVersion = existingUserApps.get(manifest.id);
+    if (existingVersion !== undefined) {
+      updateTarget = {
+        existingVersion,
+        newVersion: manifest.version,
+        comparison: compareSemver(manifest.version, existingVersion),
+      };
+    }
   }
 
   // ── 성공 ─────────────────────────────────────────────────────────────────
   return {
     ok: true,
     app: { manifest, htmlContent },
+    updateTarget,
   };
 }
 

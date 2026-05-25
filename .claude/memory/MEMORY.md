@@ -9,8 +9,8 @@
 - 스킬: 9개 (zm-commit, zm-unit-done, zm-session, zm-troubleshoot, zm-memory-save, zm-work-intake, zm-work-completion, zm-doc-status, zm-roadmap)
 - 규칙: 10개 (frontend, security, work-units, known-mistakes, doc-naming, file-categories, quality-standard, self-review, auto-memory-protocol, troubleshoot-auto)
 - 훅: 10개 Python (mistake_guard, post_review, session_start, notify_done, category_guard, emit_event, prompt_context, pre_compact, post_compact, post_review_checks)
-- 단위 테스트: 0 | E2E: Playwright 6개 (snake/hydration/zip-upload/pentest/engine-compat/demo-video, 모두 PASS)
-- 의존성: next 16, react 19, tailwind 4, zod 4.4.3, typescript 5, react-rnd v10.5.3, phaser@3.90.0, idb@8.0.3, jszip@3.10.1, pixi.js@8.18.1 (NEW), three@0.184.0 (NEW), playwright (dev)
+- 단위 테스트: Vitest 56개 (6파일 ALL PASS) | E2E: Playwright 6개 (모두 PASS)
+- 의존성: next 16, react 19, tailwind 4, zod 4.4.3, typescript 5, react-rnd v10.5.3, phaser@3.90.0, idb@8.0.3, jszip@3.10.1, pixi.js@8.18.1, three@0.184.0, vitest@4.1.7 (dev), playwright (dev)
 
 ## 기술 스택
 - **FE/풀스택**: Next.js 16 (App Router) + React 19 + Tailwind v4
@@ -45,24 +45,21 @@
 - v2 단계 — 설계 안정성/유연성/확장성 > 개발 속도. 면밀한 검토 + 작업 결과 검수 중시.
 
 ## Project State
-- **Phase 3 진행 중 (2/4, 50%)**. 작업 1 ✅ (APP-02 ZIP 업로드), 작업 2 ✅ (안정화).
+- **Phase 3 ✅ 완료 (4/4, 100%)** + **Post-POC 진행 중**
 - **POC 종료 게이트 ✅ 통과** — 보안 14 페네스트 + 번들 임계치 PASS, 데모/시연 가능.
-- 마지막 커밋: `d1c391a test(security): Phase 3 작업 2 안정화`, push 완료.
-- **🛑 세션 종료 (2026-05-25)**. 다음 세션 진입 시 Phase 3 남은 3 후보 중 사용자 선택:
-  - 게임 엔진 호환성 (Pixi.js + Three.js + Godot)
-  - STG-02 OPFS + DSK-04 윈도우 위치 영속화
-  - 데모 영상 (e2e end-to-end)
+- **Post-POC**: APP-04 ✅ + TEST-01 ✅ 완료
+- 다음 후보: DSK-05 (데스크탑 커스터마이징) / APP-04 확장 (컨텍스트 메뉴)
 
 ## 최근 결정사항 (최대 10, FIFO)
-- 2026-05-25: N-08 postMessage DoS 방어 완료 — rate-limiter.ts (고정 윈도우 카운터 60건/초 + penalty 2초). host.ts 통합. ADR-0010.
-- 2026-05-25: STG-02 + DSK-04 완료 — StorageAdapter Strategy 패턴 (IDB/OPFS/Memory) + 윈도우 레이아웃 영속화. ADR-0009 확정. 번들 1.28MB (감소).
-- 2026-05-25: 에이전트 팀 재편 10→13명. 신규: design-reviewer(opus), integration-tester(sonnet), perf-monitor(haiku). 2단계 검증 파이프라인 + architect/design-reviewer 필수 게이트. 우선순위: 설계 안정성/유연성/확장성 > 속도.
-- 2026-05-25: 문서 정밀 검토 — 11건 이슈 수정 (broken link 3건 + FIFO 정리 + 버전 0.8.0 bump + settings.json 스킬 permission 추가). 정합성 97%→100%.
-- 2026-05-25: Phase 3-C 데모 영상 완료 — Playwright 비디오 녹화 7 Scene (스토어→ZIP→Snake→Pixi+Three→사용자앱→피날레). M4 마일스톤 달성, POC 공식 종료.
-- 2026-05-25: Phase 3-B 게임 엔진 호환성 매트릭스 — Pixi.js 8.18.1 + Three.js r184 ALL PASS. 3개 엔진 sandbox/WebGL/격리 검증.
-- 2026-05-25: 문서 체계 고도화 — sonix_docs 패턴 도입. docs/ 번호 기반 카테고리 + 규칙 10 + 훅 10 + 스킬 9 + events/ 이벤트 스트림.
-- 2026-05-25: Phase 3 작업 2 완료 — 안정화 (번들 1.4MB + 14 페네스트 ALL PASS). N-08 postMessage DoS v2 후보.
+- 2026-05-25: TEST-01 완료 — Vitest 4.1.7 도입 + 56개 단위 테스트 (version/manifest/protocol/rate-limiter/zip-loader/memory-adapter). zip-loader Node.js File 호환 수정.
+- 2026-05-25: APP-04 완료 — 사용자 앱 삭제(확인 다이얼로그) + 업데이트(semver 비교). ConfirmDialog 범용 UI. ADR-0011.
+- 2026-05-25: N-08 postMessage DoS 방어 완료 — rate-limiter.ts (고정 윈도우 카운터 60건/초 + penalty 2초). host.ts 통합.
+- 2026-05-25: STG-02 + DSK-04 완료 — StorageAdapter Strategy 패턴 (IDB/OPFS/Memory) + 윈도우 레이아웃 영속화. ADR-0009 확정.
+- 2026-05-25: 에이전트 팀 재편 10→13명. 2단계 검증 파이프라인 + architect/design-reviewer 필수 게이트.
+- 2026-05-25: Phase 3-C 데모 영상 완료 — Playwright 비디오 녹화 7 Scene. M4 마일스톤 달성, POC 공식 종료.
+- 2026-05-25: Phase 3-B 게임 엔진 호환성 매트릭스 — Pixi.js 8.18.1 + Three.js r184 ALL PASS.
+- 2026-05-25: 문서 체계 고도화 — sonix_docs 패턴 도입. docs/ 번호 기반 카테고리 + 규칙 10 + 훅 10 + 스킬 9.
+- 2026-05-25: Phase 3 작업 2 완료 — 안정화 (번들 1.4MB + 14 페네스트 ALL PASS).
 - 2026-05-24: Phase 3 작업 1 완료 — APP-02 ZIP 업로드 (JSZip 3.10.1, 보안 검증 6단계). ADR-0008 + PROD-05.
-- 2026-05-24: Phase 2 ✅ 완료 (4/4) — STR-01/02 + STG-01 + APP-03 + GAME-01. Playwright e2e ALL PASS.
 
-> **최종 갱신**: 2026-05-25 — N-08 DoS 방어 + STG-02/DSK-04 완료
+> **최종 갱신**: 2026-05-25 — TEST-01 Vitest 56개 단위 테스트 도입

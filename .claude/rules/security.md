@@ -92,9 +92,10 @@ paths:
    - `manifest.json` 콘텐츠를 `parseManifest(content)` 호출
    - 실패 시: 거부 ("매니페스트 형식 오류")
 
-9. **ID 중복 검사**
-   - `manifest.id`가 `reservedIds` (built-in 앱 + 기존 user apps) 에 이미 존재하는가?
-   - 존재 시: 거부 ("이미 설치된 앱입니다")
+9. **ID 중복 검사 (APP-04 이원화)**
+   - `manifest.id`가 `reservedIds` (built-in 앱만) 에 존재하면: 거부 ("시스템 앱과 충돌")
+   - `manifest.id`가 `existingUserApps`에 존재하면: 업데이트 감지 (ok: true + updateTarget 반환)
+   - 양쪽 모두 없으면: 신규 앱 (ok: true + updateTarget: null)
 
 10. **저장** (위 모든 검증 통과 시)
     - UserAppRecord = { id, manifest, htmlContent, installedAt, sourceZipSize, htmlSize }

@@ -6,6 +6,7 @@ import React, {
   useReducer,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
 } from 'react';
 import type { WindowManager, WindowState, WindowOpenInit } from './types';
@@ -220,17 +221,10 @@ export function WindowManagerProvider({
     [dispatchWithPersist],
   );
 
-  const manager: WindowManager = {
-    windows,
-    open,
-    close,
-    minimize,
-    maximize,
-    restore,
-    focus,
-    setPosition,
-    setSize,
-  };
+  const manager = useMemo<WindowManager>(
+    () => ({ windows, open, close, minimize, maximize, restore, focus, setPosition, setSize }),
+    [windows, open, close, minimize, maximize, restore, focus, setPosition, setSize],
+  );
 
   return (
     <WindowManagerContext.Provider value={manager}>

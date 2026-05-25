@@ -2,13 +2,27 @@
 
 import React, { useRef, useState } from 'react';
 import { loadUserAppFromZip } from '@/lib/apps/zip-loader';
-import type { ZipLoadErrorCode } from '@/lib/apps/zip-loader';
+import type { ZipLoadErrorCode, ParsedUserApp, UpdateTarget } from '@/lib/apps/zip-loader';
 import { DESKTOP_APPS } from '@/components/desktop/desktopApps';
 import { useUserApps } from './UserAppsProvider';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 
-// ─── 상태 타입 (P10=A: 단순 상태) ────────────────────────────────────────────
+// ─── 상태 타입 ───────────────────────────────────────────────────────────────
 
-type UploadStatus = 'idle' | 'parsing' | 'validating' | 'saving' | 'done' | 'error';
+type UploadStatus = 'idle' | 'parsing' | 'confirming-update' | 'saving' | 'done' | 'error';
+
+// ─── built-in 앱 reserved IDs (모듈 상수 — 렌더마다 재생성 방지) ─────────────
+
+const BUILTIN_RESERVED_IDS: ReadonlySet<string> = new Set<string>([
+  ...DESKTOP_APPS.map((e) => e.id),
+  ...DESKTOP_APPS.flatMap((e): string[] => {
+    const m = e.manifest;
+    if (typeof m === 'object' && m !== null && 'id' in m && typeof m.id === 'string') {
+      return [m.id];
+    }
+    return [];
+  }),
+]);
 
 // ─── 에러 메시지 매핑 ─────────────────────────────────────────────────────────
 
@@ -22,46 +36,41 @@ const ERROR_MESSAGES: Record<ZipLoadErrorCode, string> = {
   ZIP_TOO_LARGE: 'ZIP 파일이 너무 큽니다 (최대 10MB)',
   HTML_TOO_LARGE: 'index.html이 너무 큽니다 (최대 5MB)',
   BOMB: 'ZIP bomb 감지 (압축비 1000x 초과)',
-  DUPLICATE_ID: '이미 존재하는 앱 ID입니다.',
+  DUPLICATE_ID: '시스템 앱과 ID가 충돌합니다.',
 };
+
+// ─── 업데이트 확인 메시지 생성 ────────────────────────────────────────────────
+
+function buildUpdateDescription(target: UpdateTarget): string {
+  switch (target.comparison) {
+    case 1:
+      return `v${target.existingVersion} → v${target.newVersion} 으로 업그레이드합니다.`;
+    case 0:
+      return `동일한 버전(v${target.newVersion})으로 덮어씁니다. 앱 내용이 교체됩니다.`;
+    case -1:
+      return `v${target.existingVersion} → v${target.newVersion} 으로 다운그레이드합니다. 이전 버전의 데이터가 손실될 수 있습니다.`;
+  }
+}
 
 // ─── AppUploadButton ──────────────────────────────────────────────────────────
 
-/**
- * AppUploadButton — ZIP 앱 업로드 버튼.
- *
- * APP-02 / P2=A: 스토어 페이지 헤더에 삽입.
- * 파일 선택 → loadUserAppFromZip 검증 → addUserApp IDB 영속화.
- *
- * SSR 안전: useRef/useState는 클라이언트 전용이지만 'use client' 디렉티브로 보장.
- * File input은 CSP에 의해 인라인 핸들러 없이 동작.
- */
 export function AppUploadButton(): React.JSX.Element {
   const inputRef = useRef<HTMLInputElement>(null);
   const [status, setStatus] = useState<UploadStatus>('idle');
   const [errMsg, setErrMsg] = useState<string>('');
-  const { addUserApp, userApps } = useUserApps();
+  const { addUserApp, updateUserApp, userAppVersions } = useUserApps();
 
-  // built-in entry.id + built-in manifest.id + 현재 사용자 앱 manifest.id 모두 reservedIds로 전달
-  // (zip-loader는 manifest.id로 비교 — built-in 앱의 entry.id와 manifest.id가 다르므로 둘 다 차단)
-  const reservedIds = new Set<string>([
-    ...DESKTOP_APPS.map((e) => e.id),
-    ...DESKTOP_APPS.flatMap((e): string[] => {
-      const m = e.manifest;
-      if (typeof m === 'object' && m !== null && 'id' in m && typeof m.id === 'string') {
-        return [m.id];
-      }
-      return [];
-    }),
-    ...userApps.map((u) => u.manifest.id),
-  ]);
+  // 업데이트 확인 대기 중인 앱 정보
+  const [pendingUpdate, setPendingUpdate] = useState<{
+    app: ParsedUserApp;
+    target: UpdateTarget;
+  } | null>(null);
 
   const handleFile = async (file: File): Promise<void> => {
     setStatus('parsing');
     setErrMsg('');
 
-    // loadUserAppFromZip: ZIP 크기·magic·path traversal·bomb·manifest·html 검증
-    const result = await loadUserAppFromZip(file, reservedIds);
+    const result = await loadUserAppFromZip(file, BUILTIN_RESERVED_IDS, userAppVersions);
 
     if (!result.ok) {
       setStatus('error');
@@ -69,42 +78,58 @@ export function AppUploadButton(): React.JSX.Element {
       return;
     }
 
+    // 업데이트 대상 감지 → 확인 다이얼로그 표시
+    if (result.updateTarget !== null) {
+      setPendingUpdate({ app: result.app, target: result.updateTarget });
+      setStatus('confirming-update');
+      return;
+    }
+
+    // 신규 앱 → 바로 저장
     setStatus('saving');
     await addUserApp(result.app);
     setStatus('done');
+    setTimeout((): void => setStatus('idle'), 2000);
+  };
 
-    // 2초 후 idle 복귀
-    setTimeout((): void => {
-      setStatus('idle');
-    }, 2000);
+  const handleConfirmUpdate = async (): Promise<void> => {
+    if (pendingUpdate === null) return;
+    setStatus('saving');
+    await updateUserApp(pendingUpdate.app);
+    setPendingUpdate(null);
+    setStatus('done');
+    setTimeout((): void => setStatus('idle'), 2000);
+  };
+
+  const handleCancelUpdate = (): void => {
+    setPendingUpdate(null);
+    setStatus('idle');
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const f = e.target.files?.[0];
     if (f === undefined) return;
     void handleFile(f);
-    // 동일 파일 재업로드 허용 — input value 초기화
     if (inputRef.current !== null) {
       inputRef.current.value = '';
     }
   };
 
-  const isDisabled = status === 'parsing' || status === 'saving';
+  const isDisabled = status === 'parsing' || status === 'saving' || status === 'confirming-update';
 
   const buttonLabel = ((): string => {
     switch (status) {
-      case 'idle':    return 'ZIP 앱 업로드';
-      case 'parsing': return '검증 중...';
-      case 'validating': return '검증 중...';
-      case 'saving':  return '저장 중...';
-      case 'done':    return '완료';
-      case 'error':   return '다시 시도';
+      case 'idle':              return 'ZIP 앱 업로드';
+      case 'parsing':           return '검증 중...';
+      case 'confirming-update': return '업데이트 확인 중...';
+      case 'saving':            return '저장 중...';
+      case 'done':              return '완료';
+      case 'error':             return '다시 시도';
     }
   })();
 
   return (
     <div className="flex items-center gap-3">
-      {/* 숨겨진 file input */}
       <input
         ref={inputRef}
         type="file"
@@ -115,7 +140,6 @@ export function AppUploadButton(): React.JSX.Element {
         tabIndex={-1}
       />
 
-      {/* 업로드 버튼 */}
       <button
         type="button"
         disabled={isDisabled}
@@ -149,11 +173,24 @@ export function AppUploadButton(): React.JSX.Element {
         {buttonLabel}
       </button>
 
-      {/* 에러 메시지 */}
       {errMsg !== '' && (
         <span className="text-xs text-red-600 max-w-xs truncate" role="alert" title={errMsg}>
           {errMsg}
         </span>
+      )}
+
+      {/* 업데이트 확인 다이얼로그 */}
+      {pendingUpdate !== null && (
+        <ConfirmDialog
+          open={status === 'confirming-update'}
+          title={`"${pendingUpdate.app.manifest.name}" 업데이트`}
+          description={buildUpdateDescription(pendingUpdate.target)}
+          confirmLabel="업데이트"
+          cancelLabel="취소"
+          variant={pendingUpdate.target.comparison === -1 ? 'danger' : 'primary'}
+          onConfirm={(): void => void handleConfirmUpdate()}
+          onCancel={handleCancelUpdate}
+        />
       )}
     </div>
   );

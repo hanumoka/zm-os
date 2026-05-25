@@ -2,13 +2,11 @@
 
 > 1페이지 프로젝트 컨텍스트. 세션 시작 시 필독. 수치 변경 시 즉시 갱신.
 
-## 🚀 Phase 3 진행 중 (2/4, 50%) 🔄
-- **Phase 1**: ✅ 완료 (7/7)
-- **Phase 2**: ✅ 완료 (4/4, 100%)
-- **Phase 3**: ✅ 완료 (4/4, 100%) — 작업 1~4 모두 완료 (2026-05-25)
-- **POC 종료 게이트**: ✅ 통과 (보안 14 페네스트 + 번들 임계치 PASS — 데모/시연 가능)
-- **마지막 커밋**: `3f896b0 docs(infra): docs/ 내부 링크 경로 갱신`, push 완료
-- **POC 1차 완료 (2026-05-25)** — Phase 0~3 전체 완료, M4 마일스톤 달성
+## ✅ POC 완료 → Post-POC 진행 중
+- **Phase 1~3**: ✅ 전부 완료 — M4 마일스톤 달성
+- **POC 종료 게이트**: ✅ 통과 (보안 14 페네스트 + 번들 임계치 PASS)
+- **Post-POC**: APP-04 ✅ + TEST-01 ✅ 완료
+- **다음 후보**: DSK-05 (데스크탑 커스터마이징)
 
 ### 완료한 작업
 **작업 1 ✅ APP-02**: 사용자 ZIP 앱 업로드 (JSZip 3.10.1 + 보안 검증)
@@ -24,10 +22,11 @@
 - 코드 변경 0건 (architect 목표)
 - 신규 위협: N-08 postMessage DoS (v2 후보)
 
-### 다음 후보 (사용자 우선순위 대기)
-1. ~~게임 엔진 호환성 (B)~~ ✅ 완료 — Pixi.js 8 + Three.js r184 ALL PASS
-2. ~~데모 영상 (C)~~ ✅ 완료 — Playwright 비디오 녹화 7 Scene
-3. **STG-02 OPFS + DSK-04** — OPFS 어댑터 + 윈도우 위치 영속화 (v2 후보)
+**Post-POC ✅ APP-04**: 사용자 앱 삭제/업데이트 UX
+- ConfirmDialog (HTML `<dialog>`, useId) + semver 비교
+- zip-loader 업데이트 감지 (built-in 보호 유지)
+- Desktop 윈도우 자동 닫기 + WindowManagerProvider useMemo 안정화
+- ADR-0011 + 13명 에이전트 2단계 검증 파이프라인
 
 ## 현재 상태 (2026-05-25)
 - **저장소**: `git@github-personal:hanumoka/zm-os.git`, branch `main`

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useWindowManager } from './useWindowManager';
 import { Window } from './Window';
@@ -60,6 +60,16 @@ export function Desktop({
   );
   const desktopAreaRef = useRef<HTMLDivElement>(null);
   const [selectedIconId, setSelectedIconId] = useState<string | null>(null);
+
+  // APP-04: 삭제된 앱의 실행 중 윈도우 자동 닫기
+  useEffect(() => {
+    const appIds = new Set(apps.map((a) => a.id));
+    for (const win of manager.windows) {
+      if (!appIds.has(win.contentId) || !isInstalled(win.contentId)) {
+        manager.close(win.id);
+      }
+    }
+  }, [apps, manager, isInstalled]);
 
   // P3=i: 설치된 앱만 아이콘 표시
   const visibleApps = apps.filter((a) => isInstalled(a.id));
