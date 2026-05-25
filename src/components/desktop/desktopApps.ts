@@ -207,6 +207,69 @@ export const DESKTOP_APPS: ReadonlyArray<DesktopAppEntry> = [
     author: 'zm-os team',
     version: '1.0.0',
   },
+  // ── Particle Rain (Pixi.js) ───────────────────────────────────────────────
+  {
+    id: 'particle-rain',
+    name: 'Particle Rain',
+    icon: { kind: 'emoji', char: '🌧️' },
+    source: 'built-in' as const,
+    contentUrl: '/sample-game-pixi/index.html',
+    iconPosition: { x: 30, y: 330 },
+    windowDefaults: {
+      position: { x: 200, y: 60 },
+      size: { width: 640, height: 480 },
+    },
+    manifest: {
+      schemaVersion: 1,
+      id: 'com.zmos.sample.particle-rain',
+      name: 'Particle Rain',
+      version: '1.0.0',
+      author: 'zm-os team',
+      description: 'Pixi.js 기반 파티클 비 데모',
+      entryPoint: 'index.html',
+      size: { defaultWidth: 600, defaultHeight: 440 },
+    },
+    description: 'Pixi.js 2D 엔진으로 만든 파티클 비 인터랙션',
+    longDescription:
+      'Pixi.js 8 WebGL 렌더러가 sandbox iframe(null origin) 안에서 동작하는 데모입니다. ' +
+      '200개 파티클이 화면에서 떨어지며, 클릭하면 해당 위치에서 파티클이 폭발합니다. ' +
+      '게임 엔진 호환성 매트릭스 Phase 3-B 검증용.',
+    category: 'demo',
+    author: 'zm-os team',
+    version: '1.0.0',
+  },
+
+  // ── Spinning Cubes (Three.js) ────────────────────────────────────────────
+  {
+    id: 'spinning-cubes',
+    name: 'Spinning Cubes',
+    icon: { kind: 'emoji', char: '🧊' },
+    source: 'built-in' as const,
+    contentUrl: '/sample-game-three/index.html',
+    iconPosition: { x: 30, y: 430 },
+    windowDefaults: {
+      position: { x: 350, y: 100 },
+      size: { width: 640, height: 480 },
+    },
+    manifest: {
+      schemaVersion: 1,
+      id: 'com.zmos.sample.spinning-cubes',
+      name: 'Spinning Cubes',
+      version: '1.0.0',
+      author: 'zm-os team',
+      description: 'Three.js 기반 3D 회전 큐브 데모',
+      entryPoint: 'index.html',
+      size: { defaultWidth: 600, defaultHeight: 440 },
+    },
+    description: 'Three.js 3D 엔진으로 만든 회전 큐브 씬',
+    longDescription:
+      'Three.js r184 WebGL 렌더러가 sandbox iframe(null origin) 안에서 동작하는 데모입니다. ' +
+      '12개 큐브가 와이어프레임 구를 중심으로 공전하며, 마우스를 움직이면 카메라가 추종합니다. ' +
+      '게임 엔진 호환성 매트릭스 Phase 3-B 검증용.',
+    category: 'demo',
+    author: 'zm-os team',
+    version: '1.0.0',
+  },
 ] as const;
 
 // ─── findDesktopApp ───────────────────────────────────────────────────────────

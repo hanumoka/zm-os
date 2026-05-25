@@ -3,7 +3,7 @@
 ## 🚀 Phase 3 진행 중 (2/4, 50%)
 - **Phase 1**: ✅ 완료 (7/7, 100%)
 - **Phase 2**: ✅ 완료 (4/4, 100%)
-- **Phase 3**: 🔄 진행 중 (2/4, 50%) — 작업 1/2 ✅ 완료
+- **Phase 3**: 🔄 진행 중 (3/4, 75%) — 작업 1/2/3 ✅ 완료
 - **현재 상태**: Phase 3 작업 2 검증 완료 → doc-updater 진행 중 (2026-05-25)
 
 ### 작업 1 — APP-02 사용자 ZIP 업로드 (✅ 완료)
@@ -41,7 +41,7 @@
 
 | 후보 | 설명 | 작업 단위 |
 |------|------|----------|
-| **B. 게임 엔진 호환성** | Pixi.js + Three.js 샘플 게임 추가 + 호환성 매트릭스 | 2-3 파일 |
+| **B. 게임 엔진 호환성** ✅ | Pixi.js 8.18.1 + Three.js r184 — 3개 엔진 ALL PASS | 완료 (2026-05-25) |
 | **C. 데모 영상** | ZIP 업로드 → 설치 → 데스크탑 표시 → 실행 e2e (3분 이내, Playwright e2e + 비디오 렌더) | 1 영상 + script |
 | **STG-02 OPFS + DSK-04** | OPFS 어댑터 (Chrome/Edge) + 윈도우 위치 영속화 + Safari IDB 폴백 | 3-4 파일 |
 
@@ -70,7 +70,7 @@
 | 4 | 윈도우 매니저 (DSK-01) | src/components/desktop/{types, Window, useWindowManager, WindowManagerProvider, windowReducer} | ✅ 완료 |
 | 5 | 데스크탑 영역 (DSK-02) | src/components/desktop/Desktop.tsx + DesktopIcon.tsx + desktopApps.ts + AppFrame.tsx | ✅ 완료 |
 | 6 | 작업표시줄 (DSK-03) | src/components/desktop/Taskbar.tsx + TaskbarButton.tsx + Clock.tsx | ✅ 완료 |
-| 7 | `app-sandbox-auditor` agent 1회 감사 | zm-claude-docs/security/phase-1-audit-2026-05-24.md | ✅ 완료 |
+| 7 | `app-sandbox-auditor` agent 1회 감사 | docs/05-security/phase-1-audit-2026-05-24.md | ✅ 완료 |
 
 ### 최근 변경 (2026-05-24)
 - **[작업 4]**: Phase 2 작업 4 완료 — GAME-01 (Phaser 3 Snake) ✅ PASS
@@ -94,7 +94,7 @@
   - 매트릭스: 8 항목 (7 PASS + 1 PARTIAL)
   - 신규 위협: N-1/N-2/N-3/N-4 (Medium/Low/Low/Info)
   - 즉시 fix 2건: src/lib/apps/ipc/runtime-iife.ts:59 (DANGEROUS_KEYS 패턴) + src/lib/apps/ipc/host.ts:162 (SANDBOX_ORIGIN 일관성)
-  - 산출물: zm-claude-docs/security/phase-1-audit-2026-05-24.md (신규 감사 리포트)
+  - 산출물: docs/05-security/phase-1-audit-2026-05-24.md (신규 감사 리포트)
   - **Phase 1 7/7 (100%) 완료** — Phase 2 진입 가능
   - 다음: Phase 2 plan (앱 스토어 STR-01/02 + APP-02/03 + 첫 게임 GAME-01 시연)
 - **22:30**: Phase 1 작업 5+6 통합 완료 (데스크탑 DSK-02 + 작업표시줄 DSK-03 + ADR-0006)
@@ -129,8 +129,8 @@
   - `src/lib/apps/sandbox.ts` (확장, IPC 옵션 추가, onMessage @deprecated)
   - `src/app/sandbox-test/page.tsx` (확장, 섹션 2 IPC 데모)
   - `public/sample-game-ipc/index.html` (신규, ping/getTime/echo)
-  - `zm-claude-docs/decisions/adr-0003-ipc-surface.md` (신규)
-  - `zm-claude-docs/decisions/index.md` (수정, ADR-0003 등재)
+  - `docs/02-decisions/adr-0003-ipc-surface.md` (신규)
+  - `docs/02-decisions/index.md` (수정, ADR-0003 등재)
   - POC v1 = 자체 wire-compatible RPC (srcdoc inline 호환, esbuild 회피)
   - 권한 v1 = allowedMethods 화이트리스트 (manifest 매핑은 v2)
   - 검증: build-checker ✅ / code-reviewer 재리뷰 ✅ / app-sandbox-auditor 재감사 ✅ / constraint-checker ✅ / self-verifier ✅ (조건부, 사용자 검증 deferred)

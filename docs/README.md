@@ -43,7 +43,7 @@
 - [02-phase-3-stabilization-audit-2026-05-25.md](06-security/02-phase-3-stabilization-audit-2026-05-25.md) — Phase 3 안정화 감사 (14 페네스트)
 
 ## 07-testing/ — 테스트 전략/결과
-- (향후 추가)
+- [01-engine-compatibility-matrix.md](07-testing/01-engine-compatibility-matrix.md) — 게임 엔진 호환성 매트릭스 (Phaser/Pixi/Three.js)
 
 ## 11-archive/ — 월별 작업 로그
 - [2026-05.md](11-archive/2026-05.md) — 2026년 5월

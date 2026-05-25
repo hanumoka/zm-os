@@ -5,7 +5,7 @@
 ## 🚀 Phase 3 진행 중 (2/4, 50%) 🔄
 - **Phase 1**: ✅ 완료 (7/7)
 - **Phase 2**: ✅ 완료 (4/4, 100%)
-- **Phase 3**: 🔄 진행 중 (2/4, 50%) — 작업 1 ✅ APP-02 ZIP / 작업 2 ✅ 안정화 (2026-05-25)
+- **Phase 3**: 🔄 진행 중 (3/4, 75%) — 작업 1 ✅ APP-02 ZIP / 작업 2 ✅ 안정화 / 작업 3 ✅ 엔진 호환성 (2026-05-25)
 - **POC 종료 게이트**: ✅ 통과 (보안 14 페네스트 + 번들 임계치 PASS — 데모/시연 가능)
 - **마지막 커밋**: `d1c391a test(security): Phase 3 작업 2 안정화 — 14 페네스트 ALL PASS + 번들 측정`, push 완료
 - **🛑 세션 종료 (2026-05-25)** — 다음 세션 진입 시 Phase 3 남은 3 후보 중 선택
@@ -25,7 +25,7 @@
 - 신규 위협: N-08 postMessage DoS (v2 후보)
 
 ### 다음 후보 (사용자 우선순위 대기)
-1. **게임 엔진 호환성 (B)** — Pixi.js + Three.js 호환성 매트릭스
+1. ~~게임 엔진 호환성 (B)~~ ✅ 완료 — Pixi.js 8 + Three.js r184 ALL PASS
 2. **데모 영상 (C)** — ZIP 업로드 → 설치 → 실행 e2e (3분, Playwright)
 3. **STG-02 OPFS + DSK-04** — OPFS 어댑터 + 윈도우 위치 영속화
 
@@ -54,7 +54,7 @@
 - TECH-02: Python hooks (`.claude/hooks/*.py`)
 - PROD-01: POC 스코프 = 게임 스토어 + 단일 사용자
 
-상세: [`.claude/memory/policy-registry.md`](../../.claude/memory/policy-registry.md)
+상세: [`docs/03-policy/01-policy-registry.md`](../03-policy/01-policy-registry.md)
 
 ## 검증 방법 (사용자 직접 확인 권장)
 

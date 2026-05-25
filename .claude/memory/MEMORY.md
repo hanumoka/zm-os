@@ -2,15 +2,15 @@
 > 시스템 프롬프트 자동 로드 (200줄 한도). 최종 갱신: 2026-05-25 (문서 체계 고도화)
 
 ## 프로젝트 수치 (항상 최신 유지)
-- 현재 Phase: **Phase 3 진행 중 (2/4, 50%)** — 작업 1/2 ✅ 완료
+- 현재 Phase: **Phase 3 진행 중 (3/4, 75%)** — 작업 1/2/3 ✅ 완료
 - 코드 LOC: ~4300 LOC (TS) + samples/games ~1500 LOC (HTML/JS) — 작업 2 문서만 (코드 변경 0)
 - 에이전트: 10개 (architect, research-analyst, lib-developer, fe-developer, build-checker, code-reviewer, app-sandbox-auditor, constraint-checker, self-verifier, doc-updater) + workflow 문서
 - 모델 전략: architect/self-verifier=opus / 구현·리뷰·감사=sonnet / 빌드·문서·제약검사=haiku
 - 스킬: 9개 (zm-commit, zm-unit-done, zm-session, zm-troubleshoot, zm-memory-save, zm-work-intake, zm-work-completion, zm-doc-status, zm-roadmap)
 - 규칙: 10개 (frontend, security, work-units, known-mistakes, doc-naming, file-categories, quality-standard, self-review, auto-memory-protocol, troubleshoot-auto)
 - 훅: 10개 Python (mistake_guard, post_review, session_start, notify_done, category_guard, emit_event, prompt_context, pre_compact, post_compact, post_review_checks)
-- 단위 테스트: 0 | E2E: Playwright 2개 (e2e-snake.mjs + e2e-hydration.mjs, 모두 PASS) — Phase 3 정식 e2e 도입 예정
-- 의존성: next 16, react 19, tailwind 4, zod 4.4.3, typescript 5, react-rnd v10.5.3, phaser@3.90.0, idb@8.0.3, jszip@3.10.1 (NEW Phase 3), playwright (dev)
+- 단위 테스트: 0 | E2E: Playwright 5개 (snake/hydration/zip-upload/pentest/engine-compat, 모두 PASS)
+- 의존성: next 16, react 19, tailwind 4, zod 4.4.3, typescript 5, react-rnd v10.5.3, phaser@3.90.0, idb@8.0.3, jszip@3.10.1, pixi.js@8.18.1 (NEW), three@0.184.0 (NEW), playwright (dev)
 
 ## 기술 스택
 - **FE/풀스택**: Next.js 16 (App Router) + React 19 + Tailwind v4

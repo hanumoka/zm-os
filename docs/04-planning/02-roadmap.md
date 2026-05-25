@@ -14,7 +14,7 @@
 | **Phase 0** — 초기 셋팅 | ✅ 완료 | 100% | 2026-05-24 |
 | **Phase 1** — 코어 샌드박싱 + 윈도우 매니저 | ✅ 완료 | 100% (작업 7/7) | 2026-05-24 |
 | **Phase 2** — 앱 스토어 + 첫 게임 시연 | ✅ 완료 | 100% (작업 4/4) | 2026-05-24 |
-| **Phase 3** — POC 안정화 + 데모 영상 | 🔄 진행 중 | 50% (작업 2/4) | 미정 |
+| **Phase 3** — POC 안정화 + 데모 영상 | 🔄 진행 중 | 75% (작업 3/4) | 미정 |
 
 POC 종료 후: v2 plan (멀티유저/클라우드) 별도 plan 필요.
 
@@ -26,7 +26,7 @@ POC 종료 후: v2 plan (멀티유저/클라우드) 별도 plan 필요.
 |-------|------|------|
 | A | Next.js 16 골격 | ✅ |
 | B | `.claude/` 셋팅 | ✅ |
-| C | `zm-claude-docs/` 골격 | 🔄 |
+| C | `docs/` 골격 | 🔄 |
 | D | CLAUDE.md + README.md | ⏳ |
 | E | 검증 + 첫 커밋 | ⏳ |
 
@@ -68,7 +68,7 @@ POC 종료 후: v2 plan (멀티유저/클라우드) 별도 plan 필요.
 |------|------|------|
 | ✅ 사용자 ZIP 앱 업로드 (APP-02) | JSZip 3.10.1 + 보안 검증 6단계 (magic byte → 파싱 → path traversal → 압축비 → 필수 파일 → 매니페스트) + UserAppsProvider + IDB STORE_USER_APPS | ✅ 완료 |
 | ✅ 안정화 (A1+A2) | 빌드/번들 사이즈 측정 (static 1.4MB, gzip ~400-500KB) + iframe 셀프 페네스트 자동화 (Playwright, 14 항목 ALL PASS) | ✅ 완료 |
-| B. 게임 엔진 호환성 매트릭스 | Pixi.js + Three.js + Godot.js 샘플 + 호환 여부 표 | ⏳ 계획 |
+| B. 게임 엔진 호환성 매트릭스 | Pixi.js 8.18.1 + Three.js r184 샘플 + 3개 엔진 ALL PASS (Godot v2) | ✅ 완료 |
 | C. 데모 영상 1편 (3분 이내) | ZIP 업로드 → 설치 → 데스크탑 표시 → 실행 e2e | ⏳ 계획 |
 
 ---
@@ -146,7 +146,7 @@ POC 종료 후: v2 plan (멀티유저/클라우드) 별도 plan 필요.
 - Phase 1 작업 7 완료 (보안 감사) ✅ PASS
 - app-sandbox-auditor 1회 전체 감사 (8 항목 매트릭스 + ADR 정합 + CVE 매핑)
 - 즉시 fix 2건 적용: H-1 (runtime-iife DANGEROUS_KEYS 객체 결함) + SANDBOX_ORIGIN 상수 일관성
-- 감사 리포트 보관: zm-claude-docs/security/phase-1-audit-2026-05-24.md
+- 감사 리포트 보관: docs/05-security/phase-1-audit-2026-05-24.md
 - **Phase 1 7/7 (100%) 완료** — Phase 2 진입 가능
 
 ### 0.1.5 (2026-05-24)
