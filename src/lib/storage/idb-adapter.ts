@@ -17,6 +17,7 @@ import {
   STORE_INSTALLED_APPS,
   STORE_USER_APPS,
   STORE_DESKTOP_LAYOUT,
+  STORE_DESKTOP_SETTINGS,
 } from './indexeddb';
 import type { IDBStoreName } from './indexeddb';
 
@@ -24,6 +25,7 @@ const NAMESPACE_MAP: Record<string, IDBStoreName> = {
   'installed-apps': STORE_INSTALLED_APPS,
   'user-apps': STORE_USER_APPS,
   'desktop-layout': STORE_DESKTOP_LAYOUT,
+  'desktop-settings': STORE_DESKTOP_SETTINGS,
 };
 
 function resolveStoreName(namespace: string): IDBStoreName {

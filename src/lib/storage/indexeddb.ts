@@ -18,19 +18,22 @@ import { type DBSchema, type IDBPDatabase, openDB as idbOpenDB } from 'idb';
 
 // ─── DB / Store 상수 ─────────────────────────────────────────────────────────
 export const DB_NAME = 'zm-os';
-/** DB 버전. store 추가 시 bump (v2: STORE_USER_APPS, v3: STORE_DESKTOP_LAYOUT) */
-export const DB_VERSION = 3;
+/** DB 버전. store 추가 시 bump (v2: STORE_USER_APPS, v3: STORE_DESKTOP_LAYOUT, v4: STORE_DESKTOP_SETTINGS) */
+export const DB_VERSION = 4;
 export const STORE_INSTALLED_APPS = 'installed-apps' as const;
 /** v2: 사용자 업로드 앱 store (APP-02) */
 export const STORE_USER_APPS = 'user-apps' as const;
 /** v3: 데스크탑 윈도우 레이아웃 영속화 (DSK-04) */
 export const STORE_DESKTOP_LAYOUT = 'desktop-layout' as const;
+/** v4: 데스크탑 설정 (배경화면/테마) (DSK-05) */
+export const STORE_DESKTOP_SETTINGS = 'desktop-settings' as const;
 
 // ─── 타입 ─────────────────────────────────────────────────────────────────────
 export type IDBStoreName =
   | typeof STORE_INSTALLED_APPS
   | typeof STORE_USER_APPS
-  | typeof STORE_DESKTOP_LAYOUT;
+  | typeof STORE_DESKTOP_LAYOUT
+  | typeof STORE_DESKTOP_SETTINGS;
 
 /**
  * idb DBSchema 타입 정의 — value를 any로 두어야 idb 내부 타입 충족
@@ -50,6 +53,11 @@ interface ZmOsDBSchema extends DBSchema {
     value: any;
   };
   [STORE_DESKTOP_LAYOUT]: {
+    key: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    value: any;
+  };
+  [STORE_DESKTOP_SETTINGS]: {
     key: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     value: any;
@@ -105,6 +113,12 @@ export function openDB(): Promise<IDBPDatabase<ZmOsDBSchema>> {
         if (oldVersion < 3) {
           if (!db.objectStoreNames.contains(STORE_DESKTOP_LAYOUT)) {
             db.createObjectStore(STORE_DESKTOP_LAYOUT);
+          }
+        }
+        // v3 → v4: STORE_DESKTOP_SETTINGS 생성 (DSK-05 배경화면/테마)
+        if (oldVersion < 4) {
+          if (!db.objectStoreNames.contains(STORE_DESKTOP_SETTINGS)) {
+            db.createObjectStore(STORE_DESKTOP_SETTINGS);
           }
         }
       },
