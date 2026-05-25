@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""SessionStart hook — zm-claude-docs/session/{quick-ref,current-phase}.md + 최근 git 상태 표시."""
+"""SessionStart hook — docs/10-session/{quick-ref,current-phase}.md + 최근 git 상태 표시."""
 import sys
 import json
 import subprocess
@@ -41,7 +41,7 @@ def main():
         data = {}
 
     cwd = Path(data.get('cwd', '.'))
-    session_dir = cwd / 'zm-claude-docs' / 'session'
+    session_dir = cwd / 'docs' / '10-session'
 
     output = []
 

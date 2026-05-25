@@ -16,7 +16,11 @@
       "Bash(date *)",
       "Bash(PYTHONUTF8=1 python *)",
       "Skill(zm-memory-save)",
-      "Skill(zm-session)"
+      "Skill(zm-session)",
+      "Skill(zm-work-intake)",
+      "Skill(zm-work-completion)",
+      "Skill(zm-doc-status)",
+      "Skill(zm-roadmap)"
     ],
     "deny": []
   },
@@ -31,6 +35,16 @@
             "timeout": 5
           }
         ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python -X utf8 \"${CLAUDE_PROJECT_DIR}/.claude/hooks/category_guard.py\"",
+            "timeout": 5
+          }
+        ]
       }
     ],
     "PostToolUse": [
@@ -41,6 +55,16 @@
             "type": "command",
             "command": "python -X utf8 \"${CLAUDE_PROJECT_DIR}/.claude/hooks/post_review.py\"",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "python -X utf8 \"${CLAUDE_PROJECT_DIR}/.claude/hooks/post_review_checks.py\"",
+            "timeout": 8
+          },
+          {
+            "type": "command",
+            "command": "python -X utf8 \"${CLAUDE_PROJECT_DIR}/.claude/hooks/emit_event.py\"",
+            "timeout": 3
           }
         ]
       }
@@ -52,6 +76,33 @@
             "type": "command",
             "command": "python -X utf8 \"${CLAUDE_PROJECT_DIR}/.claude/hooks/session_start.py\"",
             "timeout": 8
+          },
+          {
+            "type": "command",
+            "command": "python -X utf8 \"${CLAUDE_PROJECT_DIR}/.claude/hooks/prompt_context.py\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python -X utf8 \"${CLAUDE_PROJECT_DIR}/.claude/hooks/pre_compact.py\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python -X utf8 \"${CLAUDE_PROJECT_DIR}/.claude/hooks/post_compact.py\"",
+            "timeout": 5
           }
         ]
       }

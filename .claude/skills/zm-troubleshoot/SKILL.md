@@ -12,7 +12,7 @@ argument-hint: "[조회: TS-NNN 또는 키워드 | 등록: 증상 설명]"
 ### 조회 모드 (TS-NNN 또는 키워드)
 
 $ARGUMENTS가 "TS-" 로 시작하거나 키워드인 경우:
-1. `.claude/memory/troubleshooting-patterns.md`에서 검색
+1. `docs/13-troubleshooting/entries.md`에서 검색
 2. 관련 패턴 목록 출력
 3. 유사 패턴 제안
 
@@ -25,7 +25,7 @@ $ARGUMENTS가 증상 설명인 경우:
    - 원인 (왜 발생?)
    - 해결 (어떻게 고쳤?)
    - 관련 파일
-3. `.claude/memory/troubleshooting-patterns.md`에 추가:
+3. `docs/13-troubleshooting/entries.md`에 추가 + `docs/13-troubleshooting/index.md` 인덱스 행 추가:
 
 ```markdown
 ### [TS-NNN] 제목
@@ -59,7 +59,7 @@ $ARGUMENTS가 증상 설명인 경우:
 
 ### 수정 전 필수 확인
 1. **실제 렌더링 경로 추적**: URL → route file → 실제 컴포넌트 확인 (Grep으로 텍스트 검색, DevTools 콘솔)
-2. **기존 패턴 확인**: `.claude/memory/troubleshooting-patterns.md` 참조
+2. **기존 패턴 확인**: `docs/13-troubleshooting/entries.md` 참조
 3. **진단 우선**: 수정 전 디버깅 로그 추가 → 데이터 확인 → 수정
 
 ### 수정 후 필수

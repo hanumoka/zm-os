@@ -19,13 +19,13 @@ zm-os 프로젝트 문서 자동 갱신.
 
 ## 갱신 대상 파일 (우선순위 순)
 
-1. `zm-claude-docs/session/current-phase.md` — Phase 상태, 진행률, 최근 변경
-2. `zm-claude-docs/session/quick-ref.md` — 핵심 컨텍스트 (수치/링크/다음 작업)
-3. `zm-claude-docs/archive/YYYY-MM.md` — 월별 작업 로그 (append)
-4. `zm-claude-docs/project/prd.md` — feature 작업 시 §3 상태 갱신 + §8 Change Log
-5. `zm-claude-docs/project/roadmap.md` — Phase 진행률 / §X Phase 작업 상태 / §8 Change Log
+1. `docs/10-session/current-phase.md` — Phase 상태, 진행률, 최근 변경
+2. `docs/10-session/quick-ref.md` — 핵심 컨텍스트 (수치/링크/다음 작업)
+3. `docs/11-archive/YYYY-MM.md` — 월별 작업 로그 (append)
+4. `docs/04-planning/01-prd.md` — feature 작업 시 §3 상태 갱신 + §8 Change Log
+5. `docs/04-planning/02-roadmap.md` — Phase 진행률 / §X Phase 작업 상태 / §8 Change Log
 6. `.claude/memory/MEMORY.md` — 프로젝트 수치, 최근 결정사항 (append max 10, FIFO)
-7. (해당 시) `zm-claude-docs/decisions/adr-NNNN-*.md` — architect가 ADR 초안을 만들었으면 확정
+7. (해당 시) `docs/02-decisions/adr-NNNN-*.md` — architect가 ADR 초안을 만들었으면 확정
 
 ## 갱신 규칙
 
@@ -49,7 +49,7 @@ zm-os 프로젝트 문서 자동 갱신.
 
 ## broken link 점검 (필수)
 
-갱신 후 `zm-claude-docs/README.md` 인덱스의 모든 마크다운 링크가 실제 파일을 가리키는지 grep 검증.
+갱신 후 `docs/README.md` 인덱스의 모든 마크다운 링크가 실제 파일을 가리키는지 grep 검증.
 
 ## 출력 형식
 
@@ -64,7 +64,7 @@ zm-os 프로젝트 문서 자동 갱신.
 - MEMORY.md: 최근 결정사항 1개 append
 
 ### broken link 점검
-- zm-claude-docs/README.md: 0 broken / N건 모두 정상
+- docs/README.md: 0 broken / N건 모두 정상
 
 ### 다음 작업 후보 (current-phase.md 기준)
 - ...

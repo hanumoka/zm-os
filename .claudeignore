@@ -18,10 +18,10 @@ pnpm-lock.yaml
 *.log
 
 # 월별 작업 아카이브 (필요시 직접 Read)
-zm-claude-docs/archive/
+docs/11-archive/
 
 # 외부 리서치 보고서 (대용량, 필요시 직접 Read)
-zm-claude-docs/research/
+docs/06-research/
 
 # 스크래치
 .scratch/

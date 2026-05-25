@@ -1,14 +1,14 @@
 # zm-os Project Memory
-> 시스템 프롬프트 자동 로드 (200줄 한도). 최종 갱신: 2026-05-24 (Phase 3 작업 1 완료)
+> 시스템 프롬프트 자동 로드 (200줄 한도). 최종 갱신: 2026-05-25 (문서 체계 고도화)
 
 ## 프로젝트 수치 (항상 최신 유지)
 - 현재 Phase: **Phase 3 진행 중 (2/4, 50%)** — 작업 1/2 ✅ 완료
 - 코드 LOC: ~4300 LOC (TS) + samples/games ~1500 LOC (HTML/JS) — 작업 2 문서만 (코드 변경 0)
 - 에이전트: 10개 (architect, research-analyst, lib-developer, fe-developer, build-checker, code-reviewer, app-sandbox-auditor, constraint-checker, self-verifier, doc-updater) + workflow 문서
 - 모델 전략: architect/self-verifier=opus / 구현·리뷰·감사=sonnet / 빌드·문서·제약검사=haiku
-- 스킬: 5개 (zm-commit, zm-unit-done, zm-session, zm-troubleshoot, zm-memory-save)
-- 규칙: 4개 (frontend, security, work-units, known-mistakes)
-- 훅: 4개 Python (mistake_guard, post_review, session_start, notify_done)
+- 스킬: 9개 (zm-commit, zm-unit-done, zm-session, zm-troubleshoot, zm-memory-save, zm-work-intake, zm-work-completion, zm-doc-status, zm-roadmap)
+- 규칙: 10개 (frontend, security, work-units, known-mistakes, doc-naming, file-categories, quality-standard, self-review, auto-memory-protocol, troubleshoot-auto)
+- 훅: 10개 Python (mistake_guard, post_review, session_start, notify_done, category_guard, emit_event, prompt_context, pre_compact, post_compact, post_review_checks)
 - 단위 테스트: 0 | E2E: Playwright 2개 (e2e-snake.mjs + e2e-hydration.mjs, 모두 PASS) — Phase 3 정식 e2e 도입 예정
 - 의존성: next 16, react 19, tailwind 4, zod 4.4.3, typescript 5, react-rnd v10.5.3, phaser@3.90.0, idb@8.0.3, jszip@3.10.1 (NEW Phase 3), playwright (dev)
 
@@ -26,14 +26,14 @@
 - 작업 단위 원칙: `.claude/rules/work-units.md`
 
 ## Key Learnings
-- [Troubleshooting Patterns](troubleshooting-patterns.md) — TS-000~ 현재 0건
+- [Troubleshooting Patterns](../../docs/13-troubleshooting/entries.md) — TS-000~ 현재 0건
 - [Tech Gotchas](tech-gotchas.md) — iframe sandbox / OPFS / Next.js App Router / Tailwind v4 주의사항
-- [Policy Registry](policy-registry.md) — 확정 정책 SSOT (ARCH-01, ARCH-02, TECH-01)
+- [Policy Registry](../../docs/03-policy/01-policy-registry.md) — 확정 정책 SSOT (ARCH-01, ARCH-02, TECH-01)
 
 ## PRD + 로드맵 (Living Documents)
-- **PRD**: `zm-claude-docs/project/prd.md`
-- **로드맵**: `zm-claude-docs/project/roadmap.md`
-- **Feature Map**: `zm-claude-docs/project/feature-map.md`
+- **PRD**: `docs/04-planning/01-prd.md`
+- **로드맵**: `docs/04-planning/02-roadmap.md`
+- **Feature Map**: `docs/01-architecture/05-feature-map.md`
 
 ## SSH GitHub 계정
 - 개인 계정 `hanumoka` 사용. SSH config host는 `github-personal` (key: `id_hanumoka_personal`)

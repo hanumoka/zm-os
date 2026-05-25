@@ -13,6 +13,8 @@ SENSITIVE_PREFIXES = [
     'next.config.ts',
     '.claude/hooks/',
     '.claude/settings.json',
+    'docs/03-policy/',
+    'docs/06-security/',
 ]
 
 

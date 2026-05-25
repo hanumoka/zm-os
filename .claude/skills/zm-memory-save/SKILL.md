@@ -23,19 +23,19 @@ $ARGUMENTS가 비어있으면 변경사항 분석으로 자동 분류:
 ### 3. Work Completion 문서 갱신 (유형별)
 
 #### bugfix
-1. `.claude/memory/troubleshooting-patterns.md`에 TS-NNN 추가
+1. `docs/13-troubleshooting/entries.md`에 TS-NNN 추가
 2. `.claude/rules/known-mistakes.md`에 반복 패턴이면 M-NNN 추가 제안
 
 #### feature
-1. `zm-claude-docs/session/current-phase.md` 상태 갱신
-2. `zm-claude-docs/project/prd.md` 해당 항목 업데이트
+1. `docs/10-session/current-phase.md` 상태 갱신
+2. `docs/04-planning/01-prd.md` 해당 항목 업데이트
 
 #### docs
 - 해당 문서만 날짜 갱신
 
 ### 4. `.claude/memory/MEMORY.md` 갱신
 - 프로젝트 수치 변경 시 갱신
-- 정책 결정 추가 시 `.claude/memory/policy-registry.md`에 SSOT 기록
+- 정책 결정 추가 시 `docs/03-policy/01-policy-registry.md`에 SSOT 기록
 
 ### 5. 갱신 요약 출력
 

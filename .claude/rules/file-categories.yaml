@@ -1,0 +1,67 @@
+# file-categories.yaml
+# 파일 카테고리 분류 — category_guard.py 참조
+# 단일 개발자 POC — SHARDED/EVENTS는 경량 적용
+
+categories:
+  architecture:
+    dir: "docs/01-architecture"
+    patterns: ["*.md"]
+    description: "기능별 아키텍처 문서"
+
+  decisions:
+    dir: "docs/02-decisions"
+    patterns: ["adr-*.md", "index.md"]
+    description: "Architecture Decision Records"
+
+  policy:
+    dir: "docs/03-policy"
+    patterns: ["*.md", "_digest.md"]
+    description: "정책 SSOT + 다이제스트"
+
+  planning:
+    dir: "docs/04-planning"
+    patterns: ["*.md"]
+    description: "PRD, 로드맵, Phase 계획"
+
+  analysis:
+    dir: "docs/05-analysis"
+    patterns: ["*.md"]
+    description: "외부 리서치 + 기술 분석"
+
+  security:
+    dir: "docs/06-security"
+    patterns: ["*.md"]
+    description: "보안 감사 리포트"
+
+  testing:
+    dir: "docs/07-testing"
+    patterns: ["*.md"]
+    description: "테스트 전략/결과"
+
+  session:
+    dir: "docs/10-session"
+    patterns: ["quick-ref.md", "current-phase.md"]
+    description: "세션 컨텍스트 (고정 파일명)"
+
+  archive:
+    dir: "docs/11-archive"
+    patterns: ["????-??.md"]
+    description: "월별 작업 로그"
+
+  troubleshooting:
+    dir: "docs/13-troubleshooting"
+    patterns: ["index.md", "entries.md"]
+    description: "트러블슈팅 인덱스 + 엔트리"
+
+  events:
+    dir: "events"
+    patterns: ["????-??.jsonl"]
+    description: "이벤트 스트림 (append-only)"
+    enforce: "append_only"
+
+# 교차 검증 규칙
+cross_validation:
+  - rule: "adr-*.md 파일은 docs/02-decisions/ 에만 존재"
+  - rule: "_digest.md 파일은 docs/03-policy/ 에만 존재"
+  - rule: "quick-ref.md, current-phase.md는 docs/10-session/ 에만 존재"
+  - rule: "entries.md는 docs/13-troubleshooting/ 에만 존재"

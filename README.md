@@ -47,7 +47,7 @@ zm-os/
 │   ├── lib/              # apps (샌드박싱/IPC) / api / storage
 │   └── types/
 ├── public/               # 정적 자산
-├── zm-claude-docs/       # 모든 문서 (PRD/roadmap/ADR/features/research)
+├── docs/                 # 모든 문서 (PRD/roadmap/ADR/features/research)
 ├── .claude/              # Claude Code 셋팅 (agents/skills/rules/hooks/memory)
 ├── CLAUDE.md             # Claude Code 지침
 └── README.md             # 이 파일
@@ -57,11 +57,11 @@ zm-os/
 
 ## 문서
 
-- **PRD**: [`zm-claude-docs/project/prd.md`](zm-claude-docs/project/prd.md)
-- **로드맵**: [`zm-claude-docs/project/roadmap.md`](zm-claude-docs/project/roadmap.md)
-- **Feature Map**: [`zm-claude-docs/project/feature-map.md`](zm-claude-docs/project/feature-map.md)
-- **ADR 인덱스**: [`zm-claude-docs/decisions/index.md`](zm-claude-docs/decisions/index.md)
-- **외부 리서치**: [`zm-claude-docs/research/`](zm-claude-docs/research/) — 브라우저 OS 비교 / 샌드박싱 기법 / 멀티테넌트 백엔드 옵션
+- **PRD**: [`docs/04-planning/01-prd.md`](docs/04-planning/01-prd.md)
+- **로드맵**: [`docs/04-planning/02-roadmap.md`](docs/04-planning/02-roadmap.md)
+- **Feature Map**: [`docs/01-architecture/05-feature-map.md`](docs/01-architecture/05-feature-map.md)
+- **ADR 인덱스**: [`docs/02-decisions/index.md`](docs/02-decisions/index.md)
+- **외부 리서치**: [`docs/06-research/`](docs/06-research/) — 브라우저 OS 비교 / 샌드박싱 기법 / 멀티테넌트 백엔드 옵션
 - **Claude Code 지침**: [`CLAUDE.md`](CLAUDE.md)
 
 ---
@@ -81,7 +81,7 @@ zm-os/
 사용자 제출 앱은 **반드시 blob: URL iframe + `sandbox="allow-scripts"`** 안에서만 실행. host와 origin 격리.
 호스트-앱 통신은 **Comlink** RPC만 사용.
 
-상세: [`.claude/rules/security.md`](.claude/rules/security.md) | [`zm-claude-docs/research/sandboxing-untrusted-js.md`](zm-claude-docs/research/sandboxing-untrusted-js.md)
+상세: [`.claude/rules/security.md`](.claude/rules/security.md) | [`docs/06-research/sandboxing-untrusted-js.md`](docs/06-research/sandboxing-untrusted-js.md)
 
 ---
 

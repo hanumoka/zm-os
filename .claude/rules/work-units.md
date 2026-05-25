@@ -6,14 +6,14 @@
 
 ## 완료 조건 (모두 충족)
 - `npx tsc --noEmit` 에러 0
-- `zm-claude-docs/session/current-phase.md` 해당 항목 ✅ 처리
-- 월별 작업 로그 (`zm-claude-docs/archive/YYYY-MM.md`) 기록
+- `docs/10-session/current-phase.md` 해당 항목 ✅ 처리
+- 월별 작업 로그 (`docs/11-archive/YYYY-MM.md`) 기록
 
 ## 정책 질문 의무
 - 구현 전 정책 판단이 필요한 지점에서 반드시 사용자에게 질문
 - 선택지 제시 형태로 질문 (A(추천) vs B vs C)
 - 질문 없이 임의로 정책 결정 금지
-- 사용자 결정 후 → `.claude/memory/policy-registry.md`에 append 또는 갱신
+- 사용자 결정 후 → `docs/03-policy/01-policy-registry.md`에 append 또는 갱신
 
 ## 자동 검증
 - 각 작업 단위 완료 시 `/zm-unit-done` 실행 권장

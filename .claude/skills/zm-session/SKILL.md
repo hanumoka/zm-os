@@ -9,8 +9,8 @@ zm-os 세션 시작 프로토콜을 실행합니다.
 
 ## 순서
 
-1. `zm-claude-docs/session/quick-ref.md` 읽기
-2. `zm-claude-docs/session/current-phase.md` 읽기
+1. `docs/10-session/quick-ref.md` 읽기
+2. `docs/10-session/current-phase.md` 읽기
 3. `git status --short` + `git log --oneline -5` 확인
 4. `git branch --show-current`로 현재 브랜치 확인
 5. 종합 보고서 작성 (한글)

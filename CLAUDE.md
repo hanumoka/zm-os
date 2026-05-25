@@ -18,7 +18,7 @@
 - 로컬 dev 서버 동작
 - 멀티유저는 v2, 가상 OS는 v3
 
-상세: [`zm-claude-docs/project/prd.md`](zm-claude-docs/project/prd.md) | [`zm-claude-docs/project/roadmap.md`](zm-claude-docs/project/roadmap.md)
+상세: [`docs/04-planning/01-prd.md`](docs/04-planning/01-prd.md) | [`docs/04-planning/02-roadmap.md`](docs/04-planning/02-roadmap.md)
 
 ---
 
@@ -38,9 +38,9 @@
 
 | 문서 | 용도 |
 |------|------|
-| [zm-claude-docs/session/quick-ref.md](zm-claude-docs/session/quick-ref.md) | 1페이지 컨텍스트 (세션 시작 시 필독) |
-| [zm-claude-docs/session/current-phase.md](zm-claude-docs/session/current-phase.md) | 현재 Phase 상세 |
-| [zm-claude-docs/archive/](zm-claude-docs/archive/) | 월별 작업 로그 |
+| [docs/10-session/quick-ref.md](docs/10-session/quick-ref.md) | 1페이지 컨텍스트 (세션 시작 시 필독) |
+| [docs/10-session/current-phase.md](docs/10-session/current-phase.md) | 현재 Phase 상세 |
+| [docs/11-archive/](docs/11-archive/) | 월별 작업 로그 |
 
 ### 세션 재시작 자동 프로세스
 `session_start.py` 훅이 quick-ref + current-phase + git 상태를 자동 로드.
@@ -71,7 +71,8 @@ zm-os/
 │   │   └── storage/             # IndexedDB / OPFS
 │   └── types/
 ├── public/                      # 정적 자산
-├── zm-claude-docs/              # 모든 문서 (SSOT 인덱스 + features/decisions/research)
+├── docs/                        # 프로젝트 문서 (번호 기반 카테고리 구조)
+├── events/                      # 이벤트 스트림 (append-only JSONL)
 └── .claude/                     # Claude Code 셋팅 (agents/skills/rules/memory/hooks)
 ```
 
@@ -96,8 +97,8 @@ zm-os/
 
 > 3대 원칙: **POC 빠른 검증** > **보안 / 격리** > **코드 정교함**
 
-상세: [`zm-claude-docs/project/roadmap.md`](zm-claude-docs/project/roadmap.md)
-정책 SSOT: [`.claude/memory/policy-registry.md`](.claude/memory/policy-registry.md)
+상세: [`docs/04-planning/02-roadmap.md`](docs/04-planning/02-roadmap.md)
+정책 SSOT: [`docs/03-policy/01-policy-registry.md`](docs/03-policy/01-policy-registry.md)
 
 ---
 
@@ -157,12 +158,16 @@ Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
 **문서** (1):
 - **doc-updater** (haiku, 8t): 진행 문서 갱신 + broken link 점검.
 
-5개 스킬:
+9개 스킬:
 - `/zm-commit` — 커밋 규칙 적용
 - `/zm-unit-done` — 작업 단위 완료 파이프라인 (빌드+문서+로그)
 - `/zm-session` — 세션 시작 보고
 - `/zm-troubleshoot` — TS-NNN 등록/조회
 - `/zm-memory-save` — 메모리 + Work Completion 갱신
+- `/zm-work-intake` — 작업 진입 체크리스트
+- `/zm-work-completion` — 작업 완료 종합 파이프라인
+- `/zm-doc-status` — docs/ 전체 상태 대시보드
+- `/zm-roadmap` — 로드맵 조회/갱신
 
 ---
 
@@ -187,7 +192,7 @@ Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
    - 문서/코드/커밋에 포함 금지
 
 5. **문서 우선 확인**
-   - 구현 전 `zm-claude-docs/features/` / `decisions/` 검토
+   - 구현 전 `docs/01-architecture/` / `docs/02-decisions/` 검토
 
 ---
 
@@ -195,13 +200,13 @@ Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
 
 ### Auto Memory Protocol
 - `.claude/memory/MEMORY.md` "최근 결정사항"에 새 결정 append (최대 10, FIFO)
-- 정책 결정 → `.claude/memory/policy-registry.md` 에 SSOT 등재 (ARCH/TECH/PROD/CONST)
+- 정책 결정 → `docs/03-policy/01-policy-registry.md` 에 SSOT 등재 (ARCH/TECH/PROD/CONST)
 - TODO 완료 시 `[x]` 전환
 
 ### Work Completion Protocol
 작업 완료 시 (`/zm-unit-done` 권장):
-- **bugfix** → `.claude/memory/troubleshooting-patterns.md` TS-NNN 추가 + 반복 시 `.claude/rules/known-mistakes.md` M-NNN 제안
-- **feature** → `zm-claude-docs/session/current-phase.md` + `zm-claude-docs/project/prd.md` 동시 갱신
+- **bugfix** → `docs/13-troubleshooting/entries.md` TS-NNN 추가 + 반복 시 `.claude/rules/known-mistakes.md` M-NNN 제안
+- **feature** → `docs/10-session/current-phase.md` + `docs/04-planning/01-prd.md` 동시 갱신
 - **docs** → 해당 문서 날짜만 갱신
 
 ### Mistake Recording Protocol
@@ -213,5 +218,5 @@ Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
 ---
 
 *프로젝트: zm-os 브라우저 가상 데스크탑 POC*
-*상태: Phase 0 — 초기 셋팅 진행 중 (2026-05-24)*
+*상태: Phase 3 진행 중 (2026-05-25)*
 *작업 모드: Claude Code 자율 개발 + 사용자 리뷰*
