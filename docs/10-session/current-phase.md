@@ -35,22 +35,17 @@
 - **신규 위협**: N-08 (postMessage DoS, POC 수용, v2 후보)
 - **검증**: 자동화 ALL PASS, 코드 검증 0건 (문서만)
 
-## 🎯 Phase 3 다음 후보 (사용자 우선순위 대기)
+## 🎯 Post-POC 완료 작업
 
-완료: 작업 1/2 (APP-02 + 안정화) — **작업 3/4 우선순위 결정 대기**:
+| 작업 | 설명 | ADR | 상태 |
+|------|------|-----|------|
+| APP-04 | 사용자 앱 삭제/업데이트 UX (ConfirmDialog + semver) | ADR-0011 | ✅ 완료 |
+| TEST-01 | Vitest 4.1.7 + 56개 단위 테스트 | — | ✅ 완료 |
+| DSK-05 | 데스크탑 커스터마이징 (배경/테마/설정 UI) | ADR-0012 | ✅ 완료 |
 
-| 후보 | 설명 | 작업 단위 |
-|------|------|----------|
-| **B. 게임 엔진 호환성** ✅ | Pixi.js 8.18.1 + Three.js r184 — 3개 엔진 ALL PASS | 완료 (2026-05-25) |
-| **C. 데모 영상** ✅ | Playwright 비디오 녹화 — 7 Scene (스토어설치→ZIP업로드→Snake→Pixi+Three→사용자앱→피날레) | 완료 (2026-05-25) |
-| **STG-02 OPFS + DSK-04** | OPFS 어댑터 (Chrome/Edge) + 윈도우 위치 영속화 + Safari IDB 폴백 | 3-4 파일 |
-
-### 재개 절차
-1. 본 문서 + `quick-ref.md` + MEMORY.md 자동 로드 (session_start.py)
-2. 사용자에게 Phase 3 작업 3/4 선택지 제시 (B/C/STG-02)
-3. 선택 후 architect → research(필요 시) → 구현 → 검증 4명 → self-verifier → doc-updater 워크플로
-
----
+### 다음 후보
+- IPC-02: Comlink 직접 통합 (v2 준비)
+- APP-04 확장: 데스크탑 우클릭 컨텍스트 메뉴에서 앱 삭제/정보
 
 ---
 
