@@ -12,6 +12,8 @@ import type {
   ResolvedTheme,
   DesktopSettingsRecord,
 } from '@/lib/storage/desktop-settings';
+import { usePersistenceError } from '@/lib/errors/PersistenceErrorContext';
+import { createPersistenceError } from '@/lib/errors/persistence-error';
 
 // ─── Context Value 타입 ────────────────────────────────────────────────────────
 
@@ -96,6 +98,7 @@ export function DesktopSettingsProvider({ children }: { children: React.ReactNod
 
   const stateRef = useRef(state);
   stateRef.current = state;
+  const { onPersistenceError } = usePersistenceError();
 
   // IDB hydration
   useEffect(() => {
@@ -106,7 +109,7 @@ export function DesktopSettingsProvider({ children }: { children: React.ReactNod
         dispatch({ type: 'HYDRATE', settings: record });
       })
       .catch((err: unknown) => {
-        console.error('[DesktopSettings] hydration failed', err);
+        onPersistenceError(createPersistenceError('desktop-settings', 'hydrate', err));
       });
     return () => { cancelled = true; };
   }, []);
@@ -117,8 +120,10 @@ export function DesktopSettingsProvider({ children }: { children: React.ReactNod
       wallpaper: config,
       themeMode: stateRef.current.themeMode,
       savedAt: Date.now(),
-    }).catch(console.error);
-  }, []);
+    }).catch((err: unknown) => {
+      onPersistenceError(createPersistenceError('desktop-settings', 'persist', err));
+    });
+  }, [onPersistenceError]);
 
   const setThemeMode = useCallback((mode: ThemeMode): void => {
     dispatch({ type: 'SET_THEME', mode });
@@ -126,8 +131,10 @@ export function DesktopSettingsProvider({ children }: { children: React.ReactNod
       wallpaper: stateRef.current.wallpaper,
       themeMode: mode,
       savedAt: Date.now(),
-    }).catch(console.error);
-  }, []);
+    }).catch((err: unknown) => {
+      onPersistenceError(createPersistenceError('desktop-settings', 'persist', err));
+    });
+  }, [onPersistenceError]);
 
   const value = useMemo<DesktopSettingsContextValue>(
     () => ({

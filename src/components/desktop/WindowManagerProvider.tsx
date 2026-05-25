@@ -16,6 +16,8 @@ import {
   loadDesktopLayout,
   saveDesktopLayout,
 } from '@/lib/storage/desktop-layout';
+import { usePersistenceError } from '@/lib/errors/PersistenceErrorContext';
+import { createPersistenceError } from '@/lib/errors/persistence-error';
 
 // ─── 상수 ────────────────────────────────────────────────────────────────────
 
@@ -82,6 +84,7 @@ export function WindowManagerProvider({
 
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hydratedRef = useRef(false);
+  const { onPersistenceError } = usePersistenceError();
 
   // ─── Persist 헬퍼 ──────────────────────────────────────────────────────────
 
@@ -89,8 +92,10 @@ export function WindowManagerProvider({
     if (!hydratedRef.current) return;
     const current = windowsRef.current;
     if (current.length === 0) return;
-    void saveDesktopLayout(windowsToLayout(current)).catch(console.error);
-  }, []);
+    void saveDesktopLayout(windowsToLayout(current)).catch((err: unknown) => {
+      onPersistenceError(createPersistenceError('window-layout', 'persist', err));
+    });
+  }, [onPersistenceError]);
 
   const persistDebounced = useCallback((): void => {
     if (debounceTimerRef.current !== null) {
@@ -128,7 +133,7 @@ export function WindowManagerProvider({
       .catch((e) => {
         if (cancelled) return;
         hydratedRef.current = true;
-        console.error('[WindowManager] layout hydration failed:', e);
+        onPersistenceError(createPersistenceError('window-layout', 'hydrate', e));
       });
 
     return () => {

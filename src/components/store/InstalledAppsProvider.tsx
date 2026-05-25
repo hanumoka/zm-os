@@ -13,6 +13,8 @@ import {
   persistInstalledApp,
   removeInstalledApp,
 } from '@/lib/storage/installed-apps';
+import { usePersistenceError } from '@/lib/errors/PersistenceErrorContext';
+import { createPersistenceError } from '@/lib/errors/persistence-error';
 
 // ─── Context Value 타입 ───────────────────────────────────────────────────────
 
@@ -115,6 +117,7 @@ export function InstalledAppsProvider({
     installedAppsReducer,
     new Set<string>() as ReadonlySet<string>,
   );
+  const { onPersistenceError } = usePersistenceError();
 
   // ── IDB hydration (P1=A, frontend.md 비동기 패턴 b — cancelled flag) ──────
   useEffect(() => {
@@ -125,8 +128,7 @@ export function InstalledAppsProvider({
         dispatch({ type: 'HYDRATE', ids });
       })
       .catch((err: unknown) => {
-        // P4=ㄱ: silent — console.error만 (UI 블로킹 없음)
-        console.error('[InstalledAppsProvider] IDB hydration 실패', err);
+        onPersistenceError(createPersistenceError('installed-apps', 'hydrate', err));
       });
     return (): void => {
       cancelled = true;
@@ -137,17 +139,17 @@ export function InstalledAppsProvider({
   const install = useCallback((id: string): void => {
     dispatch({ type: 'INSTALL', id });
     void persistInstalledApp(id).catch((err: unknown) => {
-      console.error('[InstalledAppsProvider] IDB persist install 실패', { id, err });
+      onPersistenceError(createPersistenceError('installed-apps', 'persist', err));
     });
-  }, []);
+  }, [onPersistenceError]);
 
   // ── uninstall: 동기 dispatch + fire-and-forget IDB 삭제 (P3=α, P4=ㄱ) ────
   const uninstall = useCallback((id: string): void => {
     dispatch({ type: 'UNINSTALL', id });
     void removeInstalledApp(id).catch((err: unknown) => {
-      console.error('[InstalledAppsProvider] IDB remove uninstall 실패', { id, err });
+      onPersistenceError(createPersistenceError('installed-apps', 'delete', err));
     });
-  }, []);
+  }, [onPersistenceError]);
 
   const isInstalled = useCallback(
     (id: string): boolean => installedIds.has(id),

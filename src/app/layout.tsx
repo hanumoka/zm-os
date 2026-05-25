@@ -5,6 +5,7 @@ import { UserAppsProvider } from '@/components/store/UserAppsProvider';
 import { InstalledAppsProvider } from '@/components/store/InstalledAppsProvider';
 import { WindowManagerProvider } from '@/components/desktop/WindowManagerProvider';
 import { DesktopSettingsProvider } from '@/components/desktop/DesktopSettingsProvider';
+import { PersistenceErrorProvider } from '@/lib/errors/PersistenceErrorContext';
 
 export const metadata: Metadata = {
   title: 'zm-os',
@@ -24,13 +25,15 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body>
-        <DesktopSettingsProvider>
-          <UserAppsProvider>
-            <InstalledAppsProvider>
-              <WindowManagerProvider>{children}</WindowManagerProvider>
-            </InstalledAppsProvider>
-          </UserAppsProvider>
-        </DesktopSettingsProvider>
+        <PersistenceErrorProvider>
+          <DesktopSettingsProvider>
+            <UserAppsProvider>
+              <InstalledAppsProvider>
+                <WindowManagerProvider>{children}</WindowManagerProvider>
+              </InstalledAppsProvider>
+            </UserAppsProvider>
+          </DesktopSettingsProvider>
+        </PersistenceErrorProvider>
       </body>
     </html>
   );

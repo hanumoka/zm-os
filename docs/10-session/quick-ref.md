@@ -5,8 +5,9 @@
 ## ✅ POC 완료 → Post-POC 진행 중
 - **Phase 1~3**: ✅ 전부 완료 — M4 마일스톤 달성
 - **POC 종료 게이트**: ✅ 통과 (보안 14 페네스트 + 번들 임계치 PASS)
-- **Post-POC**: APP-04 ✅ + TEST-01 ✅ + DSK-05 ✅ 완료
-- **다음 후보**: IPC-02 (Comlink 직접 통합) / APP-04 확장 (컨텍스트 메뉴)
+- **Post-POC**: APP-04 ✅ + TEST-01 ✅ + DSK-05 ✅ + REFAC-01 (2/8) 진행 중
+- **REFAC-01**: 설계 리팩토링 — C-1 Error Boundary ✅ + H-5 에러 플러밍 ✅ (나머지 6항목 대기)
+- **다음 후보**: REFAC-01 나머지 / IPC-02 (Comlink 직접 통합) / APP-04 확장 (컨텍스트 메뉴)
 
 ### 완료한 작업
 **작업 1 ✅ APP-02**: 사용자 ZIP 앱 업로드 (JSZip 3.10.1 + 보안 검증)
