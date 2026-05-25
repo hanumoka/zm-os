@@ -7,8 +7,8 @@
 - **Phase 2**: ✅ 완료 (4/4, 100%)
 - **Phase 3**: ✅ 완료 (4/4, 100%) — 작업 1~4 모두 완료 (2026-05-25)
 - **POC 종료 게이트**: ✅ 통과 (보안 14 페네스트 + 번들 임계치 PASS — 데모/시연 가능)
-- **마지막 커밋**: `d1c391a test(security): Phase 3 작업 2 안정화 — 14 페네스트 ALL PASS + 번들 측정`, push 완료
-- **🛑 세션 종료 (2026-05-25)** — 다음 세션 진입 시 Phase 3 남은 3 후보 중 선택
+- **마지막 커밋**: `3f896b0 docs(infra): docs/ 내부 링크 경로 갱신`, push 완료
+- **POC 1차 완료 (2026-05-25)** — Phase 0~3 전체 완료, M4 마일스톤 달성
 
 ### 완료한 작업
 **작업 1 ✅ APP-02**: 사용자 ZIP 앱 업로드 (JSZip 3.10.1 + 보안 검증)
@@ -29,7 +29,7 @@
 2. ~~데모 영상 (C)~~ ✅ 완료 — Playwright 비디오 녹화 7 Scene
 3. **STG-02 OPFS + DSK-04** — OPFS 어댑터 + 윈도우 위치 영속화 (v2 후보)
 
-## 현재 상태 (2026-05-24)
+## 현재 상태 (2026-05-25)
 - **저장소**: `git@github-personal:hanumoka/zm-os.git`, branch `main`
 - **빌드**: `npm install` 완료, `npx tsc --noEmit` 통과
 - **dev 서버**: 백그라운드 실행 중 (재부팅 시 종료)
@@ -85,8 +85,8 @@ npm run dev
 - 작업 4: 포장 + v2 계획
 
 ## Quick Links
-- PRD: [`project/prd.md`](../project/prd.md)
-- 로드맵: [`project/roadmap.md`](../project/roadmap.md)
+- PRD: [`01-prd.md`](../04-planning/01-prd.md)
+- 로드맵: [`02-roadmap.md`](../04-planning/02-roadmap.md)
 - 현재 Phase 상세: [`current-phase.md`](current-phase.md)
 - 보안 규칙: [`.claude/rules/security.md`](../../.claude/rules/security.md)
-- 외부 리서치: [`research/`](../research/)
+- 외부 리서치: [`05-analysis/`](../05-analysis/)

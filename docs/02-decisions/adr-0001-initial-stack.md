@@ -14,9 +14,9 @@ related: []
 zm-os POC를 빠르게 검증하기 위해 1차 스코프와 핵심 기술 선택을 결정해야 한다. 후보를 넓게 두면 의사결정 비용이 커지고, 너무 좁히면 v2 확장 경로가 막힌다. 외부 OSS/논문 리서치 결과(아래 참조)와 두 본인 프로젝트(`zm-v3`, `sonix_docs`)의 검증된 패턴을 토대로 결정한다.
 
 **리서치 입력**:
-- [`research/browser-os-landscape.md`](../research/browser-os-landscape.md) — Puter/daedalOS/OS.js/v86/WebContainers 비교
-- [`research/sandboxing-untrusted-js.md`](../research/sandboxing-untrusted-js.md) — iframe/ShadowRealm/QuickJS-WASM 비교, CVE
-- [`research/multitenant-stack-options.md`](../research/multitenant-stack-options.md) — Supabase/Cloudflare/Puter 비교
+- [`01-browser-os-landscape.md`](../05-analysis/01-browser-os-landscape.md) — Puter/daedalOS/OS.js/v86/WebContainers 비교
+- [`02-sandboxing-untrusted-js.md`](../05-analysis/02-sandboxing-untrusted-js.md) — iframe/ShadowRealm/QuickJS-WASM 비교, CVE
+- [`03-multitenant-stack-options.md`](../05-analysis/03-multitenant-stack-options.md) — Supabase/Cloudflare/Puter 비교
 
 ## Decision
 

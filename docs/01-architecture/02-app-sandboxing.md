@@ -14,7 +14,7 @@
 
 **blob: URL iframe + `sandbox="allow-scripts"` + Comlink IPC**
 
-근거: [`research/sandboxing-untrusted-js.md`](../research/sandboxing-untrusted-js.md)
+근거: [`02-sandboxing-untrusted-js.md`](../05-analysis/02-sandboxing-untrusted-js.md)
 - 게임 엔진(Phaser/Pixi/Three.js/Godot) 100% 호환
 - Figma, itch.io 등에서 검증된 패턴
 - 구현 단순, 성능 오버헤드 거의 없음

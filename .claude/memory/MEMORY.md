@@ -9,7 +9,7 @@
 - 스킬: 9개 (zm-commit, zm-unit-done, zm-session, zm-troubleshoot, zm-memory-save, zm-work-intake, zm-work-completion, zm-doc-status, zm-roadmap)
 - 규칙: 10개 (frontend, security, work-units, known-mistakes, doc-naming, file-categories, quality-standard, self-review, auto-memory-protocol, troubleshoot-auto)
 - 훅: 10개 Python (mistake_guard, post_review, session_start, notify_done, category_guard, emit_event, prompt_context, pre_compact, post_compact, post_review_checks)
-- 단위 테스트: 0 | E2E: Playwright 5개 (snake/hydration/zip-upload/pentest/engine-compat, 모두 PASS)
+- 단위 테스트: 0 | E2E: Playwright 6개 (snake/hydration/zip-upload/pentest/engine-compat/demo-video, 모두 PASS)
 - 의존성: next 16, react 19, tailwind 4, zod 4.4.3, typescript 5, react-rnd v10.5.3, phaser@3.90.0, idb@8.0.3, jszip@3.10.1, pixi.js@8.18.1 (NEW), three@0.184.0 (NEW), playwright (dev)
 
 ## 기술 스택
@@ -54,19 +54,15 @@
   - 데모 영상 (e2e end-to-end)
 
 ## 최근 결정사항 (최대 10, FIFO)
-- 2026-05-25: **🛑 세션 종료 (오늘 분량 마무리)**. Phase 3 50% (2/4) + POC 종료 게이트 통과. 누적 일정: Phase 2 4/4 + Phase 3 2/4 + e2e Playwright 4개 도입 (snake/hydration/zip-upload/pentest) + TS-004/005 발견&fix + ADR-0007/0008 + PROD-05 + N-05~N-08 위협. 다음 세션: 게임 엔진 매트릭스 / STG-02+DSK-04 / 데모 영상 중 선택.
-- 2026-05-25: Phase 3 작업 2 완료 — 안정화 (번들 측정 + iframe 셀프 페네스트). 산출물: e2e-pentest.mjs + 감사 리포트. 14/14 페네스트 ALL PASS (PT-a/b/c/d/e/g/h + ZP-C7/C8 + CSP). 번들 static 1.4MB, gzip ~400-500KB (LCP 내). 코드 변경 0건 (architect 목표). N-08 postMessage DoS v2 후보.
-- 2026-05-24: Phase 3 작업 1 완료 — APP-02 사용자 ZIP 앱 업로드 (JSZip 3.10.1, 보안 검증 6단계, UserAppsProvider/AppUploadButton). 신규: zip-loader(320 LOC) + UI(300 LOC). 검증 4명 + self-verifier ✅ PASS. ADR-0008 + PROD-05 신규. 보안 위협 N-05/06/07 등록.
-- 2026-05-24: Phase 2 ✅ 완료 (4/4, 100%) — STR-01/02 + STG-01 + APP-03 + GAME-01. Playwright e2e ALL PASS (snake 10 step + hydration 8 step). 
-- 2026-05-24: PROD-03/04 신규 정책 — 카탈로그 메타데이터 단일 모델 + Provider scope 옵션 A + 좌표 컨벤션.
-- 2026-05-24: Phase 1 작업 7 보안 감사 ✅ PASS. app-sandbox-auditor 8항목 매트릭스 완료, ADR 정합 + CVE 추적. H-1 + SANDBOX_ORIGIN fix.
-- 2026-05-24: 작업 5+6 통합 완료 — DSK-02 데스크탑 + DSK-03 작업표시줄. ADR-0006.
-- 2026-05-24: ADR-0005 확정 — 윈도우 상태 관리 = React Context + useReducer (Zustand 미도입).
-- 2026-05-24: ADR-0002 확정 — 윈도우 매니저 = react-rnd v10.5.3.
-- 2026-05-24: 작업 3 완료 — CSP/Permissions-Policy 정적 헤더 (ADR-0004).
-- 2026-05-24: 에이전트 팀 10명 재구성 — architect/research-analyst/lib-developer/fe-developer/build-checker/code-reviewer/app-sandbox-auditor/constraint-checker/self-verifier/doc-updater. 표준 워크플로.
-- 2026-05-24: Phase 0 완료 + Phase 1 진입. 문서/CC 셋팅 (zm-v3 + sonix_docs 패턴).
-- 2026-05-24: ARCH-02 iframe 샌드박싱 (blob: + allow-scripts) + TECH-01 IndexedDB+OPFS.
-- 2026-05-24: 작업 4 완료 — 윈도우 매니저 DSK-01 (react-rnd).
+- 2026-05-25: 문서 정밀 검토 — 11건 이슈 수정 (broken link 3건 + FIFO 정리 + 버전 0.8.0 bump + settings.json 스킬 permission 추가). 정합성 97%→100%.
+- 2026-05-25: Phase 3-C 데모 영상 완료 — Playwright 비디오 녹화 7 Scene (스토어→ZIP→Snake→Pixi+Three→사용자앱→피날레). M4 마일스톤 달성, POC 공식 종료.
+- 2026-05-25: Phase 3-B 게임 엔진 호환성 매트릭스 — Pixi.js 8.18.1 + Three.js r184 ALL PASS. 3개 엔진 sandbox/WebGL/격리 검증.
+- 2026-05-25: 문서 체계 고도화 — sonix_docs 패턴 도입. docs/ 번호 기반 카테고리 + 규칙 10 + 훅 10 + 스킬 9 + events/ 이벤트 스트림.
+- 2026-05-25: Phase 3 작업 2 완료 — 안정화 (번들 1.4MB + 14 페네스트 ALL PASS). N-08 postMessage DoS v2 후보.
+- 2026-05-24: Phase 3 작업 1 완료 — APP-02 ZIP 업로드 (JSZip 3.10.1, 보안 검증 6단계). ADR-0008 + PROD-05.
+- 2026-05-24: Phase 2 ✅ 완료 (4/4) — STR-01/02 + STG-01 + APP-03 + GAME-01. Playwright e2e ALL PASS.
+- 2026-05-24: Phase 1 ✅ 완료 (7/7) — 코어 샌드박싱 + 윈도우 매니저 + 보안 감사.
+- 2026-05-24: 에이전트 팀 10명 재구성. 표준 워크플로 (_workflow.md).
+- 2026-05-24: Phase 0 완료 + 핵심 정책 확정 — ARCH-01/02 + TECH-01~05 + PROD-01~05.
 
-> **최종 갱신**: 2026-05-25 — Phase 3 작업 2 완료, 문서 갱신 완료
+> **최종 갱신**: 2026-05-25 — POC 1차 완료 (M4), 문서 정밀 검토 + 리팩토링 완료

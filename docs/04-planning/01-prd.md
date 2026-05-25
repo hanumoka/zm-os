@@ -2,9 +2,9 @@
 
 > **Living Document**. 기능 완료 시 즉시 갱신. 버전 bump 필수.
 
-**Version**: 0.7.0
+**Version**: 0.8.0
 **Last Updated**: 2026-05-25
-**Status**: Phase 3 진행 중 (2/4, 50%)
+**Status**: POC 1차 완료 — Phase 0~3 전체 완료 (M4 마일스톤)
 
 ---
 
@@ -62,7 +62,7 @@ zm-os는 **브라우저 안에서 동작하는 가상 데스크탑** 으로, 사
 | **IPC-01** | Comlink 기반 RPC 어댑터 | ✅ 완료 | `src/lib/apps/ipc/` (wire-compatible v1) |
 | **STG-01** | IndexedDB 추상화 | ✅ 완료 | `src/lib/storage/indexeddb.ts` (idb v8.0.3 + 메모리 폴백) |
 | **STG-02** | OPFS 어댑터 (Chrome/Edge) | ⏳ 계획 | Safari는 IndexedDB 폴백 |
-| **GAME-01** | 첫 샘플 게임 (Phaser 또는 Pixi) | ✅ 완료 | `public/sample-game-phaser/` Phaser 3 Snake — Phase 2 작업 4. Bouncing Ball은 `public/sample-game/` 유지 |
+| **GAME-01** | 샘플 게임 (Phaser + Pixi.js + Three.js) | ✅ 완료 | Phaser 3 Snake + Pixi.js 8 Particle Rain + Three.js r184 Spinning Cubes — 3개 엔진 호환성 ALL PASS (Phase 3-B) |
 
 ---
 
@@ -74,7 +74,7 @@ zm-os는 **브라우저 안에서 동작하는 가상 데스크탑** 으로, 사
 - 앱 스토어 백엔드 (Postgres + RLS, 업로드 + 모더레이션)
 - 멀티디바이스 동기화
 
-상세 후보 스택: [`research/multitenant-stack-options.md`](../06-research/multitenant-stack-options.md)
+상세 후보 스택: [`03-multitenant-stack-options.md`](../05-analysis/03-multitenant-stack-options.md)
 
 ---
 

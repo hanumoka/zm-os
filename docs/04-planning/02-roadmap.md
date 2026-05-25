@@ -2,7 +2,7 @@
 
 > **Living Document**. 항목 완료 시 즉시 갱신. PRD와 동시 갱신.
 
-**Version**: 0.7.0
+**Version**: 0.8.0
 **Last Updated**: 2026-05-25
 
 ---
@@ -94,6 +94,20 @@ POC 종료 후: v2 plan (멀티유저/클라우드) 별도 plan 필요.
 ---
 
 ## §8. Change Log
+
+### 0.8.0 (2026-05-25) — POC 1차 완료 (M4 마일스톤)
+- **Phase 3 전체 완료** ✅ (4/4, 100%) — M4 마일스톤 달성, POC 공식 종료
+- Phase 3-B ✅: 게임 엔진 호환성 매트릭스 — Pixi.js 8.18.1 + Three.js r184 ALL PASS
+  - 2개 built-in 샘플 앱 추가 (Particle Rain + Spinning Cubes)
+  - `docs/07-testing/01-engine-compatibility-matrix.md` 호환성 매트릭스 문서
+  - e2e-engine-compat.mjs Playwright 자동 검증
+- Phase 3-C ✅: 데모 영상 — Playwright 비디오 녹화 7 Scene
+  - e2e-demo-video.mjs (스토어 설치 → ZIP 업로드 → Snake → Pixi+Three → 사용자 앱 → 피날레)
+- 문서 체계 고도화: sonix_docs 패턴 도입
+  - zm-claude-docs/ → docs/ 번호 기반 카테고리 마이그레이션
+  - 규칙 4→10개, 훅 4→10개, 스킬 5→9개
+  - events/ 이벤트 스트림 + 정책 다이제스트 + TS 인덱스 신규
+- 문서 정밀 검토: 11건 이슈 수정 (broken link, FIFO 정리, 버전 동기화)
 
 ### 0.7.0 (2026-05-25) — Phase 3 작업 2 완료 (안정화)
 - Phase 3 작업 2 완료 ✅ (안정화: 번들 측정 + iframe 우회 시도 셀프 페네스트)

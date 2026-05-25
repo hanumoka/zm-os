@@ -19,6 +19,9 @@
       "Skill(zm-session)",
       "Skill(zm-work-intake)",
       "Skill(zm-work-completion)",
+      "Skill(zm-commit)",
+      "Skill(zm-unit-done)",
+      "Skill(zm-troubleshoot)",
       "Skill(zm-doc-status)",
       "Skill(zm-roadmap)"
     ],

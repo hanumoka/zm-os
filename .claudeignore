@@ -21,7 +21,7 @@ pnpm-lock.yaml
 docs/11-archive/
 
 # 외부 리서치 보고서 (대용량, 필요시 직접 Read)
-docs/06-research/
+docs/05-analysis/
 
 # 스크래치
 .scratch/
