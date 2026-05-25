@@ -54,8 +54,8 @@ PRD §3 DSK-02 (데스크탑 영역 + 아이콘) 와 §7 수용 기준 1·3·4·
 
 ## References
 
-- PRD §3 DSK-02, §3 STR-01/02 (`zm-claude-docs/project/prd.md`)
-- PRD §7 수용 기준 (`zm-claude-docs/project/prd.md`)
+- PRD §3 DSK-02, §3 STR-01/02 (`docs/04-planning/01-prd.md`)
+- PRD §7 수용 기준 (`docs/04-planning/01-prd.md`)
 - ADR-0002 (윈도우 매니저 = react-rnd)
 - ADR-0005 (윈도우 상태 관리 = Context + useReducer)
 - 사용자 피드백 (2026-05-24): "OS면 데스크탑 처럼 바탕화면, 작업표시줄, 바탕화면 아이콘이 있어야"

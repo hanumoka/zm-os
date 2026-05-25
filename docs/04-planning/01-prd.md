@@ -74,7 +74,7 @@ zm-os는 **브라우저 안에서 동작하는 가상 데스크탑** 으로, 사
 - 앱 스토어 백엔드 (Postgres + RLS, 업로드 + 모더레이션)
 - 멀티디바이스 동기화
 
-상세 후보 스택: [`research/multitenant-stack-options.md`](../research/multitenant-stack-options.md)
+상세 후보 스택: [`research/multitenant-stack-options.md`](../06-research/multitenant-stack-options.md)
 
 ---
 
@@ -112,7 +112,7 @@ POC 완료 = 아래 시나리오가 동작:
 ### 0.7.0 (2026-05-25) — Phase 3 작업 2 완료 (안정화)
 - Phase 3 작업 2 완료 ✅ (안정화: iframe 우회 시도 셀프 페네스트 + 번들 측정)
   - 신규: `e2e-pentest.mjs` (Playwright 자동화 페네트레이션, 14 항목 ALL PASS)
-  - 신규: `zm-claude-docs/security/phase-3-stabilization-audit-2026-05-25.md` (통합 감사 리포트)
+  - 신규: `docs/05-security/phase-3-stabilization-audit-2026-05-25.md` (통합 감사 리포트)
   - 검증 결과: iframe sandbox 격리 14/14 PASS (PT-a/b/c/d/e/g/h + ZP-C7/C8 + CSP-1)
   - 번들 측정: static chunks ~1.4MB (raw), gzip 추정 ~400-500KB (LCP target 내)
   - 코드 변경 0건 (architect 목표 달성)
@@ -186,7 +186,7 @@ POC 완료 = 아래 시나리오가 동작:
 - Phase 1 작업 7 완료 (보안 감사) ✅ PASS
 - app-sandbox-auditor 1회 전체 감사 (8 항목 매트릭스 + ADR 정합 + CVE 매핑)
 - 즉시 fix 2건 적용: H-1 (runtime-iife DANGEROUS_KEYS 객체 결함) + SANDBOX_ORIGIN 상수 일관성
-- 감사 리포트 보관: zm-claude-docs/security/phase-1-audit-2026-05-24.md
+- 감사 리포트 보관: docs/05-security/phase-1-audit-2026-05-24.md
 - **Phase 1 7/7 (100%) 완료** — Phase 2 진입 가능
 
 ### 0.1.5 (2026-05-24)

@@ -229,7 +229,7 @@ const blobUrl = URL.createObjectURL(blob);
 - **Desktop.tsx**: `src/components/desktop/Desktop.tsx` (buildCatalog 호출)
 
 ### Documentation References
-- **PRD**: `zm-claude-docs/project/prd.md` §1.2 (POC 비전) + §3 (APP-02)
+- **PRD**: `docs/04-planning/01-prd.md` §1.2 (POC 비전) + §3 (APP-02)
 - **ADR-0006**: 데스크탑 카탈로그 (v2 reshape 경로)
 - **ADR-0007**: IndexedDB 저수준 추상화
 - **security.md**: "사용자 제출 ZIP 수신 절차" 신설
@@ -245,7 +245,7 @@ const blobUrl = URL.createObjectURL(blob);
 - **PROD-02** (카탈로그): user source 추가로 ADR-0006 reshape
 
 ### Security Audit References
-- **Phase 3 앱-샌드박스-감사**: `zm-claude-docs/security/phase-3-app02-audit-2026-05-24.md` (신규)
+- **Phase 3 앱-샌드박스-감사**: `docs/05-security/phase-3-app02-audit-2026-05-24.md` (신규)
   - N-05: JSZip private API 의존
   - N-06: HTML 크기 임계치 (5MB) 설정의 정당성
   - N-07: ZIP bomb 압축비 검증 로직 정확성
