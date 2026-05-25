@@ -3,9 +3,9 @@
 
 ## 프로젝트 수치 (항상 최신 유지)
 - 현재 Phase: **Phase 3 ✅ 완료 (4/4, 100%)** — M4 마일스톤 달성, POC 종료
-- 코드 LOC: ~4300 LOC (TS) + samples/games ~1500 LOC (HTML/JS) — 작업 2 문서만 (코드 변경 0)
-- 에이전트: 10개 (architect, research-analyst, lib-developer, fe-developer, build-checker, code-reviewer, app-sandbox-auditor, constraint-checker, self-verifier, doc-updater) + workflow 문서
-- 모델 전략: architect/self-verifier=opus / 구현·리뷰·감사=sonnet / 빌드·문서·제약검사=haiku
+- 코드 LOC: ~4600 LOC (TS) + samples/games ~1500 LOC (HTML/JS) — STG-02/DSK-04 신규 6파일 + 수정 3파일
+- 에이전트: 13개 (architect, research-analyst, design-reviewer, lib-developer, fe-developer, build-checker, code-reviewer, app-sandbox-auditor, constraint-checker, integration-tester, perf-monitor, self-verifier, doc-updater) + workflow 문서
+- 모델 전략: architect/design-reviewer/self-verifier=opus / 구현·리뷰·감사·통합검증=sonnet / 빌드·문서·제약·성능=haiku
 - 스킬: 9개 (zm-commit, zm-unit-done, zm-session, zm-troubleshoot, zm-memory-save, zm-work-intake, zm-work-completion, zm-doc-status, zm-roadmap)
 - 규칙: 10개 (frontend, security, work-units, known-mistakes, doc-naming, file-categories, quality-standard, self-review, auto-memory-protocol, troubleshoot-auto)
 - 훅: 10개 Python (mistake_guard, post_review, session_start, notify_done, category_guard, emit_event, prompt_context, pre_compact, post_compact, post_review_checks)
@@ -42,7 +42,7 @@
 ## User Preferences
 - 한국어로 응답 기본
 - 정책 결정 사항은 사용자에게 선택지 제시 후 결정 (work-units.md 참조)
-- POC 단계 — 코드 정교함보다 빠른 검증 우선
+- v2 단계 — 설계 안정성/유연성/확장성 > 개발 속도. 면밀한 검토 + 작업 결과 검수 중시.
 
 ## Project State
 - **Phase 3 진행 중 (2/4, 50%)**. 작업 1 ✅ (APP-02 ZIP 업로드), 작업 2 ✅ (안정화).
@@ -54,6 +54,9 @@
   - 데모 영상 (e2e end-to-end)
 
 ## 최근 결정사항 (최대 10, FIFO)
+- 2026-05-25: N-08 postMessage DoS 방어 완료 — rate-limiter.ts (고정 윈도우 카운터 60건/초 + penalty 2초). host.ts 통합. ADR-0010.
+- 2026-05-25: STG-02 + DSK-04 완료 — StorageAdapter Strategy 패턴 (IDB/OPFS/Memory) + 윈도우 레이아웃 영속화. ADR-0009 확정. 번들 1.28MB (감소).
+- 2026-05-25: 에이전트 팀 재편 10→13명. 신규: design-reviewer(opus), integration-tester(sonnet), perf-monitor(haiku). 2단계 검증 파이프라인 + architect/design-reviewer 필수 게이트. 우선순위: 설계 안정성/유연성/확장성 > 속도.
 - 2026-05-25: 문서 정밀 검토 — 11건 이슈 수정 (broken link 3건 + FIFO 정리 + 버전 0.8.0 bump + settings.json 스킬 permission 추가). 정합성 97%→100%.
 - 2026-05-25: Phase 3-C 데모 영상 완료 — Playwright 비디오 녹화 7 Scene (스토어→ZIP→Snake→Pixi+Three→사용자앱→피날레). M4 마일스톤 달성, POC 공식 종료.
 - 2026-05-25: Phase 3-B 게임 엔진 호환성 매트릭스 — Pixi.js 8.18.1 + Three.js r184 ALL PASS. 3개 엔진 sandbox/WebGL/격리 검증.
@@ -61,8 +64,5 @@
 - 2026-05-25: Phase 3 작업 2 완료 — 안정화 (번들 1.4MB + 14 페네스트 ALL PASS). N-08 postMessage DoS v2 후보.
 - 2026-05-24: Phase 3 작업 1 완료 — APP-02 ZIP 업로드 (JSZip 3.10.1, 보안 검증 6단계). ADR-0008 + PROD-05.
 - 2026-05-24: Phase 2 ✅ 완료 (4/4) — STR-01/02 + STG-01 + APP-03 + GAME-01. Playwright e2e ALL PASS.
-- 2026-05-24: Phase 1 ✅ 완료 (7/7) — 코어 샌드박싱 + 윈도우 매니저 + 보안 감사.
-- 2026-05-24: 에이전트 팀 10명 재구성. 표준 워크플로 (_workflow.md).
-- 2026-05-24: Phase 0 완료 + 핵심 정책 확정 — ARCH-01/02 + TECH-01~05 + PROD-01~05.
 
-> **최종 갱신**: 2026-05-25 — POC 1차 완료 (M4), 문서 정밀 검토 + 리팩토링 완료
+> **최종 갱신**: 2026-05-25 — N-08 DoS 방어 + STG-02/DSK-04 완료

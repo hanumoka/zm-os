@@ -15,6 +15,7 @@ zm-os 코드 리뷰를 수행. 세션 간 학습 패턴은 `.claude/memory/MEMOR
 
 ## 검증 항목
 
+### A. 코드 정확성 (기존)
 1. **TypeScript strict 위반**: any 사용, 반환 타입 누락, non-null assertion(!) 남용
 2. **iframe 샌드박스 정책**: `allow-same-origin` 사용 금지, blob: URL 또는 srcdoc origin 사용 여부
 3. **postMessage origin 검증**: 와일드카드 수신자 금지, `event.origin` 검증 필수
@@ -24,6 +25,13 @@ zm-os 코드 리뷰를 수행. 세션 간 학습 패턴은 `.claude/memory/MEMOR
 7. **CSP/Permissions-Policy 헤더**: `next.config.ts` 변경의 영향 검토
 8. **SSR 안전**: `window`/`document`/`localStorage` 접근이 `useEffect` 내부인지
 9. **architect 명세 준수**: 구현 결과가 architect 명세와 일치하는지 (인터페이스 시그니처 비교)
+
+### B. 설계 품질 (신규 — 설계 안정성/유연성/확장성)
+10. **SOLID 원칙**: 단일 책임 위반, 개방-폐쇄 위반, 의존성 역전 위반 여부
+11. **확장성 차단**: 하드코딩된 분기(switch/if-else 체인)가 전략 패턴/맵으로 대체 가능한지
+12. **인터페이스 안정성**: public API 시그니처가 불필요하게 변경되지 않았는지
+13. **모듈 응집도**: 한 파일에 관련 없는 기능이 혼재하지 않는지
+14. **의존성 방향**: 상위 모듈이 하위 모듈을 직접 의존하지 않는지 (추상화 경유)
 
 ### 보안 체크 (app-sandbox-auditor와 분담)
 

@@ -70,19 +70,14 @@ npm run dev
 - `canTouchParentStorage`, `canTouchParentDocument`, `canTouchParentCookies` 모두 `false`
 - 게임 안 상태바에 "✅ 격리 OK"
 
-## 에이전트 팀 (10명 — 2026-05-24 재구성)
+## 에이전트 팀 (13명 — 2026-05-25 재편, 2단계 검증)
 
-설계 architect+research-analyst / 구현 lib-developer+fe-developer / 검증 build+code-reviewer+sandbox-auditor+constraint / 메타 self-verifier / 문서 doc-updater. 표준 워크플로: [`.claude/agents/_workflow.md`](../../.claude/agents/_workflow.md)
+설계 architect+research-analyst+**design-reviewer** / 구현 lib-developer+fe-developer / 1차검증 build+code-reviewer(+SOLID)+sandbox-auditor+constraint / 2차검증 **integration-tester**+**perf-monitor** / 메타 self-verifier / 문서 doc-updater. architect+design-reviewer = 필수 게이트. 워크플로: [`.claude/agents/_workflow.md`](../../.claude/agents/_workflow.md)
 
-## Phase 3 진행 상황 (50% — 2/4) 🔄
+## Phase 3 ✅ 완료 (4/4, 100%) — POC 종료 후 v2 진입
 
-완료:
-- 작업 1 ✅: APP-02 사용자 ZIP 앱 업로드 (JSZip 3.10.1, 보안 검증, UserAppsProvider, AppUploadButton)
-- 작업 2 ✅: 안정화 (번들 ~400-500KB gzip, 셀프 페네스트 14/14 PASS)
-
-다음:
-- 작업 3: 게임 엔진 호환성 (B) 또는 데모 영상 (C)
-- 작업 4: 포장 + v2 계획
+작업 1~4 모두 완료. 에이전트 팀 13명 재편 (설계 안정성/유연성/확장성 중심).
+다음 작업 후보: Tier 1 (STG-02/DSK-04/N-08/APP-04/TEST-01/DSK-05)
 
 ## Quick Links
 - PRD: [`01-prd.md`](../04-planning/01-prd.md)

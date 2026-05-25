@@ -12,13 +12,13 @@
 | [ADR-0006](adr-0006-desktop-app-catalog.md) | 데스크탑 앱 카탈로그 모델 — POC v1 하드코딩 + v2 STR 전환 | accepted | 2026-05-24 |
 | [ADR-0007](adr-0007-client-storage-indexeddb.md) | 클라이언트 스토리지 추상화 — IndexedDB (idb library) + 메모리 폴백 | accepted | 2026-05-24 |
 | [ADR-0008](adr-0008-user-zip-upload.md) | POC v1 사용자 ZIP 앱 업로드 모델 (JSZip + 단일 HTML + 보안 검증) | accepted | 2026-05-24 |
+| [ADR-0009](adr-0009-storage-abstraction.md) | 스토리지 추상화 계층 — StorageAdapter Strategy 패턴 + OPFS 어댑터 | accepted | 2026-05-25 |
 
 ## 다음 번호 가이드
 
-- ADR-0009 후보:
+- ADR-0010 후보:
   - IPC 권한 모델 v2 (manifest.permissions 매핑)
   - Comlink 라이브러리 도입 (v2 향상)
-  - 윈도우 상태 persist (OPFS 또는 IndexedDB)
   - 윈도우 매니저 v2 reshape
 
 ## 작성 규칙

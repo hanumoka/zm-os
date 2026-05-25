@@ -18,14 +18,19 @@ import { type DBSchema, type IDBPDatabase, openDB as idbOpenDB } from 'idb';
 
 // ─── DB / Store 상수 ─────────────────────────────────────────────────────────
 export const DB_NAME = 'zm-os';
-/** DB 버전. store 추가 시 bump (현재 v2: STORE_USER_APPS 추가) */
-export const DB_VERSION = 2;
+/** DB 버전. store 추가 시 bump (v2: STORE_USER_APPS, v3: STORE_DESKTOP_LAYOUT) */
+export const DB_VERSION = 3;
 export const STORE_INSTALLED_APPS = 'installed-apps' as const;
 /** v2: 사용자 업로드 앱 store (APP-02) */
 export const STORE_USER_APPS = 'user-apps' as const;
+/** v3: 데스크탑 윈도우 레이아웃 영속화 (DSK-04) */
+export const STORE_DESKTOP_LAYOUT = 'desktop-layout' as const;
 
 // ─── 타입 ─────────────────────────────────────────────────────────────────────
-export type IDBStoreName = typeof STORE_INSTALLED_APPS | typeof STORE_USER_APPS;
+export type IDBStoreName =
+  | typeof STORE_INSTALLED_APPS
+  | typeof STORE_USER_APPS
+  | typeof STORE_DESKTOP_LAYOUT;
 
 /**
  * idb DBSchema 타입 정의 — value를 any로 두어야 idb 내부 타입 충족
@@ -36,13 +41,16 @@ export type IDBStoreName = typeof STORE_INSTALLED_APPS | typeof STORE_USER_APPS;
 interface ZmOsDBSchema extends DBSchema {
   [STORE_INSTALLED_APPS]: {
     key: string;
-    // idb DBSchemaValue가 value: any를 요구하므로 불가피한 any — 외부 API는 T = unknown 제네릭으로 노출
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     value: any;
   };
   [STORE_USER_APPS]: {
     key: string;
-    // idb DBSchemaValue가 value: any를 요구하므로 불가피한 any — 외부 API는 T = unknown 제네릭으로 노출
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    value: any;
+  };
+  [STORE_DESKTOP_LAYOUT]: {
+    key: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     value: any;
   };
@@ -91,6 +99,12 @@ export function openDB(): Promise<IDBPDatabase<ZmOsDBSchema>> {
         if (oldVersion < 2) {
           if (!db.objectStoreNames.contains(STORE_USER_APPS)) {
             db.createObjectStore(STORE_USER_APPS);
+          }
+        }
+        // v2 → v3: STORE_DESKTOP_LAYOUT 생성 (DSK-04 윈도우 레이아웃 영속화)
+        if (oldVersion < 3) {
+          if (!db.objectStoreNames.contains(STORE_DESKTOP_LAYOUT)) {
+            db.createObjectStore(STORE_DESKTOP_LAYOUT);
           }
         }
       },

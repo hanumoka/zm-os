@@ -131,11 +131,11 @@ const MAGIC_BYTES = [
 - **CVE-2022-48285** (JSZip): Path traversal — v3.8.0+에서 수정됨 (현재 3.10.1 채택)
 
 ### 내부 위협 (N-NNN)
-- **N-08** (postMessage DoS): iframe → parent DoS 방어 부재
-  - **현상** (Phase 3 작업 2): sandbox iframe에서 parent로 postMessage 100건 폭주 테스트 → host 모두 수신
-  - **영향**: POC v1 단일 사용자라 실질 위협 없음. v2 (멀티/외부 노출) 시 악의적 user app이 host hang 가능
-  - **대응** (v2 권고): message rate limit (초당 ≤10건) + 사용자 강제 종료 옵션
-  - **근거**: security.md "리소스 고갈 방어" 섹션 + Phase 3 작업 2 감사 리포트
+- **N-08** (postMessage DoS): ✅ 해결 — rate limiter 도입
+  - **현상** (Phase 3 작업 2): sandbox iframe에서 parent로 postMessage 폭주 → host 전부 수신
+  - **대응**: `src/lib/apps/ipc/rate-limiter.ts` — 고정 윈도우 카운터 + 벌칙 쿨다운 (60건/초, penalty 2초)
+  - **INIT 핸드셰이크 제외** (앱 시작 보장), `onRateLimitExceeded` 콜백으로 확장 가능
+  - **ADR**: ADR-0010
 
 신규 CVE는 정기 점검 필요 (브라우저 보안 공지 모니터링). JSZip 의존성 변경 시 CVE 기록 검토 의무.
 

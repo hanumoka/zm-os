@@ -27,7 +27,8 @@ export type WindowAction =
   | { type: 'RESTORE'; payload: { id: string } }
   | { type: 'FOCUS'; payload: { id: string } }
   | { type: 'SET_POSITION'; payload: { id: string; x: number; y: number } }
-  | { type: 'SET_SIZE'; payload: { id: string; width: number; height: number } };
+  | { type: 'SET_SIZE'; payload: { id: string; width: number; height: number } }
+  | { type: 'RESTORE_LAYOUT'; payload: { windows: WindowState[] } };
 
 // ─── 헬퍼 ─────────────────────────────────────────────────────────────────────
 
@@ -119,6 +120,9 @@ export function windowReducer(
             }
           : w,
       );
+
+    case 'RESTORE_LAYOUT':
+      return action.payload.windows;
 
     default:
       return state;

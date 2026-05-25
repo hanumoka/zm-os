@@ -95,7 +95,7 @@ zm-os/
 
 ## 🎯 6. 개발 우선순위
 
-> 3대 원칙: **POC 빠른 검증** > **보안 / 격리** > **코드 정교함**
+> 3대 원칙: **설계 안정성/유연성/확장성** > **보안 / 격리** > **개발 속도**
 
 상세: [`docs/04-planning/02-roadmap.md`](docs/04-planning/02-roadmap.md)
 정책 SSOT: [`docs/03-policy/01-policy-registry.md`](docs/03-policy/01-policy-registry.md)
@@ -134,26 +134,31 @@ Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
 
 ---
 
-## 🤖 9. 에이전트 (10명 팀)
+## 🤖 9. 에이전트 (13명 팀, 2단계 검증 파이프라인)
 
 > 상세 위임 규칙 → `.claude/agents/` / 표준 작업 흐름 → `.claude/agents/_workflow.md`
 
-**설계** (2):
-- **architect** (opus, 20t): 인터페이스/모듈 경계/확장 포인트/ADR 초안. 코드 작성 전 첫 호출.
+**설계** (3):
+- **architect** (opus, 20t): **필수 게이트**. 인터페이스/모듈 경계/확장 포인트/ADR 초안. 모든 작업의 첫 호출.
 - **research-analyst** (sonnet, 15t): 외부 사실 확인 전담. 모든 주장에 출처 URL 필수.
+- **design-reviewer** (opus, 15t): **필수 게이트**. 구현↔설계 적합성 검증. BLOCK 권한. SOLID/확장성 검증.
 
 **구현** (2):
 - **lib-developer** (sonnet, 25t): `src/lib/` 추상화 계층 (apps/storage/api).
 - **fe-developer** (sonnet, 25t): `src/app/` + `src/components/` UI.
 
-**검증** (4, 병렬):
-- **build-checker** (haiku, 5t): tsc + 변경 파일 신규 에러 우선 (M-019 회피).
-- **code-reviewer** (sonnet, 15t, project memory): TS/SSR/패턴 + 학습 누적.
+**1차 검증** (4, 병렬):
+- **build-checker** (haiku, 5t): tsc + 변경 파일 신규 에러 우선.
+- **code-reviewer** (sonnet, 15t, project memory): TS/SSR/패턴 + **SOLID/확장성** + 학습 누적.
 - **app-sandbox-auditor** (sonnet, 15t): iframe/CSP/postMessage/CVE 8 항목 매트릭스.
 - **constraint-checker** (haiku, 8t): rules + policy-registry 결정론적 위반 검출.
 
+**2차 검증** (2, 병렬):
+- **integration-tester** (sonnet, 15t): e2e/통합 검증. Playwright 스크립트 실행 + 회귀 감지.
+- **perf-monitor** (haiku, 8t): 번들/빌드/런타임 성능 회귀 감시. 기준선 대비 임계치 판정.
+
 **메타 검증** (1):
-- **self-verifier** (opus, 15t): 작업 종료 직전 마지막 게이트. 추측/누락/오판 차단. PASS 시에만 doc-updater 진행 허용.
+- **self-verifier** (opus, 15t): 작업 종료 직전 마지막 게이트. 2단계 전체 결과 종합. 추측/누락/오판 차단.
 
 **문서** (1):
 - **doc-updater** (haiku, 8t): 진행 문서 갱신 + broken link 점검.

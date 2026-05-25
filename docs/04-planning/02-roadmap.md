@@ -57,7 +57,7 @@ POC 종료 후: v2 plan (멀티유저/클라우드) 별도 plan 필요.
 | ✅ 첫 샘플 게임 (GAME-01) | STR-02 | ✅ 완료 | Phaser 3 Snake (host self origin, IPC 미사용) |
 | ✅ IndexedDB 추상화 (STG-01) | — | ✅ 완료 | `src/lib/storage/indexeddb.ts` (idb v8.0.3 + 메모리 폴백) |
 | ✅ 설치한 앱 목록 영속화 (APP-03) | STG-01 | ✅ 완료 | IndexedDB hydration + fire-and-forget persist (InstalledAppsProvider, lib/storage/installed-apps.ts) |
-| OPFS 어댑터 (STG-02) | — | ⏳ 계획 | Safari 폴백 IndexedDB |
+| OPFS 어댑터 (STG-02) | — | ✅ 완료 | StorageAdapter Strategy 패턴 + ADR-0009 |
 | 앱 패키지 포맷 (APP-02) | — | ✅ 완료 | JSZip 3.10.1 + 보안 검증 (Phase 3 작업 1) |
 
 ---

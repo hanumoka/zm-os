@@ -16,6 +16,7 @@ export type IpcErrorCode =
   | 'denied'
   | 'invalid_origin'
   | 'protocol'
+  | 'rate_limited'
   | 'unknown';
 
 // ─── 에러 클래스 ──────────────────────────────────────────────────────────────
@@ -108,6 +109,17 @@ export interface HostEndpointOptions {
    * 미지정 시 빈 API.
    */
   expose?: HostApi;
+  /**
+   * 앱→호스트 메시지 rate limit 설정 (N-08 DoS 방어).
+   * 미지정 시 기본값: { maxMessages: 60, windowMs: 1000, penaltyMs: 2000 }
+   * false로 설정 시 rate limit 비활성화.
+   */
+  rateLimit?: Partial<import('./rate-limiter').RateLimitConfig> | false;
+  /**
+   * Rate limit 초과 시 호출되는 콜백.
+   * UI 알림/앱 강제 종료 등 호출자가 결정.
+   */
+  onRateLimitExceeded?: (status: import('./rate-limiter').RateLimitStatus) => void;
 }
 
 /** connectToHost 옵션 (앱 측 런타임에서 사용) */

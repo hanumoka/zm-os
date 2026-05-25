@@ -128,7 +128,7 @@ export const ErrorMsgSchema = z
     /** 대응하는 CALL 메시지의 callId (없으면 프로토콜 수준 오류) */
     callId: z.string().min(1).max(64).optional(),
     /** 에러 코드 */
-    code: z.enum(['timeout', 'peer_down', 'denied', 'invalid_origin', 'protocol', 'unknown']),
+    code: z.enum(['timeout', 'peer_down', 'denied', 'invalid_origin', 'protocol', 'rate_limited', 'unknown']),
     /** 에러 메시지 */
     message: z.string().max(256),
   })

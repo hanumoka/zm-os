@@ -27,6 +27,7 @@ import {
   type ErrorMsg,
 } from './protocol';
 import type { IpcStatus } from './types';
+import { createRateLimiter, type MessageRateLimiter } from './rate-limiter';
 
 // ─── 상수 ─────────────────────────────────────────────────────────────────────
 
@@ -77,6 +78,14 @@ export function createHostEndpoint(options: HostEndpointOptions): HostEndpoint {
   }
 
   const { iframe, allowedMethods, expose = {} } = options;
+
+  // ─── Rate Limiter (N-08 DoS 방어) ─────────────────────────────────────────
+  let _rateLimiter: MessageRateLimiter | null = null;
+  if (options.rateLimit !== false) {
+    _rateLimiter = createRateLimiter(
+      options.rateLimit === undefined ? undefined : options.rateLimit,
+    );
+  }
   const defaultTimeoutMs = options.defaultTimeoutMs ?? DEFAULT_TIMEOUT_MS;
 
   let _status: IpcStatus = 'idle';
@@ -176,6 +185,15 @@ export function createHostEndpoint(options: HostEndpointOptions): HostEndpoint {
 
     const msg = parseIpcMsg(event.data);
     if (msg === null) return;
+
+    // Rate limit 체크 (N-08 DoS 방어) — 핸드셰이크(INIT)는 제외
+    if (_rateLimiter !== null && msg.type !== MSG_TYPE.INIT) {
+      const verdict = _rateLimiter.check();
+      if (verdict !== 'allow') {
+        options.onRateLimitExceeded?.(_rateLimiter.status());
+        return;
+      }
+    }
 
     switch (msg.type) {
       case MSG_TYPE.INIT: {

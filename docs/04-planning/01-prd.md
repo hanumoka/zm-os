@@ -61,7 +61,7 @@ zm-os는 **브라우저 안에서 동작하는 가상 데스크탑** 으로, 사
 | **SBX-02** | CSP/Permissions-Policy 헤더 | ✅ 완료 | next.config.ts headers() + src/lib/security/csp.ts |
 | **IPC-01** | Comlink 기반 RPC 어댑터 | ✅ 완료 | `src/lib/apps/ipc/` (wire-compatible v1) |
 | **STG-01** | IndexedDB 추상화 | ✅ 완료 | `src/lib/storage/indexeddb.ts` (idb v8.0.3 + 메모리 폴백) |
-| **STG-02** | OPFS 어댑터 (Chrome/Edge) | ⏳ 계획 | Safari는 IndexedDB 폴백 |
+| **STG-02** | OPFS 어댑터 (Chrome/Edge) | ✅ 완료 | StorageAdapter Strategy 패턴 + Safari IDB 폴백 (ADR-0009) |
 | **GAME-01** | 샘플 게임 (Phaser + Pixi.js + Three.js) | ✅ 완료 | Phaser 3 Snake + Pixi.js 8 Particle Rain + Three.js r184 Spinning Cubes — 3개 엔진 호환성 ALL PASS (Phase 3-B) |
 
 ---
