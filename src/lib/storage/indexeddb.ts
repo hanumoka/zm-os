@@ -15,25 +15,28 @@
  */
 
 import { type DBSchema, type IDBPDatabase, openDB as idbOpenDB } from 'idb';
+import {
+  NS_INSTALLED_APPS,
+  NS_USER_APPS,
+  NS_DESKTOP_LAYOUT,
+  NS_DESKTOP_SETTINGS,
+} from './namespace-registry';
+import type { NamespaceId } from './namespace-registry';
+
+export {
+  NS_INSTALLED_APPS as STORE_INSTALLED_APPS,
+  NS_USER_APPS as STORE_USER_APPS,
+  NS_DESKTOP_LAYOUT as STORE_DESKTOP_LAYOUT,
+  NS_DESKTOP_SETTINGS as STORE_DESKTOP_SETTINGS,
+};
 
 // ─── DB / Store 상수 ─────────────────────────────────────────────────────────
 export const DB_NAME = 'zm-os';
 /** DB 버전. store 추가 시 bump (v2: STORE_USER_APPS, v3: STORE_DESKTOP_LAYOUT, v4: STORE_DESKTOP_SETTINGS) */
 export const DB_VERSION = 4;
-export const STORE_INSTALLED_APPS = 'installed-apps' as const;
-/** v2: 사용자 업로드 앱 store (APP-02) */
-export const STORE_USER_APPS = 'user-apps' as const;
-/** v3: 데스크탑 윈도우 레이아웃 영속화 (DSK-04) */
-export const STORE_DESKTOP_LAYOUT = 'desktop-layout' as const;
-/** v4: 데스크탑 설정 (배경화면/테마) (DSK-05) */
-export const STORE_DESKTOP_SETTINGS = 'desktop-settings' as const;
 
 // ─── 타입 ─────────────────────────────────────────────────────────────────────
-export type IDBStoreName =
-  | typeof STORE_INSTALLED_APPS
-  | typeof STORE_USER_APPS
-  | typeof STORE_DESKTOP_LAYOUT
-  | typeof STORE_DESKTOP_SETTINGS;
+export type IDBStoreName = NamespaceId;
 
 /**
  * idb DBSchema 타입 정의 — value를 any로 두어야 idb 내부 타입 충족
@@ -42,22 +45,22 @@ export type IDBStoreName =
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface ZmOsDBSchema extends DBSchema {
-  [STORE_INSTALLED_APPS]: {
+  [NS_INSTALLED_APPS]: {
     key: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     value: any;
   };
-  [STORE_USER_APPS]: {
+  [NS_USER_APPS]: {
     key: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     value: any;
   };
-  [STORE_DESKTOP_LAYOUT]: {
+  [NS_DESKTOP_LAYOUT]: {
     key: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     value: any;
   };
-  [STORE_DESKTOP_SETTINGS]: {
+  [NS_DESKTOP_SETTINGS]: {
     key: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     value: any;
@@ -97,28 +100,28 @@ export function openDB(): Promise<IDBPDatabase<ZmOsDBSchema>> {
   if (_dbPromise === null) {
     _dbPromise = idbOpenDB<ZmOsDBSchema>(DB_NAME, DB_VERSION, {
       upgrade(db, oldVersion) {
-        // v0 → v1: STORE_INSTALLED_APPS 생성
+        // v0 → v1: installed-apps 생성
         if (oldVersion < 1) {
-          if (!db.objectStoreNames.contains(STORE_INSTALLED_APPS)) {
-            db.createObjectStore(STORE_INSTALLED_APPS);
+          if (!db.objectStoreNames.contains(NS_INSTALLED_APPS)) {
+            db.createObjectStore(NS_INSTALLED_APPS);
           }
         }
-        // v1 → v2: STORE_USER_APPS 생성 (APP-02 사용자 업로드 앱)
+        // v1 → v2: user-apps 생성 (APP-02 사용자 업로드 앱)
         if (oldVersion < 2) {
-          if (!db.objectStoreNames.contains(STORE_USER_APPS)) {
-            db.createObjectStore(STORE_USER_APPS);
+          if (!db.objectStoreNames.contains(NS_USER_APPS)) {
+            db.createObjectStore(NS_USER_APPS);
           }
         }
-        // v2 → v3: STORE_DESKTOP_LAYOUT 생성 (DSK-04 윈도우 레이아웃 영속화)
+        // v2 → v3: desktop-layout 생성 (DSK-04 윈도우 레이아웃 영속화)
         if (oldVersion < 3) {
-          if (!db.objectStoreNames.contains(STORE_DESKTOP_LAYOUT)) {
-            db.createObjectStore(STORE_DESKTOP_LAYOUT);
+          if (!db.objectStoreNames.contains(NS_DESKTOP_LAYOUT)) {
+            db.createObjectStore(NS_DESKTOP_LAYOUT);
           }
         }
-        // v3 → v4: STORE_DESKTOP_SETTINGS 생성 (DSK-05 배경화면/테마)
+        // v3 → v4: desktop-settings 생성 (DSK-05 배경화면/테마)
         if (oldVersion < 4) {
-          if (!db.objectStoreNames.contains(STORE_DESKTOP_SETTINGS)) {
-            db.createObjectStore(STORE_DESKTOP_SETTINGS);
+          if (!db.objectStoreNames.contains(NS_DESKTOP_SETTINGS)) {
+            db.createObjectStore(NS_DESKTOP_SETTINGS);
           }
         }
       },

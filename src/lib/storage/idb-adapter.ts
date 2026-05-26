@@ -14,29 +14,19 @@ import {
   idbDelete,
   idbList,
   idbClear,
-  STORE_INSTALLED_APPS,
-  STORE_USER_APPS,
-  STORE_DESKTOP_LAYOUT,
-  STORE_DESKTOP_SETTINGS,
 } from './indexeddb';
 import type { IDBStoreName } from './indexeddb';
-
-const NAMESPACE_MAP: Record<string, IDBStoreName> = {
-  'installed-apps': STORE_INSTALLED_APPS,
-  'user-apps': STORE_USER_APPS,
-  'desktop-layout': STORE_DESKTOP_LAYOUT,
-  'desktop-settings': STORE_DESKTOP_SETTINGS,
-};
+import { isRegisteredNamespace, NAMESPACE_REGISTRY } from './namespace-registry';
 
 function resolveStoreName(namespace: string): IDBStoreName {
-  const storeName = NAMESPACE_MAP[namespace];
-  if (storeName === undefined) {
+  if (!isRegisteredNamespace(namespace)) {
+    const registered = NAMESPACE_REGISTRY.map((e) => e.name).join(', ');
     throw new StorageError(
-      `Unknown namespace "${namespace}". Registered: ${Object.keys(NAMESPACE_MAP).join(', ')}`,
+      `Unknown namespace "${namespace}". Registered: ${registered}`,
       'indexeddb',
     );
   }
-  return storeName;
+  return namespace;
 }
 
 export function isIDBAdapterAvailable(): boolean {

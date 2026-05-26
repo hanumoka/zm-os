@@ -7,8 +7,9 @@
  */
 
 import { resolveAdapterFor } from './resolve-adapter';
+import { NS_DESKTOP_LAYOUT } from './namespace-registry';
 
-const NAMESPACE = 'desktop-layout';
+const NAMESPACE = NS_DESKTOP_LAYOUT;
 const LAYOUT_KEY = 'current';
 
 export type PersistedWindowLayout = {

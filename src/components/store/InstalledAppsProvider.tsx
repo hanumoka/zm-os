@@ -3,7 +3,6 @@
 import React, {
   createContext,
   useContext,
-  useEffect,
   useReducer,
   useCallback,
   useMemo,
@@ -13,8 +12,8 @@ import {
   persistInstalledApp,
   removeInstalledApp,
 } from '@/lib/storage/installed-apps';
-import { usePersistenceError } from '@/lib/errors/PersistenceErrorContext';
-import { createPersistenceError } from '@/lib/errors/persistence-error';
+import { usePersistence } from '@/lib/storage/use-persistence';
+import { NS_INSTALLED_APPS } from '@/lib/storage/namespace-registry';
 
 // ─── Context Value 타입 ───────────────────────────────────────────────────────
 
@@ -117,39 +116,22 @@ export function InstalledAppsProvider({
     installedAppsReducer,
     new Set<string>() as ReadonlySet<string>,
   );
-  const { onPersistenceError } = usePersistenceError();
 
-  // ── IDB hydration (P1=A, frontend.md 비동기 패턴 b — cancelled flag) ──────
-  useEffect(() => {
-    let cancelled = false;
-    listInstalledAppIds()
-      .then((ids) => {
-        if (cancelled) return;
-        dispatch({ type: 'HYDRATE', ids });
-      })
-      .catch((err: unknown) => {
-        onPersistenceError(createPersistenceError('installed-apps', 'hydrate', err));
-      });
-    return (): void => {
-      cancelled = true;
-    };
-  }, []);
+  const { persistAsync } = usePersistence<ReadonlyArray<string>>({
+    namespace: NS_INSTALLED_APPS,
+    loadFn: listInstalledAppIds,
+    onHydrate: (ids) => dispatch({ type: 'HYDRATE', ids }),
+  });
 
-  // ── install: 동기 dispatch + fire-and-forget IDB persist (P3=α, P4=ㄱ) ────
   const install = useCallback((id: string): void => {
     dispatch({ type: 'INSTALL', id });
-    void persistInstalledApp(id).catch((err: unknown) => {
-      onPersistenceError(createPersistenceError('installed-apps', 'persist', err));
-    });
-  }, [onPersistenceError]);
+    persistAsync('persist', () => persistInstalledApp(id));
+  }, [persistAsync]);
 
-  // ── uninstall: 동기 dispatch + fire-and-forget IDB 삭제 (P3=α, P4=ㄱ) ────
   const uninstall = useCallback((id: string): void => {
     dispatch({ type: 'UNINSTALL', id });
-    void removeInstalledApp(id).catch((err: unknown) => {
-      onPersistenceError(createPersistenceError('installed-apps', 'delete', err));
-    });
-  }, [onPersistenceError]);
+    persistAsync('delete', () => removeInstalledApp(id));
+  }, [persistAsync]);
 
   const isInstalled = useCallback(
     (id: string): boolean => installedIds.has(id),

@@ -6,6 +6,7 @@
  */
 
 import { resolveAdapterFor } from './resolve-adapter';
+import { NS_DESKTOP_SETTINGS } from './namespace-registry';
 
 // ─── 타입 ─────────────────────────────────────────────────────────────────────
 
@@ -35,7 +36,7 @@ export type DesktopSettingsRecord = {
 
 // ─── 상수 ─────────────────────────────────────────────────────────────────────
 
-const NAMESPACE = 'desktop-settings';
+const NAMESPACE = NS_DESKTOP_SETTINGS;
 const KEY = 'settings';
 
 // 기본값

@@ -12,8 +12,8 @@ import type {
   ResolvedTheme,
   DesktopSettingsRecord,
 } from '@/lib/storage/desktop-settings';
-import { usePersistenceError } from '@/lib/errors/PersistenceErrorContext';
-import { createPersistenceError } from '@/lib/errors/persistence-error';
+import { NS_DESKTOP_SETTINGS } from '@/lib/storage/namespace-registry';
+import { usePersistence } from '@/lib/storage/use-persistence';
 
 // ─── Context Value 타입 ────────────────────────────────────────────────────────
 
@@ -98,43 +98,32 @@ export function DesktopSettingsProvider({ children }: { children: React.ReactNod
 
   const stateRef = useRef(state);
   stateRef.current = state;
-  const { onPersistenceError } = usePersistenceError();
 
-  // IDB hydration
-  useEffect(() => {
-    let cancelled = false;
-    loadDesktopSettings()
-      .then((record) => {
-        if (cancelled || record === undefined) return;
-        dispatch({ type: 'HYDRATE', settings: record });
-      })
-      .catch((err: unknown) => {
-        onPersistenceError(createPersistenceError('desktop-settings', 'hydrate', err));
-      });
-    return () => { cancelled = true; };
-  }, []);
+  const { persistAsync } = usePersistence<DesktopSettingsRecord | undefined>({
+    namespace: NS_DESKTOP_SETTINGS,
+    loadFn: loadDesktopSettings,
+    onHydrate: (record) => {
+      if (record !== undefined) dispatch({ type: 'HYDRATE', settings: record });
+    },
+  });
 
   const setWallpaper = useCallback((config: WallpaperConfig): void => {
     dispatch({ type: 'SET_WALLPAPER', config });
-    void saveDesktopSettings({
+    persistAsync('persist', () => saveDesktopSettings({
       wallpaper: config,
       themeMode: stateRef.current.themeMode,
       savedAt: Date.now(),
-    }).catch((err: unknown) => {
-      onPersistenceError(createPersistenceError('desktop-settings', 'persist', err));
-    });
-  }, [onPersistenceError]);
+    }));
+  }, [persistAsync]);
 
   const setThemeMode = useCallback((mode: ThemeMode): void => {
     dispatch({ type: 'SET_THEME', mode });
-    void saveDesktopSettings({
+    persistAsync('persist', () => saveDesktopSettings({
       wallpaper: stateRef.current.wallpaper,
       themeMode: mode,
       savedAt: Date.now(),
-    }).catch((err: unknown) => {
-      onPersistenceError(createPersistenceError('desktop-settings', 'persist', err));
-    });
-  }, [onPersistenceError]);
+    }));
+  }, [persistAsync]);
 
   const value = useMemo<DesktopSettingsContextValue>(
     () => ({

@@ -12,7 +12,7 @@ import type { WindowState } from '@/components/desktop/types';
 // ─── 상수 ────────────────────────────────────────────────────────────────────
 
 const SAMPLE_MANIFEST: unknown = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   id: 'com.zmos.sample.bouncing-ball',
   name: 'Bouncing Ball',
   version: '1.0.0',

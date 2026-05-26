@@ -4,15 +4,14 @@ import React, {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useReducer,
 } from 'react';
 import { listUserApps, saveUserApp, deleteUserApp } from '@/lib/storage/user-apps';
 import type { UserAppRecord } from '@/lib/storage/user-apps';
 import type { ParsedUserApp } from '@/lib/apps/zip-loader';
-import { usePersistenceError } from '@/lib/errors/PersistenceErrorContext';
-import { createPersistenceError } from '@/lib/errors/persistence-error';
+import { usePersistence } from '@/lib/storage/use-persistence';
+import { NS_USER_APPS } from '@/lib/storage/namespace-registry';
 
 // ─── Context Value 타입 ────────────────────────────────────────────────────────
 
@@ -91,55 +90,29 @@ const UserAppsContext = createContext<UserAppsContextValue | null>(null);
  */
 export function UserAppsProvider({ children }: { children: React.ReactNode }): React.JSX.Element {
   const [userApps, dispatch] = useReducer(reducer, [] as ReadonlyArray<UserAppRecord>);
-  const { onPersistenceError } = usePersistenceError();
 
-  // ── IDB hydration (cancelled flag — frontend.md 비동기 패턴 b) ───────────
-  useEffect(() => {
-    let cancelled = false;
-    listUserApps()
-      .then((apps) => {
-        if (cancelled) return;
-        dispatch({ type: 'HYDRATE', apps });
-      })
-      .catch((err: unknown) => {
-        onPersistenceError(createPersistenceError('user-apps', 'hydrate', err));
-      });
-    return (): void => {
-      cancelled = true;
-    };
-  }, []);
+  const { persistAsync } = usePersistence<ReadonlyArray<UserAppRecord>>({
+    namespace: NS_USER_APPS,
+    loadFn: listUserApps,
+    onHydrate: (apps) => dispatch({ type: 'HYDRATE', apps }),
+  });
 
-  // ── addUserApp: 동기 dispatch + fire-and-forget IDB persist ──────────────
   const addUserApp = useCallback(async (parsed: ParsedUserApp): Promise<void> => {
     const record: UserAppRecord = { ...parsed, installedAt: Date.now() };
     dispatch({ type: 'ADD', app: record });
-    try {
-      await saveUserApp(record);
-    } catch (err) {
-      onPersistenceError(createPersistenceError('user-apps', 'persist', err));
-    }
-  }, [onPersistenceError]);
+    persistAsync('persist', () => saveUserApp(record));
+  }, [persistAsync]);
 
-  // ── removeUserApp: 동기 dispatch + fire-and-forget IDB delete ────────────
   const removeUserApp = useCallback(async (id: string): Promise<void> => {
     dispatch({ type: 'REMOVE', id });
-    try {
-      await deleteUserApp(id);
-    } catch (err) {
-      onPersistenceError(createPersistenceError('user-apps', 'delete', err));
-    }
-  }, [onPersistenceError]);
+    persistAsync('delete', () => deleteUserApp(id));
+  }, [persistAsync]);
 
-  // ── updateUserApp: addUserApp과 동일한 upsert이지만 의미 분리 ─────────────
   const updateUserApp = useCallback(async (parsed: ParsedUserApp): Promise<void> => {
     const record: UserAppRecord = { ...parsed, installedAt: Date.now() };
     dispatch({ type: 'ADD', app: record });
-    try {
-      await saveUserApp(record);
-    } catch (err) {
-      onPersistenceError(createPersistenceError('user-apps', 'persist', err));
-    }
-  }, [onPersistenceError]);
+    persistAsync('persist', () => saveUserApp(record));
+  }, [persistAsync]);
 
   const hasUserApp = useCallback(
     (id: string): boolean => userApps.some((a) => a.manifest.id === id),

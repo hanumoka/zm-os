@@ -13,6 +13,7 @@ type DesktopIconProps = {
   selected?: boolean;
   onLaunch: () => void;
   onSelect?: () => void;
+  onContextMenu?: (e: React.MouseEvent) => void;
   className?: string;
 };
 
@@ -35,6 +36,7 @@ export function DesktopIcon({
   selected = false,
   onLaunch,
   onSelect,
+  onContextMenu,
   className = '',
 }: DesktopIconProps): React.JSX.Element {
   const handleClick = (): void => {
@@ -92,6 +94,7 @@ export function DesktopIcon({
       onClick={handleClick}
       onDoubleClick={handleDoubleClick}
       onKeyDown={handleKeyDown}
+      onContextMenu={onContextMenu}
     >
       {/* 아이콘 영역 */}
       <div className="flex items-center justify-center w-12 h-12 text-4xl">

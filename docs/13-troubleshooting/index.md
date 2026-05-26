@@ -9,3 +9,4 @@
 | TS-003 | AppFrame useRef guard가 2차 mount 차단 | desktop/AppFrame | React StrictMode | M-001 |
 | TS-004 | Snake 게임 자동 시작 후 즉시 Game Over | sample-game | 게임 UX | — |
 | TS-005 | ZIP built-in manifest.id 중복 검사 우회 | store/AppUpload | 입력 검증 | — |
+| TS-006 | PersistenceErrorSource 'window-layout' vs IDB 'desktop-layout' 불일치 | errors/storage | 네이밍 산재 | — |

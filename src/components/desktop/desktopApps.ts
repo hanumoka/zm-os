@@ -103,7 +103,7 @@ export const DESKTOP_APPS: ReadonlyArray<DesktopAppEntry> = [
       size: { width: 520, height: 380 },
     },
     manifest: {
-      schemaVersion: 1,
+      schemaVersion: 2,
       id: 'com.zmos.sample.bouncing-ball',
       name: 'Bouncing Ball',
       version: '1.0.0',
@@ -137,7 +137,7 @@ export const DESKTOP_APPS: ReadonlyArray<DesktopAppEntry> = [
       size: { width: 520, height: 380 },
     },
     manifest: {
-      schemaVersion: 1,
+      schemaVersion: 2,
       id: 'com.zmos.sample.ipc-demo',
       name: 'IPC Demo',
       version: '1.0.0',
@@ -188,7 +188,7 @@ export const DESKTOP_APPS: ReadonlyArray<DesktopAppEntry> = [
       size: { width: 660, height: 520 },
     },
     manifest: {
-      schemaVersion: 1,
+      schemaVersion: 2,
       id: 'com.zmos.sample.snake-game',
       name: 'Snake',
       version: '1.0.0',
@@ -220,7 +220,7 @@ export const DESKTOP_APPS: ReadonlyArray<DesktopAppEntry> = [
       size: { width: 640, height: 480 },
     },
     manifest: {
-      schemaVersion: 1,
+      schemaVersion: 2,
       id: 'com.zmos.sample.particle-rain',
       name: 'Particle Rain',
       version: '1.0.0',
@@ -252,7 +252,7 @@ export const DESKTOP_APPS: ReadonlyArray<DesktopAppEntry> = [
       size: { width: 640, height: 480 },
     },
     manifest: {
-      schemaVersion: 1,
+      schemaVersion: 2,
       id: 'com.zmos.sample.spinning-cubes',
       name: 'Spinning Cubes',
       version: '1.0.0',

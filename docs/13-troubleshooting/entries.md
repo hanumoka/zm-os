@@ -17,6 +17,16 @@
 
 ## Active Patterns
 
+### [TS-006] PersistenceErrorSource 'window-layout' vs IDB 'desktop-layout' 불일치
+
+**증상**: `WindowManagerProvider`에서 `createPersistenceError('window-layout', ...)` 호출 시 에러 소스 이름이 실제 IDB store name `'desktop-layout'`과 불일치. 에러 로그에서 정확한 store 추적 불가.
+**원인**: 동일 namespace 식별자를 3개 파일에서 독립적으로 정의하면서 `persistence-error.ts`에서만 `'window-layout'`으로 잘못 등록. 타입이 union literal이라 컴파일 에러 없이 통과.
+**해결**: `namespace-registry.ts` SSOT 신설 → `PersistenceErrorSource`를 `NamespaceId`에서 자동 도출 → 'window-layout' 자동 제거 + `NS_DESKTOP_LAYOUT` 상수로 통일.
+**관련 파일**: `src/lib/errors/persistence-error.ts:6-10`, `src/components/desktop/WindowManagerProvider.tsx:96,136`
+**날짜**: 2026-05-26
+**재발 이력**: —
+**관련 M-NNN**: —
+
 ### [TS-001] React StrictMode useEffect 안 setInterval cleanup 누락
 
 **증상**: useEffect 안에서 `const pollId = setInterval(...)`로 만든 interval이 cleanup에서 `clearInterval` 안 됨. React StrictMode unmount/remount 시 stale interval 누수.

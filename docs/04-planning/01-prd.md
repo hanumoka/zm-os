@@ -74,7 +74,8 @@ zm-os는 **브라우저 안에서 동작하는 가상 데스크탑** 으로, 사
 - 앱 스토어 백엔드 (Postgres + RLS, 업로드 + 모더레이션)
 - 멀티디바이스 동기화
 
-상세 후보 스택: [`03-multitenant-stack-options.md`](../05-analysis/03-multitenant-stack-options.md)
+**상세 plan**: [`03-v2-plan.md`](03-v2-plan.md) — 9 Epic + 46 작업 + 12 ADR 후보 (architect 검토 ✅)
+**스택 후보 분석**: [`03-multitenant-stack-options.md`](../05-analysis/03-multitenant-stack-options.md)
 
 ---
 

@@ -40,6 +40,9 @@ yarn-error.log*
 .claude/settings.local.json
 **/.claude/agent-memory/
 
+# Event stream (local session log, JSONL append-only)
+events/
+
 # Scratch / temp
 .scratch/
 tmp/

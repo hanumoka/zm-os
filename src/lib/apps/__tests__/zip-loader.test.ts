@@ -3,10 +3,18 @@ import JSZip from 'jszip';
 import { loadUserAppFromZip } from '../zip-loader';
 
 const VALID_MANIFEST = JSON.stringify({
-  schemaVersion: 1,
+  schemaVersion: 2,
   id: 'test-app',
   name: 'Test App',
   version: '1.0.0',
+});
+
+const V1_MANIFEST = JSON.stringify({
+  schemaVersion: 1,
+  id: 'test-v1-app',
+  name: 'Test V1 App',
+  version: '1.0.0',
+  permissions: ['gamepad'],
 });
 
 const VALID_HTML = '<html><body>Hello</body></html>';
@@ -73,9 +81,22 @@ describe('loadUserAppFromZip', () => {
     }
   });
 
+  it('V1 manifest ZIP loads with migrated capabilities', async () => {
+    const file = await makeZipFile({
+      'manifest.json': V1_MANIFEST,
+      'index.html': VALID_HTML,
+    });
+    const result = await loadUserAppFromZip(file, EMPTY_RESERVED);
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.app.manifest.schemaVersion).toBe(2);
+      expect(result.app.manifest.capabilities).toEqual(['gamepad']);
+    }
+  });
+
   it('invalid manifest returns MANIFEST_INVALID', async () => {
     const file = await makeZipFile({
-      'manifest.json': JSON.stringify({ schemaVersion: 1, id: 'x' }),
+      'manifest.json': JSON.stringify({ schemaVersion: 2, id: 'x' }),
       'index.html': VALID_HTML,
     });
     const result = await loadUserAppFromZip(file, EMPTY_RESERVED);
@@ -100,7 +121,7 @@ describe('loadUserAppFromZip', () => {
 
   it('duplicate reserved id returns DUPLICATE_ID', async () => {
     const manifest = JSON.stringify({
-      schemaVersion: 1,
+      schemaVersion: 2,
       id: 'builtin-app',
       name: 'Clone',
       version: '1.0.0',

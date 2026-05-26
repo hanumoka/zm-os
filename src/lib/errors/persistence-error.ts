@@ -3,11 +3,9 @@
  * Provider에서 fire-and-forget 영속화 실패 시 구조화된 에러 전달.
  */
 
-export type PersistenceErrorSource =
-  | 'installed-apps'
-  | 'user-apps'
-  | 'window-layout'
-  | 'desktop-settings';
+import type { NamespaceId } from '@/lib/storage/namespace-registry';
+
+export type PersistenceErrorSource = NamespaceId;
 
 export type PersistenceErrorOperation = 'hydrate' | 'persist' | 'delete';
 

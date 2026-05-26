@@ -43,23 +43,24 @@
 | TEST-01 | Vitest 4.1.7 + 56개 단위 테스트 | — | ✅ 완료 |
 | DSK-05 | 데스크탑 커스터마이징 (배경/테마/설정 UI) | ADR-0012 | ✅ 완료 |
 
-| REFAC-01 | 설계 리팩토링 C-1+H-5 (Error Boundary + 에러 플러밍) | ADR-0013 | ✅ 완료 |
+| REFAC-01 | 설계 리팩토링 8/8 (Error Boundary + 에러 플러밍 + NS Registry + Manifest v2 + Persistence Hook + Validation Chain + ContentLoader + Desktop 분리) | ADR-0013 | ✅ 완료 |
 
-### 설계 리팩토링 진행 상황 (8항목, 2/8 완료)
+### 설계 리팩토링 진행 상황 (8항목, 8/8 ✅ 전체 완료)
 
 | 순서 | 항목 | 내용 | 상태 |
 |------|------|------|------|
 | 1 | C-1 | React Error Boundary (error.tsx + global-error.tsx) | ✅ 완료 |
 | 2 | H-5 | Silent Catch → PersistenceErrorContext 구조화 에러 | ✅ 완료 |
-| 3 | C-3 | Namespace Registry 통합 (3파일→1파일 등록) | ⏳ 대기 |
-| 4 | H-1 | Manifest v2 Schema (capabilities 개방형 모델) | ⏳ 대기 |
-| 5 | H-4 | Provider Persistence Hook 분리 (DI 가능) | ⏳ 대기 |
-| 6 | H-2 | ZIP Loader Validation Chain (플러그형 검증) | ⏳ 대기 |
-| 7 | H-3 | AppFrame Strategy Pattern (ContentLoader) | ⏳ 대기 |
-| 8 | C-2 | Desktop.tsx God Component 분리 | ⏳ 대기 |
+| 3 | C-3 | Namespace Registry 통합 (3파일→1파일 등록) | ✅ 완료 |
+| 4 | H-1 | Manifest v2 Schema (capabilities 개방형 모델) | ✅ 완료 |
+| 5 | H-4 | Provider Persistence Hook 분리 (DI 가능) | ✅ 완료 |
+| 6 | H-2 | ZIP Loader Validation Chain (플러그형 검증) | ✅ 완료 |
+| 7 | H-3 | AppFrame Strategy Pattern (ContentLoader) | ✅ 완료 |
+| 8 | C-2 | Desktop.tsx God Component 분리 | ✅ 완료 |
 
 ### 다음 후보
-- REFAC-01 나머지 6항목 (C-3 → H-1 → H-4 → H-2 → H-3 → C-2)
+- ~~APP-04 확장: 컨텍스트 메뉴 우클릭 앱 삭제/정보~~ ✅ 완료
+- IPC-02: Comlink 직접 통합 (v2 준비, Phase 4 이연)
 - IPC-02: Comlink 직접 통합 (v2 준비)
 - APP-04 확장: 데스크탑 우클릭 컨텍스트 메뉴에서 앱 삭제/정보
 

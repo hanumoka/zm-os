@@ -9,6 +9,7 @@ import type { StorageAdapter } from './storage-adapter';
 import { isOPFSAvailable, createOPFSAdapter } from './opfs-adapter';
 import { isIDBAdapterAvailable, createIDBAdapter } from './idb-adapter';
 import { createMemoryAdapter } from './memory-adapter';
+import { getNamespaceEntry } from './namespace-registry';
 
 let _cachedAdapter: StorageAdapter | null = null;
 
@@ -30,37 +31,27 @@ export function resolveStorageAdapter(): StorageAdapter {
   return _cachedAdapter;
 }
 
-const NAMESPACE_OVERRIDES: Record<string, () => StorageAdapter> = {
-  'desktop-layout': () => {
-    if (isIDBAdapterAvailable()) return createIDBAdapter();
-    return createMemoryAdapter();
-  },
-  'installed-apps': () => {
-    if (isIDBAdapterAvailable()) return createIDBAdapter();
-    return createMemoryAdapter();
-  },
-  'user-apps': () => {
-    if (isIDBAdapterAvailable()) return createIDBAdapter();
-    return createMemoryAdapter();
-  },
-  'desktop-settings': () => {
-    if (isIDBAdapterAvailable()) return createIDBAdapter();
-    return createMemoryAdapter();
-  },
-};
+function resolveByPolicy(policy: string): StorageAdapter {
+  if (policy === 'idb-only') {
+    return isIDBAdapterAvailable() ? createIDBAdapter() : createMemoryAdapter();
+  }
+  return resolveStorageAdapter();
+}
 
 const _nsCache = new Map<string, StorageAdapter>();
 
 /**
  * namespace별 최적 어댑터를 반환한다.
- * 오버라이드 등록된 namespace는 전용 어댑터, 그 외는 기본 어댑터.
+ * 레지스트리에 등록된 namespace는 adapterPolicy에 따라 어댑터 선택, 그 외는 기본 어댑터.
  */
 export function resolveAdapterFor(namespace: string): StorageAdapter {
   const cached = _nsCache.get(namespace);
   if (cached !== undefined) return cached;
 
-  const factory = NAMESPACE_OVERRIDES[namespace];
-  const adapter = factory !== undefined ? factory() : resolveStorageAdapter();
+  const entry = getNamespaceEntry(namespace);
+  const adapter = entry !== undefined
+    ? resolveByPolicy(entry.adapterPolicy)
+    : resolveStorageAdapter();
   _nsCache.set(namespace, adapter);
   return adapter;
 }

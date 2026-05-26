@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { parseManifest } from '@/lib/apps/manifest';
 import { createSandboxedFrame } from '@/lib/apps/sandbox';
+import { createContentLoader, type ContentSource } from '@/lib/apps/content-loader';
 import type { DesktopAppEntry } from './desktopApps';
 
 // ─── Props ────────────────────────────────────────────────────────────────────
@@ -77,33 +78,13 @@ export function AppFrame({ entry }: AppFrameProps): React.JSX.Element {
       return;
     }
 
-    /**
-     * HTML 취득: source에 따라 두 경로로 분기.
-     * - 'built-in': POC 예외 raw fetch (/public 정적 파일)
-     * - 'user': entry.htmlContent를 직접 사용 (ZIP에서 이미 추출됨)
-     */
-    const getHtml = (): Promise<string> => {
-      if (entry.source === 'user') {
-        const html = entry.htmlContent;
-        if (html === undefined || html === '') {
-          return Promise.reject(new Error('user 앱 htmlContent가 없습니다'));
-        }
-        return Promise.resolve(html);
-      }
-      // built-in: raw fetch (/public 정적 파일, 외부 API 아님)
-      const url = entry.contentUrl;
-      if (url === undefined || url === '') {
-        return Promise.reject(new Error('built-in 앱 contentUrl이 없습니다'));
-      }
-      return fetch(url).then((r) => {
-        if (!r.ok) throw new Error(`fetch 실패: ${r.status} ${r.statusText}`);
-        return r.text();
-      });
-    };
-
-    // 2. HTML 취득
+    // 2. HTML 취득 (ContentLoader 전략 패턴)
+    const contentSource: ContentSource = entry.source === 'user'
+      ? { source: 'user', htmlContent: entry.htmlContent ?? '' }
+      : { source: 'built-in', contentUrl: entry.contentUrl ?? '' };
+    const loader = createContentLoader(contentSource);
     setStatus('fetching');
-    getHtml()
+    loader.load()
       .then((html) => {
         if (destroyed) {
           // eslint-disable-next-line no-console

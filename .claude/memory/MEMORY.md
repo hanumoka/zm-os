@@ -9,7 +9,7 @@
 - 스킬: 9개 (zm-commit, zm-unit-done, zm-session, zm-troubleshoot, zm-memory-save, zm-work-intake, zm-work-completion, zm-doc-status, zm-roadmap)
 - 규칙: 10개 (frontend, security, work-units, known-mistakes, doc-naming, file-categories, quality-standard, self-review, auto-memory-protocol, troubleshoot-auto)
 - 훅: 10개 Python (mistake_guard, post_review, session_start, notify_done, category_guard, emit_event, prompt_context, pre_compact, post_compact, post_review_checks)
-- 단위 테스트: Vitest 56개 (6파일 ALL PASS) | E2E: Playwright 6개 (모두 PASS)
+- 단위 테스트: Vitest 61개 (6파일 ALL PASS) | E2E: Playwright 6개 (모두 PASS)
 - 의존성: next 16, react 19, tailwind 4, zod 4.4.3, typescript 5, react-rnd v10.5.3, phaser@3.90.0, idb@8.0.3, jszip@3.10.1, pixi.js@8.18.1, three@0.184.0, vitest@4.1.7 (dev), playwright (dev)
 
 ## 기술 스택
@@ -48,11 +48,19 @@
 - **Phase 3 ✅ 완료 (4/4, 100%)** + **Post-POC 진행 중**
 - **POC 종료 게이트 ✅ 통과** — 보안 14 페네스트 + 번들 임계치 PASS, 데모/시연 가능.
 - **Post-POC**: APP-04 ✅ + TEST-01 ✅ + DSK-05 ✅ + REFAC-01 (2/8) 진행 중
-- **REFAC-01**: 설계 리팩토링 — C-1 Error Boundary ✅ + H-5 에러 플러밍 ✅ (나머지 6항목 대기)
-- 다음 후보: REFAC-01 나머지 6항목 / IPC-02 (Comlink 직접 통합) / APP-04 확장 (컨텍스트 메뉴)
+- **REFAC-01**: 설계 리팩토링 **8/8 ✅ 전체 완료** (C-1+H-5+C-3+H-1+H-4+H-2+H-3+C-2)
+- 다음 후보: IPC-02 (Comlink 직접 통합, Phase 4 이연 — 빌드 인프라 + ADR 필요)
 
 ## 최근 결정사항 (최대 10, FIFO)
-- 2026-05-25: REFAC-01 착수 — 설계 정밀 검토 8항목 확정. C-1 Error Boundary + H-5 에러 플러밍 완료. 나머지 6항목 대기.
+- 2026-05-26: v2 Plan v0.2.0 — architect 검토 + 사용자 결정 4건 반영. **9 Epic(G/H/I 신규) + 46 작업 + 12 ADR 후보 + 10 정책 reshape + M5~M10 (21주)**. 다음: ADR 3건 병렬 (Auth + DB + Sync) + 모노레포 분리.
+- 2026-05-26: v2 Plan 초안 작성 — 6 Epic + 33 작업 + 7 ADR 후보 + 8 정책 reshape + 4 마일스톤(M5~M8). docs/04-planning/03-v2-plan.md.
+- 2026-05-26: APP-04 확장 완료 — 데스크탑 아이콘 우클릭 컨텍스트 메뉴 (앱 정보 + 사용자 앱 삭제). AppInfoDialog 신규.
+- 2026-05-26: REFAC-01 정밀 감사 + 수정 — H-3 lib→components 역방향 의존성 제거 + C-2 정책 코멘트 복원.
+- 2026-05-26: REFAC-01 **전체 완료 (8/8)** — H-2 9 validator 분리 + H-3 ContentLoader 전략 + C-2 Desktop 컴포넌트 분리.
+- 2026-05-26: REFAC-01 H-4 완료 — usePersistence 훅 추출. 4개 Provider 공통 hydration+persist 패턴 DI화.
+- 2026-05-26: REFAC-01 H-1 완료 — Manifest v2 Schema (capabilities 개방형 string[]). V1/V2 하위호환 마이그레이션.
+- 2026-05-26: REFAC-01 C-3 완료 — Namespace Registry 통합 (3파일→1파일 SSOT). 'window-layout' 버그 수정.
+- 2026-05-25: REFAC-01 착수 — 설계 정밀 검토 8항목 확정. C-1 Error Boundary + H-5 에러 플러밍 완료.
 - 2026-05-25: DSK-05 완료 — 데스크탑 커스터마이징 (배경화면 8 프리셋 + URL + 라이트/다크/시스템 테마 + 컨텍스트 메뉴 + 설정 패널). ADR-0012.
 - 2026-05-25: TEST-01 완료 — Vitest 4.1.7 도입 + 56개 단위 테스트. zip-loader Node.js File 호환 수정.
 - 2026-05-25: APP-04 완료 — 사용자 앱 삭제(확인 다이얼로그) + 업데이트(semver 비교). ConfirmDialog 범용 UI. ADR-0011.

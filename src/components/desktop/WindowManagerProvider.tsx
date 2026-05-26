@@ -16,8 +16,8 @@ import {
   loadDesktopLayout,
   saveDesktopLayout,
 } from '@/lib/storage/desktop-layout';
-import { usePersistenceError } from '@/lib/errors/PersistenceErrorContext';
-import { createPersistenceError } from '@/lib/errors/persistence-error';
+import { NS_DESKTOP_LAYOUT } from '@/lib/storage/namespace-registry';
+import { usePersistence } from '@/lib/storage/use-persistence';
 
 // ─── 상수 ────────────────────────────────────────────────────────────────────
 
@@ -83,8 +83,21 @@ export function WindowManagerProvider({
   windowsRef.current = windows;
 
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const hydratedRef = useRef(false);
-  const { onPersistenceError } = usePersistenceError();
+
+  const { hydrated, persistAsync } = usePersistence<DesktopLayoutRecord | undefined>({
+    namespace: NS_DESKTOP_LAYOUT,
+    loadFn: loadDesktopLayout,
+    onHydrate: (record) => {
+      if (record === undefined || record.windows.length === 0) return;
+      dispatch({
+        type: 'RESTORE_LAYOUT',
+        payload: { windows: layoutToWindows(record.windows) },
+      });
+    },
+  });
+
+  const hydratedRef = useRef(hydrated);
+  hydratedRef.current = hydrated;
 
   // ─── Persist 헬퍼 ──────────────────────────────────────────────────────────
 
@@ -92,10 +105,8 @@ export function WindowManagerProvider({
     if (!hydratedRef.current) return;
     const current = windowsRef.current;
     if (current.length === 0) return;
-    void saveDesktopLayout(windowsToLayout(current)).catch((err: unknown) => {
-      onPersistenceError(createPersistenceError('window-layout', 'persist', err));
-    });
-  }, [onPersistenceError]);
+    persistAsync('persist', () => saveDesktopLayout(windowsToLayout(current)));
+  }, [persistAsync]);
 
   const persistDebounced = useCallback((): void => {
     if (debounceTimerRef.current !== null) {
@@ -114,32 +125,6 @@ export function WindowManagerProvider({
     }
     persistNow();
   }, [persistNow]);
-
-  // ─── Hydration (mount 시 1회) ──────────────────────────────────────────────
-
-  useEffect(() => {
-    let cancelled = false;
-
-    void loadDesktopLayout()
-      .then((record) => {
-        if (cancelled) return;
-        hydratedRef.current = true;
-        if (record === undefined || record.windows.length === 0) return;
-        dispatch({
-          type: 'RESTORE_LAYOUT',
-          payload: { windows: layoutToWindows(record.windows) },
-        });
-      })
-      .catch((e) => {
-        if (cancelled) return;
-        hydratedRef.current = true;
-        onPersistenceError(createPersistenceError('window-layout', 'hydrate', e));
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   // ─── visibilitychange flush ────────────────────────────────────────────────
 
