@@ -15,21 +15,30 @@
 | [ADR-0009](adr-0009-storage-abstraction.md) | 스토리지 추상화 계층 — StorageAdapter Strategy 패턴 + OPFS 어댑터 | accepted | 2026-05-25 |
 | [ADR-0011](adr-0011-user-app-lifecycle.md) | 사용자 앱 삭제 및 업데이트 UX (APP-04) | accepted | 2026-05-25 |
 | [ADR-0012](adr-0012-dark-mode-strategy.md) | 다크 모드 CSS 전략 — Tailwind v4 class 기반 dark variant | accepted | 2026-05-25 |
-| [ADR-0013](adr-0013-v2-auth-supabase.md) | v2 사용자 인증 — Supabase Auth 채택 | accepted | 2026-05-26 |
-| [ADR-0014](adr-0014-v2-db-supabase.md) | v2 Postgres 호스팅 + RLS — Supabase 채택 | accepted | 2026-05-26 |
-| [ADR-0015](adr-0015-v2-sync-lww.md) | v2 데스크탑 상태 동기화 — LWW + 서버 권위 시계 | accepted | 2026-05-26 |
+| [ADR-0013](adr-0013-v2-auth-supabase.md) | v2 사용자 인증 — Supabase Auth 채택 | ⚠️ reshape 대기 | 2026-05-26 |
+| [ADR-0014](adr-0014-v2-db-supabase.md) | v2 Postgres 호스팅 + RLS — Supabase 채택 | ⚠️ reshape 대기 | 2026-05-26 |
+| [ADR-0015](adr-0015-v2-sync-lww.md) | v2 데스크탑 상태 동기화 — LWW + 서버 권위 시계 | ⚠️ reshape 대기 | 2026-05-26 |
 | [ADR-0016](adr-0016-v2-monorepo.md) | v2 모노레포 도구 — pnpm workspaces + Turborepo | accepted | 2026-05-26 |
 
 ## 다음 번호 가이드
 
-- ADR-0017 후보:
-  - ADR-Storage (객체 스토리지 — R2 vs Supabase Storage)
-  - ADR-Hosting (Vercel vs Cloudflare Pages)
+> **2026-05-26 방향 전환**: 로컬-우선 + 외부 의존성 옵션 아키텍처. 클라우드 단독 가정 ADR은 reshape.
+
+- **ADR-0017** (즉시 필요): Ports & Adapters 아키텍처 + 5개 Port 정의 (AuthProvider/AppRepository/BlobStorage/SyncProvider/ModerationProvider)
+- **ADR-0018~0023** (ADR-0017 후 6건):
+  - ADR-0018: AuthProvider + LocalAuth 기본 구현
+  - ADR-0019: AppRepository + LocalRepo (IDB)
+  - ADR-0020: BlobStorage + LocalOPFS
+  - ADR-0021: SyncProvider + LocalNoOp
+  - ADR-0022: ModerationProvider + StaticAnalysis (eval/Function 검출)
+  - ADR-0023: PROD-05-v2 reshape (로컬 OPFS 다중 파일)
+- **ADR-0024+** (CloudAdapter 옵션 + Permission 등 보류 항목):
   - ADR-Permission (manifest capabilities + grant 영속화)
-  - ADR-API-Auth (Server Action vs Route Handler + JWT cookie vs header)
-  - ADR-Migration (v1 IDB → v2 cloud)
-  - ADR-Moderation (사전/사후/신뢰 등급)
-  - ADR-PROD-05-v2 (사용자 ZIP 다중 파일 + presigned URL)
+  - ADR-API-Auth (Server Action vs Route Handler, JWT cookie 위치)
+  - ADR-Hosting (Vercel / CF Pages / 정적 export)
+  - ADR-Storage-Cloud (R2 / Supabase Storage / S3 어댑터)
+  - ADR-Migration (로컬 v1 → v2)
+  - ADR-Moderation-Cloud (VirusTotal 등 옵션 어댑터)
 
 ## 작성 규칙
 

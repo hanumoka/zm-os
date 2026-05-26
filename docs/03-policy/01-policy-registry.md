@@ -106,20 +106,23 @@
 - **재고 시점**: v2에서 인라인 blocking 스크립트 또는 cookie 기반 SSR 힌트로 flash 제거
 - **상세**: ADR-0012
 
-### TECH-07: v2 사용자 인증 — Supabase Auth (2026-05-26)
+### TECH-07: v2 사용자 인증 — Supabase Auth (2026-05-26, ⚠️ reshape 대기)
+- **상태**: 사용자 결정에 따라 "로컬-우선 + 외부 의존성 옵션" 아키텍처로 전환. Supabase Auth = AuthProvider 어댑터 중 하나로 격하 예정.
 - **결정**: Supabase Auth 단독 채택. Server Action 기반 인증 흐름, cookie httpOnly + SameSite=Strict, JWT 클레임 → Postgres RLS `auth.uid()` 직접 추출.
 - **이유**: ADR-0013 — 50,000 MAU 무료 + $0.00325/MAU 초과 (Clerk 대비 6배 저렴), RLS 네이티브 통합, Lock-in 최저 (PG + GoTrue 오픈소스).
 - **보안 의무**: Supabase Auth ≥2.185.0 강제 (CVE-2026-31813), service_role key 클라이언트 노출 절대 금지, proxy.ts 단독 의존 금지 (CVE-2025-29927 회피).
 - **재고 시점**: 50k MAU 초과 또는 SSO/SAML 요구 시
 - **상세**: ADR-0013
 
-### TECH-08: v2 DB 호스팅 — Supabase Postgres + Drizzle ORM (2026-05-26)
+### TECH-08: v2 DB 호스팅 — Supabase Postgres + Drizzle ORM (2026-05-26, ⚠️ reshape 대기)
+- **상태**: 로컬-우선 전환. Supabase Postgres = AppRepository 어댑터 중 하나로 격하 예정. 로컬 기본 = IDB 기반 LocalRepo.
 - **결정**: DB 호스팅 = Supabase (ADR-0013과 단일 벤더), ORM = Drizzle ORM, 마이그레이션 = Drizzle Kit. 모든 사용자 데이터 테이블에 RLS 기본 활성화 `auth.uid() = owner_id` 패턴.
 - **이유**: ADR-0014 — Supabase Auth 결합 시 `auth.uid()` 자동 동작, 단일 벤더 운영 단순화, Lock-in 최저 (pg_dump 표준).
 - **재고 시점**: Edge runtime 호환 문제 발생 시 Neon + `pg_session_jwt`로 이전 검토
 - **상세**: ADR-0014
 
-### TECH-09: v2 동기화 전략 — LWW + 서버 권위 시계 (2026-05-26)
+### TECH-09: v2 동기화 전략 — LWW + 서버 권위 시계 (2026-05-26, ⚠️ reshape 대기)
+- **상태**: 로컬-우선 전환. LWW 알고리즘은 CloudSync 어댑터 내 유지, 로컬 기본 = LocalNoOpSync (단일 사용자 멀티 디바이스 미지원).
 - **결정**: SyncEnvelope 패턴 (data + serverSavedAt + clientSavedAt hint + idempotencyKey), 서버 측 timestamp 권위 부여, 오프라인 큐는 IDB sync-queue namespace + 지수 백오프 + 멱등성 키.
 - **이유**: ADR-0015 — 데이터 단순(Set/Array/key-value)하여 CRDT 과잉, 0KB 번들 영향, 시간 드리프트 방어, 향후 envelope 내부 CRDT 전환 reshape 가능.
 - **재고 시점**: 실시간 협업(앱 간 IPC, 동시 다중 편집) 도입 시 → Yjs 부분 도입

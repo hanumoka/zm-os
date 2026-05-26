@@ -9,6 +9,8 @@ related: ["0001", "0014", "0015"]
 
 # ADR-0013: v2 사용자 인증 — Supabase Auth 채택
 
+> ⚠️ **2026-05-26 상태 변경**: 사용자 결정에 따라 "로컬-우선 + 외부 의존성 옵션" 아키텍처로 전환됨. 본 ADR은 "Supabase Auth = AuthProvider 어댑터 중 하나"로 reshape 예정. ADR-0017 (Ports & Adapters) 작성 후 본 ADR을 superseded 처리하고 신규 ADR로 분리한다.
+
 ## Context
 
 - PRD §1.2 비전 3번 (사용자 계정 + 어디서나 본인 OS 접근) 달성을 위해 v2에서 인증 도입 필요.

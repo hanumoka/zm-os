@@ -3,9 +3,14 @@
 > **Living Document**. architect 검토 + 사용자 결정사항 반영.
 > 각 결정사항은 ADR로 별도 승격 예정.
 
-**Version**: 0.2.0
+**Version**: 0.2.1
 **Last Updated**: 2026-05-26
-**Status**: architect ✅ + 사용자 결정 ✅ — ADR 3건 병렬 작성 대기
+**Status**: ⚠️ 로컬-우선 아키텍처 전환 대기 — v0.3.0 재작성 예정
+
+> **2026-05-26 사용자 결정 (재설정)**:
+> "로컬 100% 설치 + 외부 의존성 0 + 클라우드는 추상화 레이어 뒤의 옵션"
+>
+> 이 결정으로 v0.2.0의 클라우드 전제 (Supabase Auth/DB/Sync, R2 Storage 등)는 무효화되며, **Ports & Adapters 아키텍처 (ADR-0017 대기)** + **로컬 어댑터 기본 + 클라우드 어댑터 옵션** 구조로 v0.3.0 재작성 필요.
 
 ---
 
@@ -293,9 +298,12 @@ ADR 결정 기간(2~3주)은 별도. M5 진입 전 ADR 3건 병렬 완료 필요
 ### 완료 추가 (2026-05-26)
 4. ✅ **SRV-00 실행**: 모노레포 마이그레이션 완료 — apps/web + packages/{core,storage,ipc} + pnpm + Turborepo
 
-### 다음 단계
-5. **ADR 2차 7건 작성**: Storage/Hosting/Permission/API-Auth/Migration/Moderation/PROD-05-v2
-6. **M5 진입**: SRV-01~02 + USR-01~04 (인프라 + 인증)
+### 다음 단계 (재정의 — 로컬-우선 전환)
+5. **ADR-0017 작성**: Ports & Adapters 아키텍처 + 5개 Port 정의 (AuthProvider/AppRepository/BlobStorage/SyncProvider/ModerationProvider)
+6. **ADR-0013/0014/0015 reshape**: 어댑터 옵션으로 격하 (Supabase = AuthProvider/AppRepository/SyncProvider의 한 어댑터)
+7. **ADR-0018~0023 작성**: 각 Port의 LocalAdapter 기본 구현 명세 (LocalAuth/LocalRepo/LocalOPFS/LocalNoOp/StaticAnalysis + PROD-05-v2)
+8. **v2 plan v0.3.0 재작성**: 로컬 우선 + 옵션 어댑터 구조 (9 Epic은 유지, 작업마다 LocalAdapter 필수 / CloudAdapter 옵션 표기)
+9. **M5 진입**: SRV-01~02 + USR-01~04 (로컬 인증 기본)
 
 ### ADR 1차 완료 후
 4. **ADR 2차 작성**: ADR-Storage + ADR-Hosting + ADR-Permission + ADR-API-Auth + ADR-Migration + ADR-Moderation + ADR-PROD-05-v2 (7건)

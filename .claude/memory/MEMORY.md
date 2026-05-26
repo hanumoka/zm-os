@@ -49,10 +49,11 @@
 - **POC 종료 게이트 ✅ 통과** — 보안 14 페네스트 + 번들 임계치 PASS, 데모/시연 가능.
 - **Post-POC**: APP-04 ✅ + TEST-01 ✅ + DSK-05 ✅ + REFAC-01 (2/8) 진행 중
 - **REFAC-01**: 설계 리팩토링 **8/8 ✅ 전체 완료** (C-1+H-5+C-3+H-1+H-4+H-2+H-3+C-2)
-- 다음 후보: ADR 2차 7건 작성 (Storage/Hosting/Permission/API-Auth/Migration/Moderation/PROD-05-v2) + M5 진입 (SRV-01~02 + USR-01~04)
+- 다음 후보: ADR-0017 (Ports & Adapters) + ADR-0013/0014/0015 reshape (superseded + 신규 분리) + ADR-0018~0023 (Local 어댑터 6건) + v2 plan v0.3.0 재작성
 
 ## 최근 결정사항 (최대 10, FIFO)
-- 2026-05-26: **SRV-00 실행 완료** — 모노레포 마이그레이션 (src/ → apps/web + packages/{core,storage,ipc} + pnpm workspaces + Turborepo). 검증: turbo type-check 4/4 + turbo test 61/61 + next build ✅. import alias 갱신: @/lib/* → @zm/core, @zm/storage, @zm/ipc.
+- 2026-05-26: **로컬-우선 아키텍처 전환** — 사용자 결정. 로컬 100% 외부 의존성 0 + 클라우드 옵션은 어댑터 추상화. Ports & Adapters 도입 (ADR-0017 대기). 기존 ADR-0013/0014/0015(Supabase 단일 채택)는 "어댑터 옵션"으로 reshape 대기. 진행 중이던 ADR 2차 7건은 로컬-우선 6건(0018~0023)으로 재구성, 클라우드 어댑터 ADR은 별도 트랙(0024+) 분리. 현재 스냅샷: docs/01-architecture/06-current-snapshot-2026-05-26.md.
+- 2026-05-26: **SRV-00 실행 완료** — 모노레포 마이그레이션 (src/ → apps/web + packages/{core,storage,ipc} + pnpm workspaces + Turborepo). 검증: turbo type-check 4/4 + turbo test 61/61 + next build ✅.
 - 2026-05-26: ADR-0016 (v2 모노레포) — pnpm 11 + Turborepo 2.7. 구조 apps/web + packages/{core,storage,ipc}. ARCH-01 reshape + TECH-10 등재.
 - 2026-05-26: v2 ADR 3건 일괄 작성 — ADR-0013(Auth: Supabase Auth) + ADR-0014(DB: Supabase Postgres + Drizzle) + ADR-0015(Sync: LWW + 서버 권위 시계). policy-registry TECH-07/08/09 + CONST-01/02 등재.
 - 2026-05-26: v2 Plan v0.2.0 — architect 검토 + 사용자 결정 4건 반영. **9 Epic(G/H/I 신규) + 46 작업 + 12 ADR 후보 + 10 정책 reshape + M5~M10 (21주)**.

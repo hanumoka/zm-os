@@ -58,11 +58,26 @@
 | 7 | H-3 | AppFrame Strategy Pattern (ContentLoader) | ✅ 완료 |
 | 8 | C-2 | Desktop.tsx God Component 분리 | ✅ 완료 |
 
-### 다음 후보
-- ~~APP-04 확장: 컨텍스트 메뉴 우클릭 앱 삭제/정보~~ ✅ 완료
-- IPC-02: Comlink 직접 통합 (v2 준비, Phase 4 이연)
-- IPC-02: Comlink 직접 통합 (v2 준비)
-- APP-04 확장: 데스크탑 우클릭 컨텍스트 메뉴에서 앱 삭제/정보
+### v2 진입 — 로컬-우선 아키텍처 전환 (2026-05-26)
+- ✅ SRV-00 모노레포 마이그레이션 완료 (apps/web + packages/{core,storage,ipc} + pnpm + Turborepo)
+- ✅ v2 ADR 1차 3건 작성 (0013 Auth / 0014 DB / 0015 Sync) + ADR-0016 모노레포
+- ⚠️ **방향 전환**: 사용자 결정 "로컬 100% + 외부 의존성 0 + 클라우드는 옵션 어댑터" → 기존 0013/0014/0015 reshape 대기
+- 📄 **현재 baseline**: `docs/01-architecture/06-current-snapshot-2026-05-26.md`
+
+### 다음 단계 (재정의)
+1. **ADR-0017**: Ports & Adapters 아키텍처 + 5개 Port 정의 (AuthProvider/AppRepository/BlobStorage/SyncProvider/ModerationProvider)
+2. **ADR-0013/0014/0015 reshape**: superseded 후 어댑터 옵션으로 분리
+3. **ADR-0018~0023**: 각 Port의 LocalAdapter 기본 명세
+4. **v2 plan v0.3.0**: 로컬 우선 + 옵션 어댑터 구조로 재작성
+
+### 보류 (CloudAdapter 트랙)
+- ADR-Storage-Cloud (R2 / Supabase Storage)
+- ADR-Hosting (Vercel / CF Pages / 정적 export)
+- ADR-API-Auth (Server Action / JWT cookie)
+- ADR-Moderation-Cloud (VirusTotal 등)
+- ADR-Migration (로컬 v1 → v2 로컬)
+- ADR-Permission (manifest capabilities + grant 영속화)
+- IPC-02: Comlink 직접 통합
 
 ---
 

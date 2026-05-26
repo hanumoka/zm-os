@@ -9,6 +9,8 @@ related: ["0013", "0015"]
 
 # ADR-0014: v2 Postgres 호스팅 + RLS — Supabase 채택
 
+> ⚠️ **2026-05-26 상태 변경**: 사용자 결정에 따라 "로컬-우선 + 외부 의존성 옵션" 아키텍처로 전환됨. 본 ADR은 "Supabase = AppRepository 어댑터 중 하나"로 reshape 예정. ADR-0017 (Ports & Adapters) 작성 후 본 ADR을 superseded 처리하고 신규 ADR로 분리한다.
+
 ## Context
 
 - v2에서 사용자/앱/설치 메타데이터를 Postgres에 저장. RLS로 사용자별 데이터 격리.
