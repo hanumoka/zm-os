@@ -104,6 +104,35 @@
 - **재고 시점**: v2에서 인라인 blocking 스크립트 또는 cookie 기반 SSR 힌트로 flash 제거
 - **상세**: ADR-0012
 
+### TECH-07: v2 사용자 인증 — Supabase Auth (2026-05-26)
+- **결정**: Supabase Auth 단독 채택. Server Action 기반 인증 흐름, cookie httpOnly + SameSite=Strict, JWT 클레임 → Postgres RLS `auth.uid()` 직접 추출.
+- **이유**: ADR-0013 — 50,000 MAU 무료 + $0.00325/MAU 초과 (Clerk 대비 6배 저렴), RLS 네이티브 통합, Lock-in 최저 (PG + GoTrue 오픈소스).
+- **보안 의무**: Supabase Auth ≥2.185.0 강제 (CVE-2026-31813), service_role key 클라이언트 노출 절대 금지, proxy.ts 단독 의존 금지 (CVE-2025-29927 회피).
+- **재고 시점**: 50k MAU 초과 또는 SSO/SAML 요구 시
+- **상세**: ADR-0013
+
+### TECH-08: v2 DB 호스팅 — Supabase Postgres + Drizzle ORM (2026-05-26)
+- **결정**: DB 호스팅 = Supabase (ADR-0013과 단일 벤더), ORM = Drizzle ORM, 마이그레이션 = Drizzle Kit. 모든 사용자 데이터 테이블에 RLS 기본 활성화 `auth.uid() = owner_id` 패턴.
+- **이유**: ADR-0014 — Supabase Auth 결합 시 `auth.uid()` 자동 동작, 단일 벤더 운영 단순화, Lock-in 최저 (pg_dump 표준).
+- **재고 시점**: Edge runtime 호환 문제 발생 시 Neon + `pg_session_jwt`로 이전 검토
+- **상세**: ADR-0014
+
+### TECH-09: v2 동기화 전략 — LWW + 서버 권위 시계 (2026-05-26)
+- **결정**: SyncEnvelope 패턴 (data + serverSavedAt + clientSavedAt hint + idempotencyKey), 서버 측 timestamp 권위 부여, 오프라인 큐는 IDB sync-queue namespace + 지수 백오프 + 멱등성 키.
+- **이유**: ADR-0015 — 데이터 단순(Set/Array/key-value)하여 CRDT 과잉, 0KB 번들 영향, 시간 드리프트 방어, 향후 envelope 내부 CRDT 전환 reshape 가능.
+- **재고 시점**: 실시간 협업(앱 간 IPC, 동시 다중 편집) 도입 시 → Yjs 부분 도입
+- **상세**: ADR-0015
+
+### CONST-01: RLS 기본 활성화 의무 (2026-05-26)
+- **결정**: v2 모든 사용자 데이터 테이블 마이그레이션 스크립트에 `ALTER TABLE ... ENABLE ROW LEVEL SECURITY` 강제. RLS 정책 작성 시 `SELECT (auth.uid()) = owner_id` 패턴 사용, JOIN/서브쿼리 안티패턴 회피.
+- **이유**: CVE-2025-48757 (Supabase RLS 미설정 노출, 170+ 앱 영향) 차단. Lovable AI 패턴 재현 위험 회피.
+- **검증**: 마이그레이션 CI에 lint 추가 검토 (TBD)
+
+### CONST-02: 클라이언트 시계 hint, 서버 시계 권위 (2026-05-26)
+- **결정**: v2 동기화 시 클라이언트 timestamp는 UI 표시 hint만 사용. 충돌 해결은 서버 `serverSavedAt` 권위. Postgres 컬럼 `server_saved_at TIMESTAMPTZ DEFAULT NOW()`.
+- **이유**: ADR-0015 — 클라이언트 시스템 시계 조작/드리프트 방어.
+- **재고 시점**: 없음 (영구 정책)
+
 ## Deprecated
 - (없음)
 

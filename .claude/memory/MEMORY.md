@@ -49,10 +49,11 @@
 - **POC 종료 게이트 ✅ 통과** — 보안 14 페네스트 + 번들 임계치 PASS, 데모/시연 가능.
 - **Post-POC**: APP-04 ✅ + TEST-01 ✅ + DSK-05 ✅ + REFAC-01 (2/8) 진행 중
 - **REFAC-01**: 설계 리팩토링 **8/8 ✅ 전체 완료** (C-1+H-5+C-3+H-1+H-4+H-2+H-3+C-2)
-- 다음 후보: IPC-02 (Comlink 직접 통합, Phase 4 이연 — 빌드 인프라 + ADR 필요)
+- 다음 후보: ADR-Monorepo 작성 + PRD §3 v2 ID 일괄 등재 + ADR 2차 7건 작성 (Storage/Hosting/Permission/API-Auth/Migration/Moderation/PROD-05-v2)
 
 ## 최근 결정사항 (최대 10, FIFO)
-- 2026-05-26: v2 Plan v0.2.0 — architect 검토 + 사용자 결정 4건 반영. **9 Epic(G/H/I 신규) + 46 작업 + 12 ADR 후보 + 10 정책 reshape + M5~M10 (21주)**. 다음: ADR 3건 병렬 (Auth + DB + Sync) + 모노레포 분리.
+- 2026-05-26: v2 ADR 3건 일괄 작성 — ADR-0013(Auth: Supabase Auth) + ADR-0014(DB: Supabase Postgres + Drizzle) + ADR-0015(Sync: LWW + 서버 권위 시계). policy-registry TECH-07/08/09 + CONST-01/02 등재. research-analyst 3건 사실 조사 기반.
+- 2026-05-26: v2 Plan v0.2.0 — architect 검토 + 사용자 결정 4건 반영. **9 Epic(G/H/I 신규) + 46 작업 + 12 ADR 후보 + 10 정책 reshape + M5~M10 (21주)**.
 - 2026-05-26: v2 Plan 초안 작성 — 6 Epic + 33 작업 + 7 ADR 후보 + 8 정책 reshape + 4 마일스톤(M5~M8). docs/04-planning/03-v2-plan.md.
 - 2026-05-26: APP-04 확장 완료 — 데스크탑 아이콘 우클릭 컨텍스트 메뉴 (앱 정보 + 사용자 앱 삭제). AppInfoDialog 신규.
 - 2026-05-26: REFAC-01 정밀 감사 + 수정 — H-3 lib→components 역방향 의존성 제거 + C-2 정책 코멘트 복원.

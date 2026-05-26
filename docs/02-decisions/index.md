@@ -15,13 +15,21 @@
 | [ADR-0009](adr-0009-storage-abstraction.md) | 스토리지 추상화 계층 — StorageAdapter Strategy 패턴 + OPFS 어댑터 | accepted | 2026-05-25 |
 | [ADR-0011](adr-0011-user-app-lifecycle.md) | 사용자 앱 삭제 및 업데이트 UX (APP-04) | accepted | 2026-05-25 |
 | [ADR-0012](adr-0012-dark-mode-strategy.md) | 다크 모드 CSS 전략 — Tailwind v4 class 기반 dark variant | accepted | 2026-05-25 |
+| [ADR-0013](adr-0013-v2-auth-supabase.md) | v2 사용자 인증 — Supabase Auth 채택 | accepted | 2026-05-26 |
+| [ADR-0014](adr-0014-v2-db-supabase.md) | v2 Postgres 호스팅 + RLS — Supabase 채택 | accepted | 2026-05-26 |
+| [ADR-0015](adr-0015-v2-sync-lww.md) | v2 데스크탑 상태 동기화 — LWW + 서버 권위 시계 | accepted | 2026-05-26 |
 
 ## 다음 번호 가이드
 
-- ADR-0013 후보:
-  - IPC 권한 모델 v2 (manifest.permissions 매핑)
-  - Comlink 라이브러리 도입 (v2 향상)
-  - 윈도우 매니저 v2 reshape
+- ADR-0016 후보:
+  - ADR-Storage (객체 스토리지 — R2 vs Supabase Storage)
+  - ADR-Hosting (Vercel vs Cloudflare Pages)
+  - ADR-Permission (manifest capabilities + grant 영속화)
+  - ADR-API-Auth (Server Action vs Route Handler + JWT cookie vs header)
+  - ADR-Migration (v1 IDB → v2 cloud)
+  - ADR-Moderation (사전/사후/신뢰 등급)
+  - ADR-PROD-05-v2 (사용자 ZIP 다중 파일 + presigned URL)
+  - ADR-Monorepo (packages/ 분리 — v2 진입 전 일괄)
 
 ## 작성 규칙
 
