@@ -137,6 +137,7 @@ Feature ID 규칙 확장:
 
 | ID | 작업 | 의존성 | 예상 |
 |----|------|--------|------|
+| **SRV-00** | **ARCH-01 reshape — src/ → apps/web/ + packages 추출 + pnpm + Turborepo (ADR-0016)** | **없음 (M5 진입 전 선행)** | **1~2일** |
 | SRV-01 | 호스팅 결정 (Vercel vs Cloudflare Pages) | ADR-Hosting | 1주 (검토) |
 | SRV-02 | CI/CD (lint/test/build/deploy) | SRV-01 | 3일 |
 | SRV-03 | 에러 추적 (Sentry 또는 self-hosted) | SRV-01 | 2일 |
@@ -185,7 +186,7 @@ Feature ID 규칙 확장:
 | **ADR-Migration** — 데이터 마이그레이션 전략 (v1 IDB → 서버, 백업 정책) | MIG Epic 전제 | **High (2차)** | ⏳ |
 | **ADR-Moderation** — 모더레이션 모델 (사전/사후/신뢰 등급) | MOD Epic 전체 | **High (2차)** | ⏳ |
 | **ADR-PROD-05-v2** — 사용자 ZIP 모델 v2 (단일 HTML → 다중 파일 + presigned URL) | STR-v2-03 + AppFrame.tsx | **High (BREAKING)** | ⏳ |
-| **ADR-Monorepo** — packages/ 분리 구조 (v2 진입 전 일괄) | ARCH-01 reshape | **High (즉시)** | ⏳ |
+| **ADR-Monorepo** — packages/ 분리 구조 (v2 진입 전 일괄) | ARCH-01 reshape | **High (즉시)** | ✅ ADR-0016 (pnpm + Turborepo) |
 | **ADR-Cache** — 객체 스토리지 → 클라이언트 IDB 캐시 + invalidation | 비용/성능 | Medium | ⏳ |
 
 **1차 병렬 작성** (사용자 결정): ADR-Auth + ADR-DB + ADR-Sync 동시 진행
@@ -281,13 +282,18 @@ ADR 결정 기간(2~3주)은 별도. M5 진입 전 ADR 3건 병렬 완료 필요
 
 ### 완료 (2026-05-26)
 1. ✅ **ADR 3건 병렬 작성**: ADR-0013(Auth) + ADR-0014(DB) + ADR-0015(Sync)
-   - research-analyst 3건 위임 → 사실 조사 → 사용자 결정 → ADR 작성
    - 결정: Supabase Auth + Supabase Postgres + LWW
    - policy-registry: TECH-07/08/09 + CONST-01/02 등재
+2. ✅ **ADR-Monorepo 작성**: ADR-0016 (pnpm 11 + Turborepo 2.7)
+   - 구조: apps/web + packages/{core,storage,ipc}
+   - policy-registry: ARCH-01 reshape + TECH-10 등재
+   - 신규 작업 SRV-00 추가 (M5 진입 전 선행)
+3. ✅ **PRD §3 v2 ID 일괄 등재**: 53건 (USR/CLD/STR-v2/MOD/SBX-v2/SRV/MIG/OBS/API-SEC)
 
-### 즉시 진행
-2. **ADR-Monorepo 작성**: v2 진입 전 packages/ 분리 (즉시 결정 필요)
-3. **PRD §3 v2 ID 일괄 등재**: USR/CLD/STR-v2/MOD/SBX-v2/SRV/MIG/OBS/API-SEC ID 등재
+### 다음 단계
+4. **SRV-00 실행**: src/ → apps/web/ 이동 + packages 추출 (1~2일, ADR-0016 마이그레이션)
+5. **ADR 2차 7건 작성**: Storage/Hosting/Permission/API-Auth/Migration/Moderation/PROD-05-v2
+6. **M5 진입**: SRV-01~02 + USR-01~04 (인프라 + 인증)
 
 ### ADR 1차 완료 후
 4. **ADR 2차 작성**: ADR-Storage + ADR-Hosting + ADR-Permission + ADR-API-Auth + ADR-Migration + ADR-Moderation + ADR-PROD-05-v2 (7건)

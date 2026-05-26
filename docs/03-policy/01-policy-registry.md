@@ -9,10 +9,12 @@
 
 ## Active (현행 정책)
 
-### ARCH-01: 단일 Next.js 풀스택 (2026-05-24)
-- **결정**: POC 1차는 단일 Next.js 프로젝트 (App Router) + route handlers를 BE 대용. 모노레포는 v2.
-- **이유**: POC 빠른 검증. 멀티유저 미도입 단계라 BE 분리 불필요.
-- **재고 시점**: 멀티유저/클라우드 동기화 도입 시 packages/ 분리 검토.
+### ARCH-01: Next.js 풀스택 + v2 pnpm/Turborepo 모노레포 (2026-05-24, reshape 2026-05-26)
+- **POC v1 결정**: 단일 Next.js 프로젝트 (App Router) + route handlers를 BE 대용. (ADR-0001)
+- **v2 reshape (2026-05-26)**: **v2 진입 전 pnpm 11 + Turborepo 2.7 모노레포 분리**. 구조: `apps/web` + `packages/{core,storage,ipc}`. (ADR-0016)
+- **이유**: cloud-adapter / Comlink IPC-02 / Edge Functions 분리 필요. modular monolith 구조.
+- **마이그레이션**: v2 진입 전 일괄 PR (SRV-00 신규 작업, 1~2일 예상). React hook + StorageAdapter + AppManifest 인터페이스 보존.
+- **상세**: ADR-0001 (POC v1) + ADR-0016 (v2 reshape)
 
 ### ARCH-02: iframe 샌드박싱 (2026-05-24, 정밀화 2026-05-24)
 - **결정**: 사용자 제출 앱은 **blob: URL iframe + `sandbox="allow-scripts"`** 에서만 실행. 호스트-앱 통신은 Comlink-style RPC.
@@ -132,6 +134,13 @@
 - **결정**: v2 동기화 시 클라이언트 timestamp는 UI 표시 hint만 사용. 충돌 해결은 서버 `serverSavedAt` 권위. Postgres 컬럼 `server_saved_at TIMESTAMPTZ DEFAULT NOW()`.
 - **이유**: ADR-0015 — 클라이언트 시스템 시계 조작/드리프트 방어.
 - **재고 시점**: 없음 (영구 정책)
+
+### TECH-10: v2 모노레포 도구 — pnpm + Turborepo (2026-05-26)
+- **결정**: pnpm 11 workspaces + Turborepo 2.7. workspace protocol `workspace:*`, TS Project References (`composite: true` + `references`), Vercel Remote Cache (무료).
+- **구조**: `apps/web` + `packages/{core,storage,ipc}`. `turbo.json`에 build/typecheck/test 태스크 그래프 정의.
+- **이유**: ADR-0016 — Next.js 16 + Vercel 통합 우수, 단독 개발자 친화, 빌드 캐싱 ~22% 향상, Lock-in 최저 (OSS).
+- **재고 시점**: 패키지 10+ 또는 enterprise 요구 시 Nx 검토
+- **상세**: ADR-0016
 
 ## Deprecated
 - (없음)

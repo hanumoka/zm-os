@@ -45,24 +45,50 @@ zm-os는 **브라우저 안에서 동작하는 가상 데스크탑** 으로, 사
 
 ---
 
-## §3. 기능 인벤토리 (Feature ID 규칙: DSK / STR / APP / SBX / IPC / STG)
+## §3. 기능 인벤토리
+
+> Feature ID 규칙 v1 (POC): DSK / STR / APP / SBX / IPC / STG / GAME
+> Feature ID 규칙 v2: USR / CLD / STR-v2 / MOD / SBX-v2 / SRV / MIG / OBS / API-SEC
+
+### §3.1 POC v1 (완료)
 
 | ID | 이름 | 상태 | 비고 |
 |----|------|------|------|
 | **DSK-01** | 윈도우 매니저 (드래그/리사이즈/포커스) | ✅ 완료 | `src/components/desktop/Window.tsx + useWindowManager (react-rnd v10.5.3)` |
 | **DSK-02** | 데스크탑 영역 + 아이콘 | ✅ 완료 | `src/components/desktop/Desktop.tsx + DesktopIcon.tsx + desktopApps.ts` |
 | **DSK-03** | 작업표시줄 (실행 중 앱) | ✅ 완료 | `src/components/desktop/Taskbar.tsx + TaskbarButton.tsx + Clock.tsx` |
+| **DSK-04** | 윈도우 레이아웃 영속화 | ✅ 완료 | desktop-layout.ts + WindowManagerProvider hydration (ADR-0009) |
+| **DSK-05** | 데스크탑 커스터마이징 (배경/테마/설정) | ✅ 완료 | DesktopSettingsProvider + SettingsPanel + WALLPAPER_CLASSES (ADR-0012) |
 | **STR-01** | 앱 카탈로그 UI | ✅ 완료 | `/store` 라우트 + AppCard + InstalledAppsProvider |
 | **STR-02** | 앱 상세 페이지 + 설치 | ✅ 완료 | AppDetail 패널 + install/uninstall 액션 |
-| **APP-01** | 앱 매니페스트 스키마 (Zod) | ✅ 완료 | `src/lib/apps/manifest.ts` |
-| **APP-02** | 앱 패키지 포맷 (itch.io식 ZIP) | ✅ 완료 | JSZip 3.10.1 + 보안 검증 6단계 (Phase 3 작업 1) |
+| **APP-01** | 앱 매니페스트 스키마 (Zod) | ✅ 완료 | `src/lib/apps/manifest.ts` v2 capabilities (REFAC-01 H-1) |
+| **APP-02** | 앱 패키지 포맷 (itch.io식 ZIP) | ✅ 완료 | JSZip 3.10.1 + 보안 검증 9 validator (REFAC-01 H-2) |
 | **APP-03** | 설치한 앱 목록 관리 | ✅ 완료 | IndexedDB hydration + fire-and-forget persist |
+| **APP-04** | 사용자 앱 삭제/업데이트 + 컨텍스트 메뉴 | ✅ 완료 | ConfirmDialog + semver + AppInfoDialog (ADR-0011) |
 | **SBX-01** | blob: URL iframe 샌드박스 SDK | ✅ 완료 | `src/lib/apps/sandbox.ts` (srcdoc + sandbox="allow-scripts") |
 | **SBX-02** | CSP/Permissions-Policy 헤더 | ✅ 완료 | next.config.ts headers() + src/lib/security/csp.ts |
-| **IPC-01** | Comlink 기반 RPC 어댑터 | ✅ 완료 | `src/lib/apps/ipc/` (wire-compatible v1) |
+| **IPC-01** | Comlink wire-compatible RPC 어댑터 | ✅ 완료 | `src/lib/apps/ipc/` + rate-limiter (N-08, ADR-0010) |
 | **STG-01** | IndexedDB 추상화 | ✅ 완료 | `src/lib/storage/indexeddb.ts` (idb v8.0.3 + 메모리 폴백) |
 | **STG-02** | OPFS 어댑터 (Chrome/Edge) | ✅ 완료 | StorageAdapter Strategy 패턴 + Safari IDB 폴백 (ADR-0009) |
-| **GAME-01** | 샘플 게임 (Phaser + Pixi.js + Three.js) | ✅ 완료 | Phaser 3 Snake + Pixi.js 8 Particle Rain + Three.js r184 Spinning Cubes — 3개 엔진 호환성 ALL PASS (Phase 3-B) |
+| **GAME-01** | 샘플 게임 (Phaser + Pixi.js + Three.js) | ✅ 완료 | 3개 엔진 호환성 ALL PASS (Phase 3-B) |
+| **TEST-01** | Vitest 단위 테스트 도입 | ✅ 완료 | 61 테스트, 6 파일 |
+| **REFAC-01** | 설계 리팩토링 8항목 | ✅ 완료 | Error Boundary + 에러 플러밍 + NS Registry + Manifest v2 + Persistence Hook + Validation Chain + ContentLoader + Desktop 분리 |
+
+### §3.2 v2 (계획 — 03-v2-plan.md 참조)
+
+| Epic | ID 범위 | 작업 수 | 의존 ADR |
+|------|---------|---------|---------|
+| **Epic A USR** — 인증/사용자 | USR-01 ~ USR-06 | 6 | ADR-0013 |
+| **Epic B CLD** — 클라우드 스토리지/동기화 | CLD-01 ~ CLD-09 | 9 | ADR-0014, ADR-0015 |
+| **Epic C STR-v2** — 스토어 백엔드 | STR-v2-01 ~ STR-v2-08 | 8 | ADR-0014 |
+| **Epic D MOD** — 모더레이션 | MOD-01 ~ MOD-06 | 6 | (ADR-Moderation TBD) |
+| **Epic E SBX-v2** — 보안 강화 | SBX-v2-00 ~ SBX-v2-07 | 8 | (ADR-Permission, ADR-IPC TBD) |
+| **Epic F SRV** — 인프라 | SRV-01 ~ SRV-06 | 6 | (ADR-Hosting TBD) |
+| **Epic G MIG** — 데이터 마이그레이션 | MIG-01 ~ MIG-03 | 3 | (ADR-Migration TBD) |
+| **Epic H OBS** — 관찰 가능성 | OBS-01 ~ OBS-03 | 3 | — |
+| **Epic I API-SEC** — 백엔드 보안 | API-SEC-01 ~ API-SEC-04 | 4 | (ADR-API-Auth TBD) |
+
+**v2 작업 총 53건**. 상세 ID/의존성/예상 기간은 [`03-v2-plan.md`](03-v2-plan.md) §4 Epic 분해 참조.
 
 ---
 

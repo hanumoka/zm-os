@@ -18,10 +18,11 @@
 | [ADR-0013](adr-0013-v2-auth-supabase.md) | v2 사용자 인증 — Supabase Auth 채택 | accepted | 2026-05-26 |
 | [ADR-0014](adr-0014-v2-db-supabase.md) | v2 Postgres 호스팅 + RLS — Supabase 채택 | accepted | 2026-05-26 |
 | [ADR-0015](adr-0015-v2-sync-lww.md) | v2 데스크탑 상태 동기화 — LWW + 서버 권위 시계 | accepted | 2026-05-26 |
+| [ADR-0016](adr-0016-v2-monorepo.md) | v2 모노레포 도구 — pnpm workspaces + Turborepo | accepted | 2026-05-26 |
 
 ## 다음 번호 가이드
 
-- ADR-0016 후보:
+- ADR-0017 후보:
   - ADR-Storage (객체 스토리지 — R2 vs Supabase Storage)
   - ADR-Hosting (Vercel vs Cloudflare Pages)
   - ADR-Permission (manifest capabilities + grant 영속화)
@@ -29,7 +30,6 @@
   - ADR-Migration (v1 IDB → v2 cloud)
   - ADR-Moderation (사전/사후/신뢰 등급)
   - ADR-PROD-05-v2 (사용자 ZIP 다중 파일 + presigned URL)
-  - ADR-Monorepo (packages/ 분리 — v2 진입 전 일괄)
 
 ## 작성 규칙
 
