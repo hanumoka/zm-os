@@ -137,7 +137,7 @@ Feature ID 규칙 확장:
 
 | ID | 작업 | 의존성 | 예상 |
 |----|------|--------|------|
-| **SRV-00** | **ARCH-01 reshape — src/ → apps/web/ + packages 추출 + pnpm + Turborepo (ADR-0016)** | **없음 (M5 진입 전 선행)** | **1~2일** |
+| ~~**SRV-00**~~ | ✅ **ARCH-01 reshape — src/ → apps/web/ + packages 추출 + pnpm + Turborepo (ADR-0016)** 완료 (2026-05-26) | — | 완료 |
 | SRV-01 | 호스팅 결정 (Vercel vs Cloudflare Pages) | ADR-Hosting | 1주 (검토) |
 | SRV-02 | CI/CD (lint/test/build/deploy) | SRV-01 | 3일 |
 | SRV-03 | 에러 추적 (Sentry 또는 self-hosted) | SRV-01 | 2일 |
@@ -290,8 +290,10 @@ ADR 결정 기간(2~3주)은 별도. M5 진입 전 ADR 3건 병렬 완료 필요
    - 신규 작업 SRV-00 추가 (M5 진입 전 선행)
 3. ✅ **PRD §3 v2 ID 일괄 등재**: 53건 (USR/CLD/STR-v2/MOD/SBX-v2/SRV/MIG/OBS/API-SEC)
 
+### 완료 추가 (2026-05-26)
+4. ✅ **SRV-00 실행**: 모노레포 마이그레이션 완료 — apps/web + packages/{core,storage,ipc} + pnpm + Turborepo
+
 ### 다음 단계
-4. **SRV-00 실행**: src/ → apps/web/ 이동 + packages 추출 (1~2일, ADR-0016 마이그레이션)
 5. **ADR 2차 7건 작성**: Storage/Hosting/Permission/API-Auth/Migration/Moderation/PROD-05-v2
 6. **M5 진입**: SRV-01~02 + USR-01~04 (인프라 + 인증)
 

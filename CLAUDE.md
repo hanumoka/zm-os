@@ -55,25 +55,37 @@
 ## 🏗️ 4. 코드 구조
 
 ```
-zm-os/
-├── src/                         # Next.js 풀스택 (App Router)
-│   ├── app/                     # 페이지/route handlers (BE 대용)
-│   │   ├── (desktop)/           # 가상 데스크탑 메인
-│   │   ├── store/               # 앱 스토어
-│   │   └── api/                 # route handlers
-│   ├── components/
-│   │   ├── desktop/             # 윈도우 매니저, 아이콘, 작업표시줄
-│   │   ├── store/               # 스토어 UI
-│   │   └── ui/                  # shadcn/ui 기본 (도입 시)
-│   ├── lib/
-│   │   ├── apps/                # 매니페스트, 샌드박싱, IPC
-│   │   ├── api/                 # 클라이언트 API
-│   │   └── storage/             # IndexedDB / OPFS
-│   └── types/
-├── public/                      # 정적 자산
-├── docs/                        # 프로젝트 문서 (번호 기반 카테고리 구조)
-├── events/                      # 이벤트 스트림 (append-only JSONL)
-└── .claude/                     # Claude Code 셋팅 (agents/skills/rules/memory/hooks)
+zm-os/                                # 모노레포 루트 (ADR-0016)
+├── apps/
+│   └── web/                          # Next.js 16 풀스택 (@zm/web)
+│       ├── src/
+│       │   ├── app/                  # 페이지/route handlers
+│       │   │   ├── (desktop)/        # 가상 데스크탑 메인
+│       │   │   ├── store/            # 앱 스토어
+│       │   │   └── api/              # route handlers
+│       │   ├── components/
+│       │   │   ├── desktop/          # 윈도우 매니저, 아이콘, 작업표시줄
+│       │   │   ├── store/            # 스토어 UI
+│       │   │   └── ui/               # shadcn/ui 기본 (도입 시)
+│       │   └── lib/
+│       │       ├── apps/             # zip-loader, validators, sandbox, content-loader
+│       │       ├── errors/           # PersistenceErrorContext (React)
+│       │       ├── security/         # CSP / Permissions-Policy
+│       │       └── storage/          # 도메인 wrapper + use-persistence
+│       ├── public/                   # 정적 자산
+│       ├── e2e/                      # Playwright e2e
+│       ├── next.config.ts
+│       ├── package.json
+│       └── tsconfig.json
+├── packages/
+│   ├── core/                         # @zm/core: 순수 타입/유틸 (manifest, version, namespace-registry, errors)
+│   ├── storage/                      # @zm/storage: StorageAdapter Strategy (IDB/OPFS/Memory + cloud-adapter v2)
+│   └── ipc/                          # @zm/ipc: Comlink wire-compatible RPC
+├── docs/                             # 프로젝트 문서 (번호 기반 카테고리 구조)
+├── pnpm-workspace.yaml               # pnpm workspaces 설정
+├── turbo.json                        # Turborepo 태스크 그래프
+├── package.json                      # 루트 (turbo)
+└── .claude/                          # Claude Code 셋팅 (agents/skills/rules/memory/hooks)
 ```
 
 ---

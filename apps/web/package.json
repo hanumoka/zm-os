@@ -1,0 +1,41 @@
+{
+  "name": "@zm/web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "type-check": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@zm/core": "workspace:*",
+    "@zm/ipc": "workspace:*",
+    "@zm/storage": "workspace:*",
+    "idb": "^8.0.3",
+    "jszip": "^3.10.1",
+    "next": "^16.1.1",
+    "phaser": "^3.90.0",
+    "pixi.js": "^8.18.1",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "react-rnd": "^10.5.3",
+    "three": "^0.184.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^22",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@vitest/coverage-v8": "^4.1.7",
+    "playwright": "^1.60.0",
+    "tailwindcss": "^4",
+    "typescript": "^5",
+    "vitest": "^4.1.7"
+  }
+}
