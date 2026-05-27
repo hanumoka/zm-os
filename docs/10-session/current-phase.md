@@ -58,26 +58,26 @@
 | 7 | H-3 | AppFrame Strategy Pattern (ContentLoader) | ✅ 완료 |
 | 8 | C-2 | Desktop.tsx God Component 분리 | ✅ 완료 |
 
-### v2 진입 — 로컬-우선 아키텍처 전환 (2026-05-26)
-- ✅ SRV-00 모노레포 마이그레이션 완료 (apps/web + packages/{core,storage,ipc} + pnpm + Turborepo)
-- ✅ v2 ADR 1차 3건 작성 (0013 Auth / 0014 DB / 0015 Sync) + ADR-0016 모노레포
-- ⚠️ **방향 전환**: 사용자 결정 "로컬 100% + 외부 의존성 0 + 클라우드는 옵션 어댑터" → 기존 0013/0014/0015 reshape 대기
-- 📄 **현재 baseline**: `docs/01-architecture/06-current-snapshot-2026-05-26.md`
+### v2 설계 단계 ✅ 완료 (2026-05-27)
+- ✅ SRV-00 모노레포 마이그레이션 (apps/web + packages/{core,storage,ipc} + pnpm + Turborepo)
+- ✅ ADR-0016 모노레포 + **ADR-0017~0023 일괄 채택** (Ports & Adapters + Local 어댑터 6건)
+- ✅ ADR-0013/0014/0015 superseded by ADR-0017
+- ✅ **v2 plan v0.3.0** — 10 Epic + 58 작업 + 24주 추정 (REFAC-02 3주 + M5~M10 21주)
+- 📄 baseline: `docs/01-architecture/06-current-snapshot-2026-05-26.md`
 
-### 다음 단계 (재정의)
-1. **ADR-0017**: Ports & Adapters 아키텍처 + 5개 Port 정의 (AuthProvider/AppRepository/BlobStorage/SyncProvider/ModerationProvider)
-2. **ADR-0013/0014/0015 reshape**: superseded 후 어댑터 옵션으로 분리
-3. **ADR-0018~0023**: 각 Port의 LocalAdapter 기본 명세
-4. **v2 plan v0.3.0**: 로컬 우선 + 옵션 어댑터 구조로 재작성
+### REFAC-02 진입 (2026-05-27)
+- ✅ **P1 완료 (commit e602623)**: 5 Port 인터페이스 SSOT (`packages/core/src/ports/` 7 파일) + `@zm/adapters-local` 신규 패키지 골조 + namespace-registry adapterPolicies 배열 reshape + system namespace 5번째 엔트리 + indexeddb.ts DB_VERSION 4→5 + resolve-adapter.ts 호환 alias. turbo type-check 5/5 + test 5/5 PASS.
+- ⏳ **P2 (다음)**: BlobStorage Port + LocalOPFS 어댑터 이전 + AbortSignal + BlobStorageError + `@zm/storage` shell (5일)
+- ⏳ **P3**: AppRepository Port + LocalRepo + 4 wrapper 흡수 (5일)
+- ⏳ **P4**: AuthProvider + SyncProvider + ModerationProvider 3 어댑터 + patterns.ts (5일)
+- ⏳ **P5**: Adapter Resolver + PortsContext + 5 Provider reshape (5일)
 
-### 보류 (CloudAdapter 트랙)
-- ADR-Storage-Cloud (R2 / Supabase Storage)
-- ADR-Hosting (Vercel / CF Pages / 정적 export)
-- ADR-API-Auth (Server Action / JWT cookie)
-- ADR-Moderation-Cloud (VirusTotal 등)
-- ADR-Migration (로컬 v1 → v2 로컬)
-- ADR-Permission (manifest capabilities + grant 영속화)
-- IPC-02: Comlink 직접 통합
+### M5 진입 (REFAC-02 완료 후)
+- SRV-01~02 + USR-01~04 (인프라 + 로컬 인증 기본, 3주)
+
+### 보류 (CloudAdapter 트랙, ADR-0024+)
+- CloudAuth-Supabase / CloudRepo-Supabase / CloudSync-LWW / CloudBlob / CloudModeration
+- Migration / Permission / Hosting / API-Auth / IPC-02
 
 ---
 

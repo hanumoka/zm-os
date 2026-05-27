@@ -65,7 +65,4 @@
 - 2026-05-26: **SRV-00 실행 완료** — 모노레포 마이그레이션 (src/ → apps/web + packages/{core,storage,ipc} + pnpm workspaces + Turborepo). 검증: turbo type-check 4/4 + turbo test 61/61 + next build ✅.
 - 2026-05-26: ADR-0016 (v2 모노레포) — pnpm 11 + Turborepo 2.7. 구조 apps/web + packages/{core,storage,ipc}. ARCH-01 reshape + TECH-10 등재.
 - 2026-05-26: v2 ADR 3건 일괄 작성 — ADR-0013(Auth: Supabase Auth) + ADR-0014(DB: Supabase Postgres + Drizzle) + ADR-0015(Sync: LWW + 서버 권위 시계). 이후 2026-05-27 모두 superseded by ADR-0017.
-- 2026-05-26: v2 Plan v0.2.0 — architect 검토 + 사용자 결정 4건 반영. 9 Epic + 53 작업 + 12 ADR 후보 + 10 정책 reshape + M5~M10 (21주). v0.3.0 재작성 대기.
-- 2026-05-26: APP-04 확장 완료 — 데스크탑 아이콘 우클릭 컨텍스트 메뉴 (앱 정보 + 사용자 앱 삭제). AppInfoDialog 신규.
-
-> **최종 갱신**: 2026-05-27 — v2 plan v0.3.0 + ADR-0017~0023 채택
+> **최종 갱신**: 2026-05-27 — REFAC-02-P1 완료 (Port SSOT + adapters-local 골조 + namespace reshape)
