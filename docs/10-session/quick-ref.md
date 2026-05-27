@@ -70,8 +70,8 @@ pnpm --filter @zm/web dev
 
 ## 다음 진입 지점 — REFAC-02 (코드 마이그레이션 5 작업, ~3주)
 
-1. **REFAC-02-P1** (lib-developer) — `packages/adapters-local` 신규 패키지 + `pnpm-workspace.yaml`/`turbo.json` 등록 + `namespace-registry.ts` adapterPolicies 배열 reshape + `system` namespace 5번째 엔트리 추가 (3일)
-2. **REFAC-02-P2** — BlobStorage Port + LocalOPFS 어댑터 이전 + AbortSignal + BlobStorageError + `@zm/storage` shell (5일)
+1. ✅ **REFAC-02-P1 완료 (2026-05-27)** — `packages/adapters-local` 골조 + 5 Port 인터페이스 SSOT + namespace-registry adapterPolicies 배열 reshape + system namespace + indexeddb.ts v5 upgrade. type-check 5/5 + test 5/5 PASS.
+2. **REFAC-02-P2 (다음)** — BlobStorage Port + LocalOPFS 어댑터 이전 (`packages/storage` 흡수) + AbortSignal 매 entry 폴링 + `BlobStorageError extends PortError` + `@zm/storage` deprecation shell (5일)
 3. **REFAC-02-P3** — AppRepository Port + LocalRepo + 4 wrapper 흡수 + cascade remove (5일)
 4. **REFAC-02-P4** — AuthProvider + SyncProvider + ModerationProvider 3 어댑터 + patterns.ts (5일)
 5. **REFAC-02-P5** — Adapter Resolver + PortsContext + 5 Provider reshape + 회귀 검증 (5일)

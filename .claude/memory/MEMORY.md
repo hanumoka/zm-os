@@ -1,5 +1,5 @@
 # zm-os Project Memory
-> 시스템 프롬프트 자동 로드 (200줄 한도). 최종 갱신: 2026-05-27 (v2 plan v0.3.0 + ADR-0017~0023 채택)
+> 시스템 프롬프트 자동 로드 (200줄 한도). 최종 갱신: 2026-05-27 (REFAC-02-P1 완료)
 
 ## 프로젝트 수치 (항상 최신 유지)
 - 현재 상태: **POC ✅ 완료 + Post-POC ✅ 완료 + v2 진입** (로컬-우선 전환, ADR-0017 대기)
@@ -52,10 +52,12 @@
 - **POC 종료 게이트 ✅ 통과** — 보안 14 페네스트 + 번들 임계치 PASS
 - **Post-POC ✅ 완료**: APP-04 + TEST-01 + DSK-05 + **REFAC-01 8/8** + APP-04 확장
 - **v2 설계 단계 ✅ 완료 (2026-05-27)**: SRV-00 모노레포 + ADR-0016 + **ADR-0017~0023 일괄 채택** + **v2 plan v0.3.0 작성** (10 Epic + 58 작업 + 24주 추정)
-- **다음 후보**: **REFAC-02 P1 진입** — `packages/adapters-local` 신규 + namespace-registry adapterPolicies reshape (lib-developer 위임). P1~P5 완료 후 M5 진입 (SRV-01~02 + USR-01~04 로컬 인증).
+- **REFAC-02-P1 ✅ 완료 (2026-05-27)**: 5 Port 인터페이스 SSOT (`packages/core/src/ports/` 7 파일) + `@zm/adapters-local` 신규 패키지 골조 + namespace-registry adapterPolicies 배열 reshape + system namespace 5번째 엔트리 + indexeddb.ts DB_VERSION 4→5 + resolve-adapter.ts 호환 alias 사용. turbo type-check 5/5 PASS + test 5/5 PASS (회귀 0).
+- **다음 후보**: **REFAC-02-P2 진입** — BlobStorage Port + LocalOPFS 어댑터 이전 (`packages/storage` 흡수 + AbortSignal 매 entry 폴링 + `BlobStorageError extends PortError` + `@zm/storage` deprecation shell). 5일 추정.
 
 ## 최근 결정사항 (최대 10, FIFO)
-- 2026-05-27: **v2 plan v0.3.0 작성** — ADR-0017~0023 채택 반영. 10 Epic + 58 작업 + 24주 추정 (REFAC-02 3주 + M5~M10 21주). 각 작업에 LocalAdapter 필수 / CloudAdapter 옵션 표기. 신규 Epic J REFAC-02 (P1~P5 = M5 진입 전 선행). Local-only v2.0 출시 옵션 명시. 신규 리스크 4건. roadmap v0.10.0 + PRD §3.2 갱신.
+- 2026-05-27: **REFAC-02-P1 완료** — Ports & Adapters 코드 마이그레이션 첫 작업. 13 파일 변경 (신규 10 + 수정 3). `packages/core/src/ports/` 7 파일 (common/auth/app-repository/blob-storage/sync/moderation/index) + `@zm/adapters-local` 신규 패키지 골조 + namespace-registry adapterPolicies 배열 reshape (호환 alias `getLegacyAdapterPolicy` 제공) + system namespace 추가 + indexeddb.ts v5 upgrade + resolve-adapter.ts alias 사용. lib-developer + architect 검증 + 직접 보완 (lib-developer 토큰 한도로 일부 누락). turbo type-check 5/5 + test 5/5 PASS.
+- 2026-05-27: **v2 plan v0.3.0 작성** — ADR-0017~0023 채택 반영. 10 Epic + 58 작업 + 24주 추정 (REFAC-02 3주 + M5~M10 21주). 각 작업에 LocalAdapter 필수 / CloudAdapter 옵션 표기. 신규 Epic J REFAC-02 (P1~P5 = M5 진입 전 선행). Local-only v2.0 출시 옵션 명시.
 - 2026-05-27: **ADR-0018~0023 Local 어댑터 6건 일괄 채택** — LocalAuth(crypto.randomUUID + system namespace + BroadcastChannel) + LocalRepo IDB(installed-apps/user-apps 2 namespace, cascade remove, contentRef inline v2.0) + LocalOPFS BlobStorage(packages/storage 흡수, AbortSignal 매 entry, BlobStorageError extends PortError) + LocalNoOpSync(silent no-op ~30 LOC) + LocalStaticModeration(정규식 7 패턴 fail-closed + ConfirmDialog 재사용) + Adapter Resolver(createLocalPorts + PortsContext + 동적 import Suspense + adapterPolicies Port+namespace 2차원). architect 2회 병렬 호출 + 사용자 결정 26건 추천 일괄 채택.
 - 2026-05-27: **ADR-0017 Ports & Adapters 채택** — 5 Port(Auth/AppRepo/Blob/Sync/Moderation) + 단일 `PortError` + `@zm/core/ports` SSOT + `@zm/adapters-local` 신규 패키지 + 하이브리드 어댑터 선택 + `@zm/storage` 1 v2 minor deprecation. ADR-0013/0014/0015 superseded. ARCH-03 신규 + ARCH-01/TECH-01 reshape + TECH-07/08/09 deprecated. 사용자 결정 8건 일괄 채택.
 - 2026-05-27: **문서 정밀 감사 + 9건 일괄 수정** — BLOCK 3 + WARN 6. 코드 변경 0, 문서만 11개 (commit f0b4eb9).

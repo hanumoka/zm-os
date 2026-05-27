@@ -10,7 +10,8 @@
     "./manifest": "./src/manifest.ts",
     "./version": "./src/version.ts",
     "./namespace-registry": "./src/namespace-registry.ts",
-    "./errors/persistence-error": "./src/errors/persistence-error.ts"
+    "./errors/persistence-error": "./src/errors/persistence-error.ts",
+    "./ports": "./src/ports/index.ts"
   },
   "scripts": {
     "type-check": "tsc --noEmit",

@@ -20,6 +20,7 @@ import {
   NS_USER_APPS,
   NS_DESKTOP_LAYOUT,
   NS_DESKTOP_SETTINGS,
+  NS_SYSTEM,
 } from '@zm/core';
 import type { NamespaceId } from '@zm/core';
 
@@ -28,12 +29,13 @@ export {
   NS_USER_APPS as STORE_USER_APPS,
   NS_DESKTOP_LAYOUT as STORE_DESKTOP_LAYOUT,
   NS_DESKTOP_SETTINGS as STORE_DESKTOP_SETTINGS,
+  NS_SYSTEM as STORE_SYSTEM,
 };
 
 // ─── DB / Store 상수 ─────────────────────────────────────────────────────────
 export const DB_NAME = 'zm-os';
-/** DB 버전. store 추가 시 bump (v2: STORE_USER_APPS, v3: STORE_DESKTOP_LAYOUT, v4: STORE_DESKTOP_SETTINGS) */
-export const DB_VERSION = 4;
+/** DB 버전. store 추가 시 bump (v2: STORE_USER_APPS, v3: STORE_DESKTOP_LAYOUT, v4: STORE_DESKTOP_SETTINGS, v5: STORE_SYSTEM ADR-0018 LocalAuth) */
+export const DB_VERSION = 5;
 
 // ─── 타입 ─────────────────────────────────────────────────────────────────────
 export type IDBStoreName = NamespaceId;
@@ -61,6 +63,11 @@ interface ZmOsDBSchema extends DBSchema {
     value: any;
   };
   [NS_DESKTOP_SETTINGS]: {
+    key: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    value: any;
+  };
+  [NS_SYSTEM]: {
     key: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     value: any;
@@ -122,6 +129,12 @@ export function openDB(): Promise<IDBPDatabase<ZmOsDBSchema>> {
         if (oldVersion < 4) {
           if (!db.objectStoreNames.contains(NS_DESKTOP_SETTINGS)) {
             db.createObjectStore(NS_DESKTOP_SETTINGS);
+          }
+        }
+        // v4 → v5: system 생성 (ADR-0018 LocalAuth anon UserId 영속화)
+        if (oldVersion < 5) {
+          if (!db.objectStoreNames.contains(NS_SYSTEM)) {
+            db.createObjectStore(NS_SYSTEM);
           }
         }
       },
