@@ -1,10 +1,10 @@
 ---
 number: "0015"
 title: v2 데스크탑 상태 동기화 — LWW + 서버 권위 시계
-status: accepted
+status: "accepted (will be superseded by ADR-0017+)"
 date: 2026-05-26
 author: hanumoka
-related: ["0013", "0014", "0009"]
+related: ["0013", "0014", "0009", "0017"]
 ---
 
 # ADR-0015: v2 데스크탑 상태 동기화 — LWW + 서버 권위 시계

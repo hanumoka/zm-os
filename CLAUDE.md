@@ -3,7 +3,7 @@
 # CLAUDE.md — zm-os 프로젝트 지침서
 
 > **Claude Code를 위한 zm-os 프로젝트 가이드**
-> **최종 업데이트**: 2026-05-24
+> **최종 업데이트**: 2026-05-27
 
 ---
 
@@ -139,8 +139,8 @@ Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
 - `"strict": true` 필수, **any 금지**
 - 함수 반환 타입 명시
 - 인라인 스타일 금지 (Tailwind v4 클래스 사용)
-- raw fetch 금지 (`src/lib/api/` 경유)
-- raw `postMessage` 금지 (`src/lib/apps/ipc/` Comlink 어댑터 경유)
+- raw fetch 금지 (`apps/web/src/lib/api/` 경유 — POC 미구현, v2 도입 예정)
+- raw `postMessage` 금지 (`apps/web/src/lib/apps/ipc/` Comlink 어댑터 경유)
 - `'use client'`는 필요한 컴포넌트에만 (서버 컴포넌트 기본)
 - `window` / `document` / `localStorage` 접근은 `useEffect` 내부에서만 (SSR 안전)
 
@@ -156,8 +156,8 @@ Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
 - **design-reviewer** (opus, 15t): **필수 게이트**. 구현↔설계 적합성 검증. BLOCK 권한. SOLID/확장성 검증.
 
 **구현** (2):
-- **lib-developer** (sonnet, 25t): `src/lib/` 추상화 계층 (apps/storage/api).
-- **fe-developer** (sonnet, 25t): `src/app/` + `src/components/` UI.
+- **lib-developer** (sonnet, 25t): `apps/web/src/lib/` 추상화 계층 (apps/storage/api) + `packages/{core,storage,ipc}/`.
+- **fe-developer** (sonnet, 25t): `apps/web/src/app/` + `apps/web/src/components/` UI.
 
 **1차 검증** (4, 병렬):
 - **build-checker** (haiku, 5t): tsc + 변경 파일 신규 에러 우선.
@@ -235,5 +235,5 @@ Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
 ---
 
 *프로젝트: zm-os 브라우저 가상 데스크탑 POC*
-*상태: Phase 3 진행 중 (2026-05-25)*
+*상태: POC 완료 → Post-POC 완료 → v2 진입 (로컬-우선 전환, ADR-0017 대기) (2026-05-27)*
 *작업 모드: Claude Code 자율 개발 + 사용자 리뷰*

@@ -43,7 +43,7 @@
 | TEST-01 | Vitest 4.1.7 + 56개 단위 테스트 | — | ✅ 완료 |
 | DSK-05 | 데스크탑 커스터마이징 (배경/테마/설정 UI) | ADR-0012 | ✅ 완료 |
 
-| REFAC-01 | 설계 리팩토링 8/8 (Error Boundary + 에러 플러밍 + NS Registry + Manifest v2 + Persistence Hook + Validation Chain + ContentLoader + Desktop 분리) | ADR-0013 | ✅ 완료 |
+| REFAC-01 | 설계 리팩토링 8/8 (Error Boundary + 에러 플러밍 + NS Registry + Manifest v2 + Persistence Hook + Validation Chain + ContentLoader + Desktop 분리) | — | ✅ 완료 |
 
 ### 설계 리팩토링 진행 상황 (8항목, 8/8 ✅ 전체 완료)
 

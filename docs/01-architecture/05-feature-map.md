@@ -1,94 +1,118 @@
 # Feature Map
 
 > UI / 스토리지 / 샌드박싱 연결도. PRD 기능 ID(`DSK-NN` 등)와 코드 경로 매핑.
+> **모노레포 마이그레이션 후** (SRV-00, 2026-05-26): `src/` → `apps/web/src/` + `packages/{core,storage,ipc}`
 
-**Last Updated**: 2026-05-24
+**Last Updated**: 2026-05-27
 
 ---
 
-## 데이터 흐름 (POC 1차)
+## 데이터 흐름 (POC 1차, 모노레포 후)
 
 ```
 [User]
   ↓ 클릭
-[Desktop UI (src/components/desktop/)]
+[Desktop UI (apps/web/src/components/desktop/)]
   ↓ 앱 실행 요청
 [Window Manager (DSK-01)]
   ↓ 매니페스트 로드
-[App Manifest (src/lib/apps/manifest.ts)] ← [IndexedDB (STG-01)] ← [Store (STR-01)]
-  ↓ blob: URL 생성
-[Sandbox SDK (src/lib/apps/sandbox.ts)]
+[App Manifest (packages/core/src/manifest.ts)] ← [StorageAdapter (packages/storage/)] ← [Store (STR-01)]
+  ↓ blob: URL 또는 srcdoc 생성
+[Sandbox SDK (apps/web/src/lib/apps/sandbox.ts)]
   ↓ iframe 생성 (sandbox="allow-scripts")
 [Iframe (null/blob: origin)]
-  ↓ Comlink RPC
-[IPC Adapter (src/lib/apps/ipc/)] ↔ [Host Services]
+  ↓ Comlink-compatible RPC
+[IPC Adapter (packages/ipc/)] ↔ [Host Services (apps/web/src/lib/...)]
 ```
 
 ---
 
-## 기능 ID → 코드 경로 매핑
+## 기능 ID → 코드 경로 매핑 (모노레포 후 실제 경로)
 
 ### Desktop (DSK)
-| ID | 위치 |
-|----|------|
-| DSK-01 | `src/components/desktop/WindowManager.tsx` (예정) |
-| DSK-02 | `src/components/desktop/Desktop.tsx` (예정) |
-| DSK-03 | `src/components/desktop/Taskbar.tsx` (예정) |
+| ID | 위치 | 상태 |
+|----|------|------|
+| DSK-01 | `apps/web/src/components/desktop/{WindowManagerProvider,Window,useWindowManager,windowReducer}.tsx` | ✅ |
+| DSK-02 | `apps/web/src/components/desktop/{Desktop.tsx,DesktopIcon.tsx,desktopApps.ts}` | ✅ |
+| DSK-03 | `apps/web/src/components/desktop/{Taskbar.tsx,TaskbarButton.tsx,Clock.tsx}` | ✅ |
+| DSK-04 | 윈도우 레이아웃 영속화 (StorageAdapter 통합) | ✅ |
+| DSK-05 | 데스크탑 커스터마이징 (배경/테마/설정 UI) | ✅ |
 
 ### Store (STR)
-| ID | 위치 |
-|----|------|
-| STR-01 | `src/components/store/Catalog.tsx` (예정) |
-| STR-02 | `src/components/store/AppDetail.tsx` (예정) |
+| ID | 위치 | 상태 |
+|----|------|------|
+| STR-01/02 | `apps/web/src/app/store/` + `apps/web/src/components/store/{AppCard,AppDetail}.tsx` + `InstalledAppsProvider.tsx` | ✅ |
 
 ### Apps (APP)
-| ID | 위치 |
-|----|------|
-| APP-01 | `src/lib/apps/manifest.ts` (예정) — Zod 스키마 |
-| APP-02 | `src/lib/apps/package.ts` (예정) — ZIP 압축/해제 |
-| APP-03 | `src/lib/apps/installed.ts` (예정) — IndexedDB CRUD |
+| ID | 위치 | 상태 |
+|----|------|------|
+| APP-01 | `packages/core/src/manifest.ts` (Zod 스키마, v1/v2 호환) | ✅ |
+| APP-02 | `apps/web/src/lib/apps/zip-loader.ts` + `apps/web/src/lib/apps/UserAppsProvider.tsx` + `AppUploadButton.tsx` | ✅ |
+| APP-03 | `apps/web/src/lib/storage/installed-apps.ts` (IndexedDB hydration) | ✅ |
+| APP-04 | ConfirmDialog + semver 비교 + AppInfoDialog (컨텍스트 메뉴) | ✅ |
 
 ### Sandbox (SBX)
-| ID | 위치 |
-|----|------|
-| SBX-01 | `src/lib/apps/sandbox.ts` (예정) — blob URL + iframe |
-| SBX-02 | `next.config.ts` `headers()` |
+| ID | 위치 | 상태 |
+|----|------|------|
+| SBX-01 | `apps/web/src/lib/apps/sandbox.ts` (blob URL + srcdoc iframe) | ✅ |
+| SBX-02 | `apps/web/next.config.ts` + `apps/web/src/lib/security/csp.ts` | ✅ |
 
 ### IPC
-| ID | 위치 |
-|----|------|
-| IPC-01 | `src/lib/apps/ipc/` (예정) — Comlink 어댑터 |
+| ID | 위치 | 상태 |
+|----|------|------|
+| IPC-01 | `packages/ipc/src/` (wire-compatible RPC v1) + rate-limiter (N-08 방어) | ✅ |
+| IPC-02 | Comlink 라이브러리 직접 통합 | ⏳ v2 |
 
 ### Storage (STG)
-| ID | 위치 |
-|----|------|
-| STG-01 | `src/lib/storage/indexeddb.ts` (예정) |
-| STG-02 | `src/lib/storage/opfs.ts` (예정) |
+| ID | 위치 | 상태 |
+|----|------|------|
+| STG-01 | `packages/storage/src/indexeddb.ts` (idb v8.0.3 wrapper + 메모리 폴백) | ✅ |
+| STG-02 | `packages/storage/src/{adapter,opfs,memory}.ts` (StorageAdapter Strategy) | ✅ |
 
-### Game (GAME)
-| ID | 위치 |
-|----|------|
-| GAME-01 | `public/sample-game/` 또는 `apps-bundled/game-01/` (예정) — Phaser 또는 Pixi |
+### Game (GAME) — 게임 엔진 매트릭스
+| ID | 위치 | 상태 |
+|----|------|------|
+| GAME-01 | `apps/web/public/sample-game-phaser/` (Phaser 3.90.0 Snake) | ✅ |
+| 추가 | `apps/web/public/sample-game-pixi/` (Pixi.js 8.18.1) + `sample-game-three/` (Three.js r184) | ✅ |
+
+### Errors (REFAC-01)
+| ID | 위치 | 상태 |
+|----|------|------|
+| C-1 | `apps/web/src/app/error.tsx` + `apps/web/src/app/global-error.tsx` (Error Boundary) | ✅ |
+| H-5 | `apps/web/src/lib/errors/PersistenceErrorContext.tsx` (구조화 에러 플러밍) | ✅ |
+| H-1 | `packages/core/src/manifest.ts` (Manifest v2 + v1 호환 마이그레이션) | ✅ |
+
+---
+
+## ⚠️ v2 진입 — Ports & Adapters 모델 대기 (2026-05-26 결정)
+
+**현재**: 모노레포 + 로컬 어댑터(StorageAdapter)만 일부 존재. 인증/스토어 백엔드 미구현.
+**ADR-0017 대기**: 5개 Port 정의 (AuthProvider / AppRepository / BlobStorage / SyncProvider / ModerationProvider) → ADR-0018~0023에서 각 Port의 LocalAdapter 명세.
+
+`packages/storage`는 이미 BlobStorage Port의 prototype 역할. 다른 4개 Port는 ADR-0017 작성 시 인터페이스 확정 후 구현 진입.
 
 ---
 
 ## 신뢰 경계 (Trust Boundary)
 
 ```
-┌──────────────────────────────────────┐
-│ Host Origin (zm-os 자체)              │
-│  - Next.js 페이지                    │
-│  - IndexedDB / OPFS (사용자 데이터)   │
-│  - src/lib/apps/ (host code)         │
-│                                      │
-│  ┌────────────────────────────────┐  │
-│  │ blob: / null origin (사용자 앱) │  │
-│  │  - sandbox="allow-scripts"      │  │
-│  │  - 격리된 스토리지 (parent 불가)│  │
-│  │  - postMessage만 host와 통신    │  │
-│  └────────────────────────────────┘  │
-└──────────────────────────────────────┘
+┌──────────────────────────────────────────────┐
+│ Host Origin (zm-os 자체)                      │
+│  - Next.js 페이지 (apps/web/src/app/)         │
+│  - IndexedDB / OPFS / Memory                  │
+│    (packages/storage/ StorageAdapter)         │
+│  - apps/web/src/lib/apps/ (host code)         │
+│  - packages/core (manifest/version/errors)    │
+│                                              │
+│  ┌────────────────────────────────┐          │
+│  │ blob: / null origin (사용자 앱) │          │
+│  │  - sandbox="allow-scripts"      │          │
+│  │  - 격리된 스토리지 (parent 불가)│          │
+│  │  - postMessage만 host와 통신    │          │
+│  │  - IPC rate-limiter 적용 (N-08) │          │
+│  └────────────────────────────────┘          │
+└──────────────────────────────────────────────┘
 ```
 
-신뢰 경계 통과는 **반드시 Comlink IPC를 통해서만**. 다른 통로 금지.
+신뢰 경계 통과는 **반드시 IPC RPC (`packages/ipc/`)를 통해서만**. 다른 통로 금지.
 규칙: [`.claude/rules/security.md`](../../.claude/rules/security.md)

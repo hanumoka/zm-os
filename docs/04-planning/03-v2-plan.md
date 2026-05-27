@@ -181,9 +181,9 @@ Feature ID 규칙 확장:
 
 | ADR 후보 | 영향 | 우선순위 | 진행 |
 |---------|------|---------|------|
-| **ADR-Auth** — 인증 공급자 (Clerk vs Supabase Auth vs Auth.js) | USR-01, JWT 클레임, 비용 | **High (1차 병렬)** | ✅ ADR-0013 (Supabase Auth) |
-| **ADR-DB** — Postgres 호스팅 (Supabase vs Neon vs 자체) + RLS 전략 | STR-v2-01, 비용 | **High (1차 병렬)** | ✅ ADR-0014 (Supabase) |
-| **ADR-Sync** — 동기화 전략 (CRDT Yjs/Automerge vs LWW + 충돌 표시) | CLD-03, UX 복잡도 | **High (1차 병렬)** | ✅ ADR-0015 (LWW + 서버 권위 시계) |
+| **ADR-Auth** — 인증 공급자 (Clerk vs Supabase Auth vs Auth.js) | USR-01, JWT 클레임, 비용 | **High (1차 병렬)** | ⚠️ ADR-0013 reshape 대기 (ADR-0017 후 AuthProvider 어댑터로 분리) |
+| **ADR-DB** — Postgres 호스팅 (Supabase vs Neon vs 자체) + RLS 전략 | STR-v2-01, 비용 | **High (1차 병렬)** | ⚠️ ADR-0014 reshape 대기 (ADR-0017 후 AppRepository 어댑터로 분리) |
+| **ADR-Sync** — 동기화 전략 (CRDT Yjs/Automerge vs LWW + 충돌 표시) | CLD-03, UX 복잡도 | **High (1차 병렬)** | ⚠️ ADR-0015 reshape 대기 (ADR-0017 후 SyncProvider 어댑터로 분리) |
 | **ADR-Storage** — 객체 스토리지 (R2 vs Supabase Storage vs S3) | CLD-01, 비용/지역 | **High (2차)** | ⏳ |
 | **ADR-Hosting** — 호스팅 (Vercel vs Cloudflare Pages) | SRV-01, 빌드 제약 | **High (2차)** | ⏳ |
 | **ADR-Permission** — 권한 모델 (capabilities + grant 영속화) | SBX-v2-00, APP-01 v2 schema | **High (2차)** | ⏳ |

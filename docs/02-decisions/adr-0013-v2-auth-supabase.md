@@ -1,10 +1,10 @@
 ---
 number: "0013"
 title: v2 사용자 인증 — Supabase Auth 채택
-status: accepted
+status: "accepted (will be superseded by ADR-0017+)"
 date: 2026-05-26
 author: hanumoka
-related: ["0001", "0014", "0015"]
+related: ["0001", "0014", "0015", "0017"]
 ---
 
 # ADR-0013: v2 사용자 인증 — Supabase Auth 채택

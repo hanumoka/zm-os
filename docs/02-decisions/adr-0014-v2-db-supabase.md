@@ -1,10 +1,10 @@
 ---
 number: "0014"
 title: v2 Postgres 호스팅 + RLS — Supabase 채택
-status: accepted
+status: "accepted (will be superseded by ADR-0017+)"
 date: 2026-05-26
 author: hanumoka
-related: ["0013", "0015"]
+related: ["0013", "0015", "0017"]
 ---
 
 # ADR-0014: v2 Postgres 호스팅 + RLS — Supabase 채택
