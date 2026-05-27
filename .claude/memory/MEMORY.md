@@ -1,5 +1,5 @@
 # zm-os Project Memory
-> 시스템 프롬프트 자동 로드 (200줄 한도). 최종 갱신: 2026-05-27 (문서 정밀 감사 + 9건 일괄 수정)
+> 시스템 프롬프트 자동 로드 (200줄 한도). 최종 갱신: 2026-05-27 (ADR-0017~0023 일괄 채택 — Local 어댑터 6건)
 
 ## 프로젝트 수치 (항상 최신 유지)
 - 현재 상태: **POC ✅ 완료 + Post-POC ✅ 완료 + v2 진입** (로컬-우선 전환, ADR-0017 대기)
@@ -51,20 +51,19 @@
 - **POC 1~3 Phase ✅ 완료** (4/4 × 3 = 모두 100%) — M4 마일스톤 달성, POC 공식 종료
 - **POC 종료 게이트 ✅ 통과** — 보안 14 페네스트 + 번들 임계치 PASS
 - **Post-POC ✅ 완료**: APP-04 + TEST-01 + DSK-05 + **REFAC-01 8/8** + APP-04 확장
-- **v2 진입 작업 ✅ 완료**: SRV-00 모노레포 마이그레이션 + ADR-0013/0014/0015/0016 작성
-- **⚠️ 진행 중 방향 전환**: 로컬-우선 (2026-05-26) → ADR-0013/0014/0015 헤더 `accepted (will be superseded by ADR-0017+)`, v2 plan v0.3.0 재작성 대기
-- **다음 후보**: **ADR-0017** (Ports & Adapters + 5 Port) → ADR-0018~0023 (LocalAdapter 6건) → v2 plan v0.3.0 → M5 진입
+- **v2 진입 설계 ✅ 완료 (2026-05-27)**: SRV-00 모노레포 + **ADR-0016 + ADR-0017~0023 일괄 채택** (Ports & Adapters + Local 어댑터 6건) + ADR-0013/0014/0015 superseded
+- **다음 후보**: **v2 plan v0.3.0 재작성** → **REFAC-02 5 작업** (packages/adapters-local 신규 + 5 Provider Port 호출 reshape) → M5 진입 (SRV-01~02 + USR-01~04 로컬 인증 기본)
 
 ## 최근 결정사항 (최대 10, FIFO)
-- 2026-05-27: **문서 정밀 감사 + 9건 일괄 수정** — BLOCK 3 (ADR-0013/0014/0015 헤더 status + v2-plan §5 ✅ 표기 + CLAUDE.md `src/lib/api/` 경로) + WARN 6 (_digest 동기화 + roadmap v0.9.0 + quick-ref 전면 + CLAUDE.md 경로 + feature-map 모노레포 + MEMORY FIFO). 코드 변경 0건, 문서만 10개 파일.
-- 2026-05-26: **로컬-우선 아키텍처 전환** — 사용자 결정. 로컬 100% 외부 의존성 0 + 클라우드 옵션은 어댑터 추상화. Ports & Adapters 도입 (ADR-0017 대기). 기존 ADR-0013/0014/0015는 "어댑터 옵션"으로 reshape 대기. 진행 중이던 ADR 2차 7건은 로컬-우선 6건(0018~0023)으로 재구성, 클라우드 어댑터 ADR은 별도 트랙(0024+) 분리.
+- 2026-05-27: **ADR-0018~0023 Local 어댑터 6건 일괄 채택** — LocalAuth(crypto.randomUUID + system namespace + BroadcastChannel) + LocalRepo IDB(installed-apps/user-apps 2 namespace, cascade remove, contentRef inline v2.0) + LocalOPFS BlobStorage(packages/storage 흡수, AbortSignal 매 entry, BlobStorageError extends PortError) + LocalNoOpSync(silent no-op ~30 LOC) + LocalStaticModeration(정규식 7 패턴 fail-closed + ConfirmDialog 재사용) + Adapter Resolver(createLocalPorts + PortsContext + 동적 import Suspense + adapterPolicies Port+namespace 2차원). architect 2회 병렬 호출 + 사용자 결정 26건 추천 일괄 채택.
+- 2026-05-27: **ADR-0017 Ports & Adapters 채택** — 5 Port(Auth/AppRepo/Blob/Sync/Moderation) + 단일 `PortError` + `@zm/core/ports` SSOT + `@zm/adapters-local` 신규 패키지 + 하이브리드 어댑터 선택 + `@zm/storage` 1 v2 minor deprecation. ADR-0013/0014/0015 superseded. ARCH-03 신규 + ARCH-01/TECH-01 reshape + TECH-07/08/09 deprecated. 사용자 결정 8건 일괄 채택.
+- 2026-05-27: **문서 정밀 감사 + 9건 일괄 수정** — BLOCK 3 + WARN 6. 코드 변경 0, 문서만 11개 (commit f0b4eb9).
+- 2026-05-26: **로컬-우선 아키텍처 전환** — 사용자 결정. 로컬 100% 외부 의존성 0 + 클라우드 옵션은 어댑터 추상화. ADR-0013/0014/0015 reshape 대기 결정 (2026-05-27 superseded 완료).
 - 2026-05-26: **SRV-00 실행 완료** — 모노레포 마이그레이션 (src/ → apps/web + packages/{core,storage,ipc} + pnpm workspaces + Turborepo). 검증: turbo type-check 4/4 + turbo test 61/61 + next build ✅.
 - 2026-05-26: ADR-0016 (v2 모노레포) — pnpm 11 + Turborepo 2.7. 구조 apps/web + packages/{core,storage,ipc}. ARCH-01 reshape + TECH-10 등재.
-- 2026-05-26: v2 ADR 3건 일괄 작성 — ADR-0013(Auth: Supabase Auth) + ADR-0014(DB: Supabase Postgres + Drizzle) + ADR-0015(Sync: LWW + 서버 권위 시계). policy-registry TECH-07/08/09 + CONST-01/02 등재.
-- 2026-05-26: v2 Plan v0.2.0 — architect 검토 + 사용자 결정 4건 반영. **9 Epic(G/H/I 신규) + 53 작업 + 12 ADR 후보 + 10 정책 reshape + M5~M10 (21주)**.
-- 2026-05-26: v2 Plan 초안 작성 — 6 Epic + 33 작업 + 7 ADR 후보 + 8 정책 reshape + 4 마일스톤(M5~M8). docs/04-planning/03-v2-plan.md.
+- 2026-05-26: v2 ADR 3건 일괄 작성 — ADR-0013(Auth: Supabase Auth) + ADR-0014(DB: Supabase Postgres + Drizzle) + ADR-0015(Sync: LWW + 서버 권위 시계). 이후 2026-05-27 모두 superseded by ADR-0017.
+- 2026-05-26: v2 Plan v0.2.0 — architect 검토 + 사용자 결정 4건 반영. 9 Epic + 53 작업 + 12 ADR 후보 + 10 정책 reshape + M5~M10 (21주). v0.3.0 재작성 대기.
 - 2026-05-26: APP-04 확장 완료 — 데스크탑 아이콘 우클릭 컨텍스트 메뉴 (앱 정보 + 사용자 앱 삭제). AppInfoDialog 신규.
-- 2026-05-26: REFAC-01 정밀 감사 + 수정 — H-3 lib→components 역방향 의존성 제거 + C-2 정책 코멘트 복원.
 - 2026-05-26: REFAC-01 **전체 완료 (8/8)** — C-1+H-5+C-3+H-1+H-4+H-2+H-3+C-2 모두 완료.
 
-> **최종 갱신**: 2026-05-27 — 문서 정밀 감사 + 9건 일괄 수정 (코드 변경 0)
+> **최종 갱신**: 2026-05-27 — ADR-0017~0023 일괄 채택 (Ports & Adapters + Local 어댑터 6건)

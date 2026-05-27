@@ -1,15 +1,16 @@
 ---
 number: "0013"
 title: v2 사용자 인증 — Supabase Auth 채택
-status: "accepted (will be superseded by ADR-0017+)"
+status: superseded
 date: 2026-05-26
 author: hanumoka
 related: ["0001", "0014", "0015", "0017"]
+superseded_by: ["0017"]
 ---
 
 # ADR-0013: v2 사용자 인증 — Supabase Auth 채택
 
-> ⚠️ **2026-05-26 상태 변경**: 사용자 결정에 따라 "로컬-우선 + 외부 의존성 옵션" 아키텍처로 전환됨. 본 ADR은 "Supabase Auth = AuthProvider 어댑터 중 하나"로 reshape 예정. ADR-0017 (Ports & Adapters) 작성 후 본 ADR을 superseded 처리하고 신규 ADR로 분리한다.
+> ⚠️ **2026-05-27 superseded by ADR-0017**: 본 ADR은 ADR-0017(Ports & Adapters)의 어댑터 옵션 명세로 reshape됨. Supabase Auth는 `AuthProvider` Port의 Cloud 어댑터 중 하나로 격하되며, 상세 명세는 **ADR-0024+** (CloudAuth-Supabase, v2 CLD Epic 진입 시점에 작성)에서 별도 작성된다. 본 ADR의 결정 근거(MAU 비용 분석, RLS 통합, CVE-2026-31813 강제 등)는 ADR-0024+ 작성 시 참고용으로 보존한다.
 
 ## Context
 

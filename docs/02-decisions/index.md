@@ -15,24 +15,39 @@
 | [ADR-0009](adr-0009-storage-abstraction.md) | 스토리지 추상화 계층 — StorageAdapter Strategy 패턴 + OPFS 어댑터 | accepted | 2026-05-25 |
 | [ADR-0011](adr-0011-user-app-lifecycle.md) | 사용자 앱 삭제 및 업데이트 UX (APP-04) | accepted | 2026-05-25 |
 | [ADR-0012](adr-0012-dark-mode-strategy.md) | 다크 모드 CSS 전략 — Tailwind v4 class 기반 dark variant | accepted | 2026-05-25 |
-| [ADR-0013](adr-0013-v2-auth-supabase.md) | v2 사용자 인증 — Supabase Auth 채택 | ⚠️ reshape 대기 | 2026-05-26 |
-| [ADR-0014](adr-0014-v2-db-supabase.md) | v2 Postgres 호스팅 + RLS — Supabase 채택 | ⚠️ reshape 대기 | 2026-05-26 |
-| [ADR-0015](adr-0015-v2-sync-lww.md) | v2 데스크탑 상태 동기화 — LWW + 서버 권위 시계 | ⚠️ reshape 대기 | 2026-05-26 |
+| [ADR-0013](adr-0013-v2-auth-supabase.md) | v2 사용자 인증 — Supabase Auth 채택 | superseded by ADR-0017 | 2026-05-26 |
+| [ADR-0014](adr-0014-v2-db-supabase.md) | v2 Postgres 호스팅 + RLS — Supabase 채택 | superseded by ADR-0017 | 2026-05-26 |
+| [ADR-0015](adr-0015-v2-sync-lww.md) | v2 데스크탑 상태 동기화 — LWW + 서버 권위 시계 | superseded by ADR-0017 | 2026-05-26 |
 | [ADR-0016](adr-0016-v2-monorepo.md) | v2 모노레포 도구 — pnpm workspaces + Turborepo | accepted | 2026-05-26 |
+| [ADR-0017](adr-0017-ports-and-adapters.md) | Ports & Adapters 아키텍처 + 5개 Port 정의 (로컬-우선 + 클라우드 옵션) | accepted | 2026-05-27 |
+| [ADR-0018](adr-0018-local-auth.md) | LocalAuth — POC v1 anonymous user 모델 (AuthProvider Local 어댑터) | accepted | 2026-05-27 |
+| [ADR-0019](adr-0019-localrepo-idb.md) | LocalRepo IDB — AppRepository Local 어댑터 (IndexedDB) | accepted | 2026-05-27 |
+| [ADR-0020](adr-0020-localopfs-blobstorage.md) | LocalOPFS BlobStorage — BlobStorage Local 어댑터 (IDB/OPFS/Memory + AbortSignal) | accepted | 2026-05-27 |
+| [ADR-0021](adr-0021-local-noop-sync.md) | LocalNoOpSync — 동기화 비활성 어댑터 (SyncProvider Local) | accepted | 2026-05-27 |
+| [ADR-0022](adr-0022-local-static-moderation.md) | LocalStaticModeration — HTML 정적 분석 어댑터 (ModerationProvider Local) | accepted | 2026-05-27 |
+| [ADR-0023](adr-0023-adapter-resolver-composition-root.md) | Adapter Resolver + Composition Root — createPorts() + PortsContext + 동적 import | accepted | 2026-05-27 |
 
 ## 다음 번호 가이드
 
 > **2026-05-26 방향 전환**: 로컬-우선 + 외부 의존성 옵션 아키텍처. 클라우드 단독 가정 ADR은 reshape.
+> **2026-05-27**: ADR-0017~0023 7건 채택 완료 (Ports & Adapters + Local 어댑터 6건) + ADR-0013/0014/0015 superseded 처리 완료.
 
-- **ADR-0017** (즉시 필요): Ports & Adapters 아키텍처 + 5개 Port 정의 (AuthProvider/AppRepository/BlobStorage/SyncProvider/ModerationProvider)
-- **ADR-0018~0023** (ADR-0017 후 6건):
-  - ADR-0018: AuthProvider + LocalAuth 기본 구현
-  - ADR-0019: AppRepository + LocalRepo (IDB)
-  - ADR-0020: BlobStorage + LocalOPFS
-  - ADR-0021: SyncProvider + LocalNoOp
-  - ADR-0022: ModerationProvider + StaticAnalysis (eval/Function 검출)
-  - ADR-0023: PROD-05-v2 reshape (로컬 OPFS 다중 파일)
-- **ADR-0024+** (CloudAdapter 옵션 + Permission 등 보류 항목):
+### 다음 단계 — v2 plan v0.3.0 재작성 + 구현 진입
+- **v2 plan v0.3.0**: 9 Epic 유지 + 작업마다 LocalAdapter 필수 / CloudAdapter 옵션 표기
+- **REFAC-02** (5 작업 분할): packages/adapters-local 신규 + 5 Provider Port 호출 reshape
+- **M5 진입**: SRV-01~02 + USR-01~04 로컬 인증 기본
+
+### 보류 — ADR-0024+ (CloudAdapter 옵션 트랙, v2 CLD Epic 진입 시점)
+- ADR-0024+: CloudAuth-Supabase (ADR-0013 정보 흡수)
+- ADR-0025+: CloudRepo-Supabase (ADR-0014 정보 흡수)
+- ADR-0026+: CloudSync-LWW (ADR-0015 정보 흡수)
+- ADR-0027+: Migration utility (Local↔Cloud 데이터 전환)
+- ADR-0028+: CloudBlob (R2 / Supabase Storage)
+- ADR-0029+: CloudModeration (VirusTotal 등)
+- ADR-Permission (manifest capabilities + grant 영속화)
+- ADR-Hosting (Vercel / CF Pages)
+- ADR-API-Auth (Server Action / JWT cookie)
+- IPC-02 (Comlink 직접 통합)
   - ADR-Permission (manifest capabilities + grant 영속화)
   - ADR-API-Auth (Server Action vs Route Handler, JWT cookie 위치)
   - ADR-Hosting (Vercel / CF Pages / 정적 export)

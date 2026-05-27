@@ -9,12 +9,29 @@
 
 ## Active (현행 정책)
 
-### ARCH-01: Next.js 풀스택 + v2 pnpm/Turborepo 모노레포 (2026-05-24, reshape 2026-05-26)
+### ARCH-01: Next.js 풀스택 + v2 pnpm/Turborepo 모노레포 (2026-05-24, reshape 2026-05-26 + 2026-05-27)
 - **POC v1 결정**: 단일 Next.js 프로젝트 (App Router) + route handlers를 BE 대용. (ADR-0001)
-- **v2 reshape (2026-05-26)**: **v2 진입 전 pnpm 11 + Turborepo 2.7 모노레포 분리**. 구조: `apps/web` + `packages/{core,storage,ipc}`. (ADR-0016)
-- **이유**: cloud-adapter / Comlink IPC-02 / Edge Functions 분리 필요. modular monolith 구조.
-- **마이그레이션**: v2 진입 전 일괄 PR (SRV-00 신규 작업, 1~2일 예상). React hook + StorageAdapter + AppManifest 인터페이스 보존.
-- **상세**: ADR-0001 (POC v1) + ADR-0016 (v2 reshape)
+- **v2 reshape (2026-05-26)**: v2 진입 전 pnpm 11 + Turborepo 2.7 모노레포 분리. 구조: `apps/web` + `packages/{core,storage,ipc}`. (ADR-0016)
+- **추가 reshape (2026-05-27)**: ADR-0017 채택으로 **`packages/adapters-local` 신규 패키지 추가** → 구조: `apps/web` + `packages/{core,storage,ipc,adapters-local}`. `packages/storage`는 deprecation period 1 v2 minor (BlobStorage Port re-export shell).
+- **이유**: cloud-adapter / Comlink IPC-02 / Edge Functions 분리 필요. Ports & Adapters 패턴(ADR-0017)으로 외부 의존성 격리.
+- **상세**: ADR-0001 (POC v1) + ADR-0016 (모노레포) + ADR-0017 (adapters-local)
+
+### ARCH-03: Ports & Adapters 아키텍처 — 5개 Port + 로컬-우선 + 클라우드 옵션 (2026-05-27)
+- **결정**: 5 Port 인터페이스 SSOT은 `packages/core/src/ports/` (외부 의존성 zod만). 어댑터 구현은 별도 패키지 — Local = `@zm/adapters-local` 정적 번들, Cloud = `@zm/adapters-cloud-*` 동적 import.
+- **5 Port**: AuthProvider / AppRepository / BlobStorage / SyncProvider / ModerationProvider.
+- **에러 모델**: 단일 `PortError` 클래스 (`port`/`code`/`retryable` 필드).
+- **어댑터 선택**: 하이브리드 (Local 빌드 타임 정적 포함 + Cloud 런타임 동적 import + lazy load).
+- **Local 어댑터 6건 명세** (2026-05-27 일괄 확정):
+  - ADR-0018 LocalAuth — `crypto.randomUUID` + `system` namespace + BroadcastChannel multi-tab sync
+  - ADR-0019 LocalRepo (IDB) — installed-apps/user-apps 2 namespace 흡수, BlobStorage 위 layer, cascade remove
+  - ADR-0020 LocalOPFS BlobStorage — `packages/storage` 흡수, AbortSignal 매 entry 폴링, `@zm/storage` 1 minor shell
+  - ADR-0021 LocalNoOpSync — status='disabled' 고정, silent no-op, ~30 LOC
+  - ADR-0022 LocalStaticModeration — 정규식 7 패턴, fail-closed, patterns.ts 외부화
+  - ADR-0023 Adapter Resolver — createLocalPorts factory + PortsContext + 동적 import Suspense + adapterPolicies Port+namespace 2차원
+- **이유**: ADR-0017 — 로컬 100% 동작 + 외부 의존성 0 보장. v2 Cloud 어댑터 도입 시 어댑터 교체 1건 단위.
+- **금지**: Port 인터페이스가 `@zm/storage`/`@zm/ipc` 등 어댑터 패키지를 import 금지 (DIP 준수). Local-only 빌드에 Cloud 어댑터 정적 번들 포함 금지.
+- **재고 시점**: 새 Port 후보(예: PaymentProvider) 등장 시 ADR로 추가
+- **상세**: ADR-0017 ~ ADR-0023
 
 ### ARCH-02: iframe 샌드박싱 (2026-05-24, 정밀화 2026-05-24)
 - **결정**: 사용자 제출 앱은 **blob: URL iframe + `sandbox="allow-scripts"`** 에서만 실행. 호스트-앱 통신은 Comlink-style RPC.
@@ -24,20 +41,15 @@
 - **금지**: `allow-same-origin`, `allow-top-navigation`, `allow-popups-to-escape-sandbox`
 - **상세 규칙**: `.claude/rules/security.md`
 
-### TECH-01: 클라이언트 스토리지 — IndexedDB (idb library) + 메모리 폴백 + OPFS (2026-05-24, 정밀화 2026-05-24)
-- **결정**: 
-  - **저수준 추상화 계층**: `src/lib/storage/indexeddb.ts` (idb library v8.0.3 wrapper)
-    - DB: 단일 `zm-os` v1, store `installed-apps`
-    - CRUD: idbGet/idbPut/idbDelete/idbList/idbClear (메서드별 자동 트랜잭션)
-    - 폴백: isIDBAvailable() → 메모리 Map (page reload 휘발)
-    - 타입: 제네릭 `<T>` + SSR 안전 (호출자 책임 Zod 검증)
-  - **고수준 도메인 계층**: 작업 3 APP-03 (useInstalledApps hook + IndexedDB hydration)
-  - OPFS: 크롬/엣지 지원 (Safari는 IndexedDB 폴백). v2 이상 reshape 가능.
-  - 멀티디바이스 동기화: v2에서 서버 연동 검토.
-- **이유**: ADR-0007 — idb 라이브러리 (1.19KB brotli, Safari 14 워라운드, DBSchema 제네릭). POC 범위 (설치 앱 목록) 메모리도 충분.
-- **W-02/W-03 [WARN]**: 메모리 폴백 휘발 — 호출자가 localStorage sync 또는 사용자 알림 책임 (작업 3).
-- **재고 시점**: 멀티유저 도입 시 S3 호환 스토리지 + CRDT 동기화 검토.
-- **상세**: ADR-0007
+### TECH-01: 클라이언트 스토리지 — BlobStorage Port + Local 어댑터 (IDB/OPFS/Memory) (2026-05-24, reshape 2026-05-27)
+- **현재 (2026-05-27 reshape)**: ADR-0017 채택으로 **저수준 IDB/OPFS/Memory 어댑터 3종은 BlobStorage Port의 Local 구현체로 격하**. Port 인터페이스는 `packages/core/src/ports/blob-storage.ts` SSOT, 어댑터 구현은 `@zm/adapters-local`(ADR-0020).
+- **기존 (POC v1)**:
+  - 저수준 추상화: `packages/storage/src/storage-adapter.ts` (idb v8.0.3 wrapper + 메모리 폴백 + OPFS)
+  - 고수준 도메인: `apps/web/src/lib/storage/{installed-apps,user-apps,desktop-layout,desktop-settings}.ts` (Provider hydration)
+- **v2 BlobStorage Port 확장**: Cloud 어댑터(R2/Supabase Storage)는 별도 ADR로 등재 시 옵션 추가.
+- **이유**: ADR-0017 (Ports & Adapters) + ADR-0009 (Strategy 패턴) + ADR-0007 (idb 라이브러리). 외부 의존성 0 보장.
+- **재고 시점**: Cloud 어댑터 도입(CLD Epic) 시 ADR-0025+ 또는 별도 정책.
+- **상세**: ADR-0007 + ADR-0009 + ADR-0017 + ADR-0020 (예정)
 
 ### TECH-02: Python hooks (2026-05-24)
 - **결정**: Claude Code hooks는 Python 통합 (`mistake_guard.py`, `post_review.py`, `session_start.py`, `notify_done.py`). bash sub-spawn 회피로 cold ~150ms.
@@ -106,37 +118,18 @@
 - **재고 시점**: v2에서 인라인 blocking 스크립트 또는 cookie 기반 SSR 힌트로 flash 제거
 - **상세**: ADR-0012
 
-### TECH-07: v2 사용자 인증 — Supabase Auth (2026-05-26, ⚠️ reshape 대기)
-- **상태**: 사용자 결정에 따라 "로컬-우선 + 외부 의존성 옵션" 아키텍처로 전환. Supabase Auth = AuthProvider 어댑터 중 하나로 격하 예정.
-- **결정**: Supabase Auth 단독 채택. Server Action 기반 인증 흐름, cookie httpOnly + SameSite=Strict, JWT 클레임 → Postgres RLS `auth.uid()` 직접 추출.
-- **이유**: ADR-0013 — 50,000 MAU 무료 + $0.00325/MAU 초과 (Clerk 대비 6배 저렴), RLS 네이티브 통합, Lock-in 최저 (PG + GoTrue 오픈소스).
-- **보안 의무**: Supabase Auth ≥2.185.0 강제 (CVE-2026-31813), service_role key 클라이언트 노출 절대 금지, proxy.ts 단독 의존 금지 (CVE-2025-29927 회피).
-- **재고 시점**: 50k MAU 초과 또는 SSO/SAML 요구 시
-- **상세**: ADR-0013
-
-### TECH-08: v2 DB 호스팅 — Supabase Postgres + Drizzle ORM (2026-05-26, ⚠️ reshape 대기)
-- **상태**: 로컬-우선 전환. Supabase Postgres = AppRepository 어댑터 중 하나로 격하 예정. 로컬 기본 = IDB 기반 LocalRepo.
-- **결정**: DB 호스팅 = Supabase (ADR-0013과 단일 벤더), ORM = Drizzle ORM, 마이그레이션 = Drizzle Kit. 모든 사용자 데이터 테이블에 RLS 기본 활성화 `auth.uid() = owner_id` 패턴.
-- **이유**: ADR-0014 — Supabase Auth 결합 시 `auth.uid()` 자동 동작, 단일 벤더 운영 단순화, Lock-in 최저 (pg_dump 표준).
-- **재고 시점**: Edge runtime 호환 문제 발생 시 Neon + `pg_session_jwt`로 이전 검토
-- **상세**: ADR-0014
-
-### TECH-09: v2 동기화 전략 — LWW + 서버 권위 시계 (2026-05-26, ⚠️ reshape 대기)
-- **상태**: 로컬-우선 전환. LWW 알고리즘은 CloudSync 어댑터 내 유지, 로컬 기본 = LocalNoOpSync (단일 사용자 멀티 디바이스 미지원).
-- **결정**: SyncEnvelope 패턴 (data + serverSavedAt + clientSavedAt hint + idempotencyKey), 서버 측 timestamp 권위 부여, 오프라인 큐는 IDB sync-queue namespace + 지수 백오프 + 멱등성 키.
-- **이유**: ADR-0015 — 데이터 단순(Set/Array/key-value)하여 CRDT 과잉, 0KB 번들 영향, 시간 드리프트 방어, 향후 envelope 내부 CRDT 전환 reshape 가능.
-- **재고 시점**: 실시간 협업(앱 간 IPC, 동시 다중 편집) 도입 시 → Yjs 부분 도입
-- **상세**: ADR-0015
-
-### CONST-01: RLS 기본 활성화 의무 (2026-05-26)
-- **결정**: v2 모든 사용자 데이터 테이블 마이그레이션 스크립트에 `ALTER TABLE ... ENABLE ROW LEVEL SECURITY` 강제. RLS 정책 작성 시 `SELECT (auth.uid()) = owner_id` 패턴 사용, JOIN/서브쿼리 안티패턴 회피.
+### CONST-01: RLS 기본 활성화 의무 — CloudRepo 어댑터 한정 (2026-05-26, scope 명시 2026-05-27)
+- **적용 범위**: ADR-0017 채택 후 Cloud Repo 어댑터(Supabase Postgres 등) 사용 시 한정. Local Repo 어댑터(IDB 기반)는 단일 사용자 모델이므로 무관.
+- **결정**: Cloud Repo 어댑터의 모든 사용자 데이터 테이블 마이그레이션 스크립트에 `ALTER TABLE ... ENABLE ROW LEVEL SECURITY` 강제. RLS 정책 작성 시 `SELECT (auth.uid()) = owner_id` 패턴 사용, JOIN/서브쿼리 안티패턴 회피.
 - **이유**: CVE-2025-48757 (Supabase RLS 미설정 노출, 170+ 앱 영향) 차단. Lovable AI 패턴 재현 위험 회피.
 - **검증**: 마이그레이션 CI에 lint 추가 검토 (TBD)
+- **상세**: ADR-0017 + ADR-0025+ (CloudRepo-Supabase, 예정)
 
-### CONST-02: 클라이언트 시계 hint, 서버 시계 권위 (2026-05-26)
-- **결정**: v2 동기화 시 클라이언트 timestamp는 UI 표시 hint만 사용. 충돌 해결은 서버 `serverSavedAt` 권위. Postgres 컬럼 `server_saved_at TIMESTAMPTZ DEFAULT NOW()`.
-- **이유**: ADR-0015 — 클라이언트 시스템 시계 조작/드리프트 방어.
-- **재고 시점**: 없음 (영구 정책)
+### CONST-02: 클라이언트 시계 hint, 서버 시계 권위 — CloudSync 어댑터 한정 (2026-05-26, scope 명시 2026-05-27)
+- **적용 범위**: ADR-0017 채택 후 CloudSync 어댑터(LWW + 서버 권위 시계) 사용 시 한정. LocalNoOpSync(ADR-0021)는 동기화 미수행이므로 무관.
+- **결정**: CloudSync 어댑터의 모든 sync 작업에서 클라이언트 timestamp는 UI 표시 hint만 사용. 충돌 해결은 서버 `serverSavedAt` 권위. Postgres 컬럼 `server_saved_at TIMESTAMPTZ DEFAULT NOW()`.
+- **이유**: ADR-0017 + ADR-0026+ (CloudSync-LWW, 예정) — 클라이언트 시스템 시계 조작/드리프트 방어.
+- **재고 시점**: 없음 (영구 정책 — CloudSync 어댑터 적용 시)
 
 ### TECH-10: v2 모노레포 도구 — pnpm + Turborepo (2026-05-26)
 - **결정**: pnpm 11 workspaces + Turborepo 2.7. workspace protocol `workspace:*`, TS Project References (`composite: true` + `references`), Vercel Remote Cache (무료).
@@ -145,8 +138,20 @@
 - **재고 시점**: 패키지 10+ 또는 enterprise 요구 시 Nx 검토
 - **상세**: ADR-0016
 
-## Deprecated
-- (없음)
+## Deprecated / Superseded
+
+### TECH-07 (superseded 2026-05-27): v2 사용자 인증 — Supabase Auth 단일 채택
+- **이전 결정**: Supabase Auth 단일 채택. Server Action 기반, cookie httpOnly + SameSite=Strict, JWT → Postgres RLS `auth.uid()`. ADR-0013.
+- **superseded by**: ADR-0017 — AuthProvider Port + Cloud 어댑터 옵션으로 격하. 상세는 ADR-0024+ (CloudAuth-Supabase) 예정.
+- **보안 의무 보존** (ADR-0024+ 작성 시 참고): Supabase Auth ≥2.185.0 강제 (CVE-2026-31813), service_role key 클라이언트 노출 절대 금지, proxy.ts 단독 의존 금지 (CVE-2025-29927 회피).
+
+### TECH-08 (superseded 2026-05-27): v2 DB 호스팅 — Supabase Postgres + Drizzle ORM
+- **이전 결정**: DB = Supabase, ORM = Drizzle, 마이그레이션 = Drizzle Kit, 모든 사용자 테이블 RLS 강제. ADR-0014.
+- **superseded by**: ADR-0017 — AppRepository Port + Cloud 어댑터 옵션으로 격하. 상세는 ADR-0025+ (CloudRepo-Supabase) 예정. RLS 강제는 CONST-01에서 보존.
+
+### TECH-09 (superseded 2026-05-27): v2 동기화 — LWW + 서버 권위 시계
+- **이전 결정**: SyncEnvelope 패턴 (data + serverSavedAt + clientSavedAt hint + idempotencyKey), 오프라인 큐 IDB sync-queue + 지수 백오프 + 멱등성 키. ADR-0015.
+- **superseded by**: ADR-0017 — SyncProvider Port + LocalNoOp(기본) + CloudLWW(옵션). 상세는 ADR-0021 (LocalNoOpSync) + ADR-0026+ (CloudSync-LWW) 예정. 서버 권위 시계는 CONST-02에서 보존.
 
 ## 갱신 가이드
 - 새 정책 결정 시: ID 할당 → Active에 append → 관련 문서/규칙 동시 갱신

@@ -1,15 +1,16 @@
 ---
 number: "0015"
 title: v2 데스크탑 상태 동기화 — LWW + 서버 권위 시계
-status: "accepted (will be superseded by ADR-0017+)"
+status: superseded
 date: 2026-05-26
 author: hanumoka
 related: ["0013", "0014", "0009", "0017"]
+superseded_by: ["0017"]
 ---
 
 # ADR-0015: v2 데스크탑 상태 동기화 — LWW + 서버 권위 시계
 
-> ⚠️ **2026-05-26 상태 변경**: 사용자 결정에 따라 "로컬-우선 + 외부 의존성 옵션" 아키텍처로 전환됨. 본 ADR의 LWW 알고리즘은 유지되나, "기본 = LocalNoOp Sync (단일 사용자) + 옵션 = CloudLWW (서버 권위 시계)"로 reshape 예정. ADR-0017 후 신규 ADR로 분리한다.
+> ⚠️ **2026-05-27 superseded by ADR-0017**: 본 ADR은 ADR-0017(Ports & Adapters)의 어댑터 옵션 명세로 reshape됨. LWW 알고리즘은 `SyncProvider` Port의 Cloud 어댑터(CloudLWW)에서 유지되고, Local 어댑터는 `LocalNoOpSync`(단일 사용자, status='disabled')로 분리된다. 상세 명세는 **ADR-0021** (LocalNoOp Sync) + **ADR-0026+** (CloudSync-LWW, v2 CLD Epic 진입 시점)에서 별도 작성된다. 본 ADR의 결정 근거(SyncEnvelope 패턴, 서버 권위 시계, 멱등성 키 등)는 ADR-0026+ 작성 시 참고용으로 보존한다.
 
 ## Context
 
