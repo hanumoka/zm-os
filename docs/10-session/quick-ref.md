@@ -3,12 +3,12 @@
 > 1페이지 프로젝트 컨텍스트. 세션 시작 시 필독. 수치 변경 시 즉시 갱신.
 > 최종 갱신: 2026-05-27
 
-## ✅ POC 완료 → Post-POC 완료 → v2 진입 (로컬-우선 전환)
+## ✅ POC 완료 → Post-POC 완료 → v2 설계 단계 완료
 - **Phase 1~3**: ✅ 전부 완료 — M4 마일스톤 달성, POC 공식 종료
 - **POC 종료 게이트**: ✅ 통과 (보안 14 페네스트 + 번들 임계치 PASS)
 - **Post-POC**: APP-04 ✅ + TEST-01 ✅ + DSK-05 ✅ + **REFAC-01 8/8 ✅** + APP-04 확장 ✅
-- **v2 진입 작업 완료**: SRV-00 모노레포 마이그레이션 ✅ + ADR-0013/0014/0015/0016 작성 ✅
-- **다음 후보**: **ADR-0017 (Ports & Adapters) 작성** ← 즉시 필요 / 이후 ADR-0018~0023 LocalAdapter 6건 + v2 plan v0.3.0 재작성
+- **v2 설계 단계 ✅ 완료**: SRV-00 모노레포 + **ADR-0016 + ADR-0017~0023 일괄 채택** (Ports & Adapters + Local 어댑터 6건) + **v2 plan v0.3.0** (10 Epic + 58 작업)
+- **다음 진입**: **REFAC-02 P1** (lib-developer 위임) — `packages/adapters-local` 신규 패키지 + namespace-registry adapterPolicies reshape
 
 ## 현재 상태 (2026-05-27)
 - **저장소**: `git@github-personal:hanumoka/zm-os.git`, branch `main`
@@ -68,20 +68,22 @@ pnpm --filter @zm/web dev
 
 설계 architect+research-analyst+**design-reviewer** / 구현 lib-developer+fe-developer / 1차검증 build+code-reviewer(+SOLID)+sandbox-auditor+constraint / 2차검증 **integration-tester**+**perf-monitor** / 메타 self-verifier / 문서 doc-updater. architect+design-reviewer = 필수 게이트. 워크플로: [`.claude/agents/_workflow.md`](../../.claude/agents/_workflow.md)
 
-## 다음 진입 지점
+## 다음 진입 지점 — REFAC-02 (코드 마이그레이션 5 작업, ~3주)
 
-1. **ADR-0017** (즉시 필요) — Ports & Adapters 아키텍처 + 5개 Port 정의 (AuthProvider / AppRepository / BlobStorage / SyncProvider / ModerationProvider) — architect 호출 필요
-2. **ADR-0018~0023** (ADR-0017 후) — 각 Port의 LocalAdapter 기본 명세 (LocalAuth / LocalRepo / LocalOPFS / LocalNoOp / StaticAnalysis + PROD-05-v2)
-3. **ADR-0013/0014/0015 superseded 처리** (ADR-0017 작성 시점)
-4. **v2 plan v0.3.0** — 로컬 우선 + 옵션 어댑터 구조로 재작성
-5. **M5 진입** — SRV-01~02 + USR-01~04 (인프라 + 로컬 인증)
+1. **REFAC-02-P1** (lib-developer) — `packages/adapters-local` 신규 패키지 + `pnpm-workspace.yaml`/`turbo.json` 등록 + `namespace-registry.ts` adapterPolicies 배열 reshape + `system` namespace 5번째 엔트리 추가 (3일)
+2. **REFAC-02-P2** — BlobStorage Port + LocalOPFS 어댑터 이전 + AbortSignal + BlobStorageError + `@zm/storage` shell (5일)
+3. **REFAC-02-P3** — AppRepository Port + LocalRepo + 4 wrapper 흡수 + cascade remove (5일)
+4. **REFAC-02-P4** — AuthProvider + SyncProvider + ModerationProvider 3 어댑터 + patterns.ts (5일)
+5. **REFAC-02-P5** — Adapter Resolver + PortsContext + 5 Provider reshape + 회귀 검증 (5일)
 
-보류 (CloudAdapter 트랙, ADR-0024+): ADR-Storage-Cloud / ADR-Hosting / ADR-API-Auth / ADR-Moderation-Cloud / ADR-Migration / ADR-Permission / IPC-02
+**M5 진입 (REFAC-02 완료 후)**: SRV-01~02 + USR-01~04 (인프라 + 로컬 인증 기본)
+
+보류 (CloudAdapter 트랙, ADR-0024+): CloudAuth/CloudRepo/CloudSync/CloudBlob/CloudModeration/Migration/Permission/Hosting/API-Auth/IPC-02
 
 ## Quick Links
 - PRD: [`01-prd.md`](../04-planning/01-prd.md)
-- 로드맵: [`02-roadmap.md`](../04-planning/02-roadmap.md) (v0.9.0)
-- v2 plan: [`03-v2-plan.md`](../04-planning/03-v2-plan.md) (v0.2.1, ⚠️ v0.3.0 대기)
+- 로드맵: [`02-roadmap.md`](../04-planning/02-roadmap.md) (v0.10.0)
+- v2 plan: [`03-v2-plan.md`](../04-planning/03-v2-plan.md) (v0.3.0 ✅)
 - 현재 Phase 상세: [`current-phase.md`](current-phase.md)
 - 보안 규칙: [`.claude/rules/security.md`](../../.claude/rules/security.md)
 - 외부 리서치: [`05-analysis/`](../05-analysis/)

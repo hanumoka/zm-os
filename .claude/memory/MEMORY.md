@@ -1,5 +1,5 @@
 # zm-os Project Memory
-> 시스템 프롬프트 자동 로드 (200줄 한도). 최종 갱신: 2026-05-27 (ADR-0017~0023 일괄 채택 — Local 어댑터 6건)
+> 시스템 프롬프트 자동 로드 (200줄 한도). 최종 갱신: 2026-05-27 (v2 plan v0.3.0 + ADR-0017~0023 채택)
 
 ## 프로젝트 수치 (항상 최신 유지)
 - 현재 상태: **POC ✅ 완료 + Post-POC ✅ 완료 + v2 진입** (로컬-우선 전환, ADR-0017 대기)
@@ -51,10 +51,11 @@
 - **POC 1~3 Phase ✅ 완료** (4/4 × 3 = 모두 100%) — M4 마일스톤 달성, POC 공식 종료
 - **POC 종료 게이트 ✅ 통과** — 보안 14 페네스트 + 번들 임계치 PASS
 - **Post-POC ✅ 완료**: APP-04 + TEST-01 + DSK-05 + **REFAC-01 8/8** + APP-04 확장
-- **v2 진입 설계 ✅ 완료 (2026-05-27)**: SRV-00 모노레포 + **ADR-0016 + ADR-0017~0023 일괄 채택** (Ports & Adapters + Local 어댑터 6건) + ADR-0013/0014/0015 superseded
-- **다음 후보**: **v2 plan v0.3.0 재작성** → **REFAC-02 5 작업** (packages/adapters-local 신규 + 5 Provider Port 호출 reshape) → M5 진입 (SRV-01~02 + USR-01~04 로컬 인증 기본)
+- **v2 설계 단계 ✅ 완료 (2026-05-27)**: SRV-00 모노레포 + ADR-0016 + **ADR-0017~0023 일괄 채택** + **v2 plan v0.3.0 작성** (10 Epic + 58 작업 + 24주 추정)
+- **다음 후보**: **REFAC-02 P1 진입** — `packages/adapters-local` 신규 + namespace-registry adapterPolicies reshape (lib-developer 위임). P1~P5 완료 후 M5 진입 (SRV-01~02 + USR-01~04 로컬 인증).
 
 ## 최근 결정사항 (최대 10, FIFO)
+- 2026-05-27: **v2 plan v0.3.0 작성** — ADR-0017~0023 채택 반영. 10 Epic + 58 작업 + 24주 추정 (REFAC-02 3주 + M5~M10 21주). 각 작업에 LocalAdapter 필수 / CloudAdapter 옵션 표기. 신규 Epic J REFAC-02 (P1~P5 = M5 진입 전 선행). Local-only v2.0 출시 옵션 명시. 신규 리스크 4건. roadmap v0.10.0 + PRD §3.2 갱신.
 - 2026-05-27: **ADR-0018~0023 Local 어댑터 6건 일괄 채택** — LocalAuth(crypto.randomUUID + system namespace + BroadcastChannel) + LocalRepo IDB(installed-apps/user-apps 2 namespace, cascade remove, contentRef inline v2.0) + LocalOPFS BlobStorage(packages/storage 흡수, AbortSignal 매 entry, BlobStorageError extends PortError) + LocalNoOpSync(silent no-op ~30 LOC) + LocalStaticModeration(정규식 7 패턴 fail-closed + ConfirmDialog 재사용) + Adapter Resolver(createLocalPorts + PortsContext + 동적 import Suspense + adapterPolicies Port+namespace 2차원). architect 2회 병렬 호출 + 사용자 결정 26건 추천 일괄 채택.
 - 2026-05-27: **ADR-0017 Ports & Adapters 채택** — 5 Port(Auth/AppRepo/Blob/Sync/Moderation) + 단일 `PortError` + `@zm/core/ports` SSOT + `@zm/adapters-local` 신규 패키지 + 하이브리드 어댑터 선택 + `@zm/storage` 1 v2 minor deprecation. ADR-0013/0014/0015 superseded. ARCH-03 신규 + ARCH-01/TECH-01 reshape + TECH-07/08/09 deprecated. 사용자 결정 8건 일괄 채택.
 - 2026-05-27: **문서 정밀 감사 + 9건 일괄 수정** — BLOCK 3 + WARN 6. 코드 변경 0, 문서만 11개 (commit f0b4eb9).
@@ -64,6 +65,5 @@
 - 2026-05-26: v2 ADR 3건 일괄 작성 — ADR-0013(Auth: Supabase Auth) + ADR-0014(DB: Supabase Postgres + Drizzle) + ADR-0015(Sync: LWW + 서버 권위 시계). 이후 2026-05-27 모두 superseded by ADR-0017.
 - 2026-05-26: v2 Plan v0.2.0 — architect 검토 + 사용자 결정 4건 반영. 9 Epic + 53 작업 + 12 ADR 후보 + 10 정책 reshape + M5~M10 (21주). v0.3.0 재작성 대기.
 - 2026-05-26: APP-04 확장 완료 — 데스크탑 아이콘 우클릭 컨텍스트 메뉴 (앱 정보 + 사용자 앱 삭제). AppInfoDialog 신규.
-- 2026-05-26: REFAC-01 **전체 완료 (8/8)** — C-1+H-5+C-3+H-1+H-4+H-2+H-3+C-2 모두 완료.
 
-> **최종 갱신**: 2026-05-27 — ADR-0017~0023 일괄 채택 (Ports & Adapters + Local 어댑터 6건)
+> **최종 갱신**: 2026-05-27 — v2 plan v0.3.0 + ADR-0017~0023 채택

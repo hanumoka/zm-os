@@ -78,17 +78,18 @@ zm-os는 **브라우저 안에서 동작하는 가상 데스크탑** 으로, 사
 
 | Epic | ID 범위 | 작업 수 | 의존 ADR |
 |------|---------|---------|---------|
-| **Epic A USR** — 인증/사용자 | USR-01 ~ USR-06 | 6 | ADR-0013 |
-| **Epic B CLD** — 클라우드 스토리지/동기화 | CLD-01 ~ CLD-09 | 9 | ADR-0014, ADR-0015 |
-| **Epic C STR-v2** — 스토어 백엔드 | STR-v2-01 ~ STR-v2-08 | 8 | ADR-0014 |
-| **Epic D MOD** — 모더레이션 | MOD-01 ~ MOD-06 | 6 | (ADR-Moderation TBD) |
-| **Epic E SBX-v2** — 보안 강화 | SBX-v2-00 ~ SBX-v2-07 | 8 | (ADR-Permission, ADR-IPC TBD) |
-| **Epic F SRV** — 인프라 | SRV-01 ~ SRV-06 | 6 | (ADR-Hosting TBD) |
-| **Epic G MIG** — 데이터 마이그레이션 | MIG-01 ~ MIG-03 | 3 | (ADR-Migration TBD) |
+| **Epic J REFAC-02** — Ports & Adapters 마이그레이션 [신규, M5 진입 전 선행] | REFAC-02-P1 ~ P5 | 5 | ADR-0017~0023 |
+| **Epic A USR** — 인증/사용자 | USR-01 ~ USR-06 | 6 | ADR-0018 (Local) + ADR-0024+ (Cloud 보류) |
+| **Epic B CLD** — 클라우드 스토리지/동기화 | CLD-01 ~ CLD-09 | 9 | ADR-0020/0021 (Local) + ADR-0026/0028+ (Cloud 보류) |
+| **Epic C STR-v2** — 스토어 백엔드 | STR-v2-01 ~ STR-v2-08 | 8 | ADR-0019 (Local) + ADR-0025+ (Cloud 보류) |
+| **Epic D MOD** — 모더레이션 | MOD-01 ~ MOD-06 | 6 | ADR-0022 (Local) + ADR-0029+ (Cloud 보류) |
+| **Epic E SBX-v2** — 보안 강화 | SBX-v2-00 ~ SBX-v2-07 | 8 | (ADR-Permission, ADR-IPC 보류) |
+| **Epic F SRV** — 인프라 | SRV-01 ~ SRV-06 | 6 | (ADR-Hosting 보류) |
+| **Epic G MIG** — 데이터 마이그레이션 | MIG-01 ~ MIG-03 | 3 | ADR-0018 D4 (Local export) + ADR-0027+ (Cloud 보류) |
 | **Epic H OBS** — 관찰 가능성 | OBS-01 ~ OBS-03 | 3 | — |
-| **Epic I API-SEC** — 백엔드 보안 | API-SEC-01 ~ API-SEC-04 | 4 | (ADR-API-Auth TBD) |
+| **Epic I API-SEC** — 백엔드 보안 [Cloud 전용] | API-SEC-01 ~ API-SEC-04 | 4 | (ADR-API-Auth 보류) |
 
-**v2 작업 총 53건**. 상세 ID/의존성/예상 기간은 [`03-v2-plan.md`](03-v2-plan.md) §4 Epic 분해 참조.
+**v2 작업 총 58건** (기존 53 + REFAC-02 5). 상세 ID/의존성/예상 기간은 [`03-v2-plan.md`](03-v2-plan.md) §4 Epic 분해 참조.
 
 ---
 
@@ -100,7 +101,7 @@ zm-os는 **브라우저 안에서 동작하는 가상 데스크탑** 으로, 사
 - 앱 스토어 백엔드 (Postgres + RLS, 업로드 + 모더레이션)
 - 멀티디바이스 동기화
 
-**상세 plan**: [`03-v2-plan.md`](03-v2-plan.md) — 9 Epic + 46 작업 + 12 ADR 후보 (architect 검토 ✅)
+**상세 plan**: [`03-v2-plan.md`](03-v2-plan.md) — **10 Epic + 58 작업** (v0.3.0, 2026-05-27 기준). ADR-0017~0023 채택 완료 + 로컬-우선 + 옵션 클라우드 어댑터 모델.
 **스택 후보 분석**: [`03-multitenant-stack-options.md`](../05-analysis/03-multitenant-stack-options.md)
 
 ---
