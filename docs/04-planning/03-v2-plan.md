@@ -90,9 +90,9 @@ ADR-0017~0023 채택 결과를 코드에 반영. 5 작업 분할 (각 0.5~1주, 
 |----|------|--------|------|
 | **REFAC-02-P1** | `packages/adapters-local` 신규 패키지 생성 + namespace-registry `adapterPolicies` 배열 reshape + `system` namespace 5번째 엔트리 추가 | ADR-0017/0018/0023 | 3일 |
 | **REFAC-02-P2** | BlobStorage Port + LocalOPFS 어댑터 이전 (`packages/storage` 흡수) + AbortSignal 매 entry 폴링 + `BlobStorageError extends PortError` + `@zm/storage` deprecation shell | ADR-0020 + P1 | 5일 |
-| **REFAC-02-P3** | AppRepository Port + LocalRepo (IDB) 어댑터 + 4 도메인 wrapper 흡수 (installed-apps/user-apps 제거, desktop-layout/settings reshape) + cascade remove + contentRef inline v2.0 | ADR-0019 + P2 | 5일 |
+| **REFAC-02-P3** | AppRepository Port + LocalRepo (IDB) **어댑터** (`createLocalAppRepository`, BlobStorage 위 thin layer, content-agnostic — AppRecord 메타데이터 + contentRef 포인터만) + cascade remove + INVALID_SOURCE 가드 + contract test. **소비처 wrapper 흡수/제거 + reshape + 콘텐츠(html→BlobStorage) 마이그레이션은 P5로 이관** (ADR-0019 §마이그레이션 4~8이 ADR-0023 Composition Root 의존 → P3에서 하면 빌드 깨짐). 사용자 결정 2026-06-07. | ADR-0019 + P2 | 3일 |
 | **REFAC-02-P4** | AuthProvider + SyncProvider + ModerationProvider Local 어댑터 (LocalAuth + LocalNoOpSync + LocalStaticModeration) + `patterns.ts` 7 정규식 + zip-loader 통합 (install action에서 scan 호출) | ADR-0018/0021/0022 + P2 | 5일 |
-| **REFAC-02-P5** | Adapter Resolver + Composition Root (`createLocalPorts` + `PortsContext` + 동적 import Suspense) + 5 Provider 내부 `usePorts()` reshape + Vitest TestPortsProvider + e2e 회귀 검증 | ADR-0023 + P1~P4 | 5일 |
+| **REFAC-02-P5** | Adapter Resolver + Composition Root (`createLocalPorts` + `PortsContext` + 동적 import Suspense) + 5 Provider 내부 `usePorts()` reshape + **P3 이관분: wrapper 흡수(installed-apps/user-apps 제거) + desktop-layout/settings reshape + UserAppRecord↔AppRecord 변환기 + 콘텐츠(html→BlobStorage contentRef) wiring/마이그레이션** + Vitest TestPortsProvider + e2e 회귀 검증 | ADR-0023 + P1~P4 | 7일 |
 
 **진입 게이트**: REFAC-02 5 작업 모두 완료 + Vitest 75+ PASS + e2e 6 시나리오 PASS + Suspense fallback UI 검증. 완료 후 M5 진입.
 

@@ -69,6 +69,7 @@
 | STG-01 | `packages/adapters-local/src/blob-storage/indexeddb.ts` (idb v8.0.3 raw CRUD + 메모리 폴백) | ✅ |
 | STG-02 | `packages/adapters-local/src/blob-storage/{idb,opfs,memory}-adapter.ts` — BlobStorage Port 구현 (IDB/OPFS/Memory + AbortSignal, ADR-0020) | ✅ |
 | STG-03 | `packages/storage` = deprecation shell (re-export, ADR-0020 §D5, v2.0~v2.1) | ✅ REFAC-02-P2 |
+| STG-04 | `packages/adapters-local/src/app-repository/local-app-repository.ts` — AppRepository Port 구현 (BlobStorage 위, cascade remove, content-agnostic, ADR-0019). 소비처 wiring은 P5 | ✅ REFAC-02-P3 |
 
 ### Game (GAME) — 게임 엔진 매트릭스
 | ID | 위치 | 상태 |

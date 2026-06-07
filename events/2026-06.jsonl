@@ -15,3 +15,6 @@
 {"ts":"2026-06-07T14:43:52+09:00","type":"doc_change","actor":"M01","session":"3d4e4c58","source_commit":"6560260d","details":{"file":"05-feature-map.md","category":"architecture","action":"edit"}}
 {"ts":"2026-06-07T14:43:54+09:00","type":"doc_change","actor":"M01","session":"3d4e4c58","source_commit":"6560260d","details":{"file":"05-feature-map.md","category":"architecture","action":"edit"}}
 {"ts":"2026-06-07T14:43:56+09:00","type":"doc_change","actor":"M01","session":"3d4e4c58","source_commit":"6560260d","details":{"file":"05-feature-map.md","category":"architecture","action":"edit"}}
+{"ts":"2026-06-07T15:04:04+09:00","type":"doc_change","actor":"M01","session":"3d4e4c58","source_commit":"98a90620","details":{"file":"03-v2-plan.md","category":"planning","action":"edit"}}
+{"ts":"2026-06-07T15:04:08+09:00","type":"doc_change","actor":"M01","session":"3d4e4c58","source_commit":"98a90620","details":{"file":"03-v2-plan.md","category":"planning","action":"edit"}}
+{"ts":"2026-06-07T15:04:11+09:00","type":"doc_change","actor":"M01","session":"3d4e4c58","source_commit":"98a90620","details":{"file":"05-feature-map.md","category":"architecture","action":"edit"}}
