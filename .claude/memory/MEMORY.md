@@ -1,10 +1,10 @@
 # zm-os Project Memory
-> 시스템 프롬프트 자동 로드 (200줄 한도). 최종 갱신: 2026-05-27 (REFAC-02-P1 완료)
+> 시스템 프롬프트 자동 로드 (200줄 한도). 최종 갱신: 2026-06-07 (sonix 협업 인프라 이식)
 
 ## 프로젝트 수치 (항상 최신 유지)
-- 현재 상태: **POC ✅ 완료 + Post-POC ✅ 완료 + v2 진입** (로컬-우선 전환, ADR-0017 대기)
+- 현재 상태: **POC ✅ 완료 + Post-POC ✅ 완료 + v2 진입** (로컬-우선 전환, ADR-0017~0023 채택 완료, REFAC-02 진행 중)
 - 코드 LOC: `apps/web/src + packages/*/src`만 산정, 샘플(`public/sample-*`) 제외 — 약 5200 LOC (TS) + samples ~1500 LOC (HTML/JS)
-- 구조: 모노레포 `apps/web` + `packages/{core,storage,ipc}` (pnpm 11 + Turborepo 2.7)
+- 구조: 모노레포 `apps/web` + `packages/{core,storage,ipc,adapters-local}` (pnpm 11 + Turborepo 2.7) — adapters-local은 REFAC-02-P1 골조
 - 에이전트: 14개 (architect, research-analyst, design-reviewer, lib-developer, fe-developer, build-checker, code-reviewer, app-sandbox-auditor, constraint-checker, integration-tester, perf-monitor, self-verifier, doc-updater, **zm-context-guardian**) + workflow 문서
 - 모델 전략: architect/design-reviewer/self-verifier=opus / 구현·리뷰·감사·통합검증=sonnet / 빌드·문서·제약·성능=haiku
 - 스킬: 17개 (기존 9 + 협업 8: zm-wu-start/stop/next, zm-handoff, zm-setup, zm-team, zm-onboarding, zm-agent-teams)
@@ -34,7 +34,7 @@
 ## PRD + 로드맵 (Living Documents)
 - **PRD**: `docs/04-planning/01-prd.md` (v2 ID 53건 등재)
 - **로드맵**: `docs/04-planning/02-roadmap.md` (v0.9.0)
-- **v2 Plan**: `docs/04-planning/03-v2-plan.md` (v0.2.1, ⚠️ v0.3.0 재작성 대기)
+- **v2 Plan**: `docs/04-planning/03-v2-plan.md` (v0.3.0 ✅)
 - **Feature Map**: `docs/01-architecture/05-feature-map.md`
 - **baseline 스냅샷**: `docs/01-architecture/06-current-snapshot-2026-05-26.md`
 
@@ -56,6 +56,7 @@
 - **다음 후보**: **REFAC-02-P2 진입** — BlobStorage Port + LocalOPFS 어댑터 이전 (`packages/storage` 흡수 + AbortSignal 매 entry 폴링 + `BlobStorageError extends PortError` + `@zm/storage` deprecation shell). 5일 추정.
 
 ## 최근 결정사항 (최대 10, FIFO)
+- 2026-06-07: **문서 메타데이터 정밀 검토 + 8건 일괄 동기화** — 코드/기능 결함 0 (type-check 5/5, test 61/61, 협업 인프라 무결성 100%). 협업 인프라 이식(c368b5e) 후 누적 stale 정정: CLAUDE.md/quick-ref/_workflow 에이전트 13→14명(zm-context-guardian) + 스킬 9→17, current-phase 테스트 56→61 + historical 섹션 표기, doc-naming ADR 0008→0032·arch 05→06, MEMORY/feature-map/roadmap "ADR-0017 대기"→채택완료. archive/snapshot 등 historical 박제 보존. Explore 3 병렬 감사 + 직접 검증. 코드 변경 0.
 - 2026-06-07: **sonix_docs 협업 인프라 이식 완료 (4 Phase, 37 산출물)** — 다중 세션·팀원 협업(격리·직렬화·감사 3층). file_lock/idgen/merge_jsonl/_resolve-user verbatim + wu_claim_manager(ML→WU 일반화, 기존 ID claim) + emit_event 교체(append API, actor dict 수정) + 헌법 3(ADR-0030~0032) + 카테고리 A~E + M-002/M-003 BLOCK + 협업 스킬 8 + zm-context-guardian + team-config(KYB만) + worktree/merge-driver/pre-push. events/ 추적 전환. 검증: 훅 smoke + claim 왕복 + merge driver + type-check 5/5 + vitest 5/5 회귀 0.
 - 2026-05-27: **REFAC-02-P1 완료** — Ports & Adapters 코드 마이그레이션 첫 작업. 13 파일 변경 (신규 10 + 수정 3). `packages/core/src/ports/` 7 파일 (common/auth/app-repository/blob-storage/sync/moderation/index) + `@zm/adapters-local` 신규 패키지 골조 + namespace-registry adapterPolicies 배열 reshape (호환 alias `getLegacyAdapterPolicy` 제공) + system namespace 추가 + indexeddb.ts v5 upgrade + resolve-adapter.ts alias 사용. lib-developer + architect 검증 + 직접 보완 (lib-developer 토큰 한도로 일부 누락). turbo type-check 5/5 + test 5/5 PASS.
 - 2026-05-27: **v2 plan v0.3.0 작성** — ADR-0017~0023 채택 반영. 10 Epic + 58 작업 + 24주 추정 (REFAC-02 3주 + M5~M10 21주). 각 작업에 LocalAdapter 필수 / CloudAdapter 옵션 표기. 신규 Epic J REFAC-02 (P1~P5 = M5 진입 전 선행). Local-only v2.0 출시 옵션 명시.
@@ -65,5 +66,4 @@
 - 2026-05-26: **로컬-우선 아키텍처 전환** — 사용자 결정. 로컬 100% 외부 의존성 0 + 클라우드 옵션은 어댑터 추상화. ADR-0013/0014/0015 reshape 대기 결정 (2026-05-27 superseded 완료).
 - 2026-05-26: **SRV-00 실행 완료** — 모노레포 마이그레이션 (src/ → apps/web + packages/{core,storage,ipc} + pnpm workspaces + Turborepo). 검증: turbo type-check 4/4 + turbo test 61/61 + next build ✅.
 - 2026-05-26: ADR-0016 (v2 모노레포) — pnpm 11 + Turborepo 2.7. 구조 apps/web + packages/{core,storage,ipc}. ARCH-01 reshape + TECH-10 등재.
-- 2026-05-26: v2 ADR 3건 일괄 작성 — ADR-0013(Auth: Supabase Auth) + ADR-0014(DB: Supabase Postgres + Drizzle) + ADR-0015(Sync: LWW + 서버 권위 시계). 이후 2026-05-27 모두 superseded by ADR-0017.
-> **최종 갱신**: 2026-06-07 — sonix_docs 협업 인프라 이식 (다중 세션·팀원 협업: worktree 격리 + file_lock + WU claim + events SSOT + 헌법 + 협업 스킬 8)
+> **최종 갱신**: 2026-06-07 — 문서 메타데이터 정밀 검토 + 8건 일괄 동기화 (협업 인프라 이식 후 stale 정정, 코드 변경 0)

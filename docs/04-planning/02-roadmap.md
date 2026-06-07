@@ -2,8 +2,8 @@
 
 > **Living Document**. 항목 완료 시 즉시 갱신. PRD와 동시 갱신.
 
-**Version**: 0.10.0
-**Last Updated**: 2026-05-27
+**Version**: 0.10.1
+**Last Updated**: 2026-06-07
 
 > 🔵 **진행 중 WU claim**: [`_derived-wu-state.md`](_derived-wu-state.md) — 자동 생성(누가 어느 작업 점유 중). `/zm-wu-start`·`/zm-wu-stop` 시 갱신.
 
@@ -18,7 +18,7 @@
 | **Phase 2** — 앱 스토어 + 첫 게임 시연 | ✅ 완료 | 100% (작업 4/4) | 2026-05-24 |
 | **Phase 3** — POC 안정화 + 데모 영상 | ✅ 완료 | 100% (작업 4/4) | 2026-05-25 |
 
-POC 종료 후: **v2 plan v0.3.0** (2026-05-27, ADR-0017~0023 채택 반영) → [`03-v2-plan.md`](03-v2-plan.md). **10 Epic + 58 작업** (기존 53 + REFAC-02 5 작업) + **24주 추정** (REFAC-02 3주 + M5~M10 21주). **현재 상태**: ADR-0017~0023 일괄 채택 ✅ (Ports & Adapters + Local 어댑터 6건). **다음**: REFAC-02 P1 진입 (`packages/adapters-local` 신규 + namespace-registry adapterPolicies reshape).
+POC 종료 후: **v2 plan v0.3.0** (2026-05-27, ADR-0017~0023 채택 반영) → [`03-v2-plan.md`](03-v2-plan.md). **10 Epic + 58 작업** (기존 53 + REFAC-02 5 작업) + **24주 추정** (REFAC-02 3주 + M5~M10 21주). **현재 상태**: ADR-0017~0023 채택 ✅ + **REFAC-02-P1 완료** ✅ (commit e602623, 5 Port SSOT + `packages/adapters-local` 골조 + namespace-registry reshape) + **협업 인프라 이식** ✅ (2026-06-07, commit c368b5e, sonix_docs 멀티 세션 협업). **다음**: REFAC-02-P2 (BlobStorage Port + LocalOPFS 어댑터 이전 + `packages/storage` 흡수).
 
 ---
 

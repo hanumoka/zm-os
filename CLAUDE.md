@@ -3,7 +3,7 @@
 # CLAUDE.md — zm-os 프로젝트 지침서
 
 > **Claude Code를 위한 zm-os 프로젝트 가이드**
-> **최종 업데이트**: 2026-05-27
+> **최종 업데이트**: 2026-06-07
 
 ---
 
@@ -146,7 +146,7 @@ Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
 
 ---
 
-## 🤖 9. 에이전트 (13명 팀, 2단계 검증 파이프라인)
+## 🤖 9. 에이전트 (14명 팀, 2단계 검증 파이프라인)
 
 > 상세 위임 규칙 → `.claude/agents/` / 표준 작업 흐름 → `.claude/agents/_workflow.md`
 
@@ -169,13 +169,14 @@ Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
 - **integration-tester** (sonnet, 15t): e2e/통합 검증. Playwright 스크립트 실행 + 회귀 감지.
 - **perf-monitor** (haiku, 8t): 번들/빌드/런타임 성능 회귀 감시. 기준선 대비 임계치 판정.
 
-**메타 검증** (1):
+**메타 검증** (2):
 - **self-verifier** (opus, 15t): 작업 종료 직전 마지막 게이트. 2단계 전체 결과 종합. 추측/누락/오판 차단.
+- **zm-context-guardian** (haiku): 프로젝트 메모리/세션 문서/정책/ADR 인덱스/git 커밋 간 정합성 검증. 상태 드리프트 의심 시 또는 대형 변경 후. 읽기전용 — 보고서만 생성.
 
 **문서** (1):
 - **doc-updater** (haiku, 8t): 진행 문서 갱신 + broken link 점검.
 
-9개 스킬:
+17개 스킬 (기존 9 + 협업 8):
 - `/zm-commit` — 커밋 규칙 적용
 - `/zm-unit-done` — 작업 단위 완료 파이프라인 (빌드+문서+로그)
 - `/zm-session` — 세션 시작 보고
@@ -185,6 +186,11 @@ Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
 - `/zm-work-completion` — 작업 완료 종합 파이프라인
 - `/zm-doc-status` — docs/ 전체 상태 대시보드
 - `/zm-roadmap` — 로드맵 조회/갱신
+- `/zm-wu-start` · `/zm-wu-stop` · `/zm-wu-next` — WU claim 시작/종료/다음 번호 제안
+- `/zm-handoff` — 단일 작업 인계 브리핑
+- `/zm-setup` — 머신/clone 1회 협업 인프라 초기화 (git hooks + merge driver)
+- `/zm-team` · `/zm-onboarding` — 팀원 현황 조회 / 신규 합류 등록
+- `/zm-agent-teams` — Agent Teams 기능 토글
 
 ---
 
@@ -264,5 +270,5 @@ Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
 ---
 
 *프로젝트: zm-os 브라우저 가상 데스크탑 POC*
-*상태: POC 완료 → Post-POC 완료 → v2 진입 (로컬-우선 전환, ADR-0017 대기) (2026-05-27)*
+*상태: POC ✅ → Post-POC ✅ → v2 설계 ✅ (ADR-0017~0023 채택) → v2 구현 진행 중 (REFAC-02-P1 완료) + 협업 인프라 이식 완료 (2026-06-07)*
 *작업 모드: Claude Code 자율 개발 + 사용자 리뷰*

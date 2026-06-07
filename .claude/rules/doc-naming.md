@@ -18,11 +18,11 @@ globs: ["docs/**"]
 
 ### `01-architecture/` — `NN-kebab-case.md`
 - 예: `01-desktop-window-manager.md`
-- 순차 2자리 번호. 현재 마지막: **05**
+- 순차 2자리 번호. 현재 마지막: **06**
 
 ### `02-decisions/` — `adr-NNNN-kebab-case.md`
 - 예: `adr-0009-next-topic.md`
-- 순차 4자리 번호. 현재 마지막: **0008**
+- 순차 4자리 번호. 현재 마지막: **0032** (0024~0029 CloudAdapter 트랙 예약, 0030~0032 협업 헌법)
 
 ### `03-policy/` — `NN-kebab-case.md` + `_digest.md`
 - 예: `01-policy-registry.md`

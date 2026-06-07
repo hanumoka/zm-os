@@ -3,7 +3,7 @@
 > zm-os 에이전트 팀 표준 작업 흐름. 모든 작업 단위는 이 워크플로를 따른다.
 > **v2 (2026-05-25)**: 설계 안정성/유연성/확장성 중심 + 2단계 검증 파이프라인.
 
-## 팀 구성 (13명)
+## 팀 구성 (14명)
 
 ### 설계 (3)
 - **architect** (opus, 20t) — **필수 게이트**. 인터페이스/모듈 경계/확장 포인트/ADR. 모든 작업의 첫 호출.
@@ -24,8 +24,9 @@
 - **integration-tester** (sonnet, 15t) — e2e/통합 검증, Playwright 스크립트 실행, 회귀 감지
 - **perf-monitor** (haiku, 8t) — 번들/빌드/런타임 성능 회귀 감시
 
-### 메타 검증 (1)
+### 메타 검증 (2)
 - **self-verifier** (opus, 15t) — 추측/누락/오판 마지막 게이트. 2단계 전체 결과 종합.
+- **zm-context-guardian** (haiku) — 메모리/세션 문서/정책/ADR 인덱스/git 정합성 검증 (읽기전용 보고서). 상태 드리프트 의심 시 또는 대형 변경 후.
 
 ### 문서 (1)
 - **doc-updater** (haiku, 8t) — 진행 문서 + broken link
@@ -224,4 +225,4 @@ PASS 후:
 | SOLID 검사 | 없음 | code-reviewer + design-reviewer |
 | 통합 검증 | 수동 | integration-tester 자동 |
 | 성능 감시 | 수동 | perf-monitor 자동 |
-| 팀 규모 | 10명 | 13명 |
+| 팀 규모 | 10명 | 13명 → 14명 (협업 인프라로 zm-context-guardian 추가) |

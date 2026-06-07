@@ -1,10 +1,15 @@
 # Current Phase
 
-## 🚀 POC 완료 → Post-POC 작업 진행 중
-- **Phase 1**: ✅ 완료 (7/7, 100%)
-- **Phase 2**: ✅ 완료 (4/4, 100%)
-- **Phase 3**: ✅ 완료 (4/4, 100%) — M4 마일스톤 달성
-- **Post-POC**: APP-04 ✅ + TEST-01 ✅ + DSK-05 ✅ (배경화면/테마/설정 UI)
+> 최종 갱신: 2026-06-07
+
+## 🚀 v2 진입 — REFAC-02 진행 중
+- **Phase 1~3 (POC)**: ✅ 완료 (M4 마일스톤 달성, POC 공식 종료)
+- **Post-POC**: APP-04 ✅ + TEST-01 ✅ + DSK-05 ✅ + REFAC-01 8/8 ✅
+- **v2 설계**: SRV-00 모노레포 + ADR-0016~0023 채택 + v2 plan v0.3.0 ✅
+- **REFAC-02**: **P1 ✅ 완료** (commit e602623) → **다음: P2** (BlobStorage Port + LocalOPFS 어댑터)
+- **협업 인프라**: sonix_docs 멀티 세션 협업 이식 ✅ 완료 (2026-06-07, commit c368b5e)
+
+> ⚠️ 아래 "## ✅ Phase 1" 이후는 POC 당시 historical 작업 로그. 현재 다음 작업은 본 섹션 하단 "REFAC-02 진입" 참조.
 
 ### 작업 1 — APP-02 사용자 ZIP 업로드 (✅ 완료)
 - **산출물**: 신규 4파일 + 수정 7파일 (총 11개 산출)
@@ -40,7 +45,7 @@
 | 작업 | 설명 | ADR | 상태 |
 |------|------|-----|------|
 | APP-04 | 사용자 앱 삭제/업데이트 UX (ConfirmDialog + semver) | ADR-0011 | ✅ 완료 |
-| TEST-01 | Vitest 4.1.7 + 56개 단위 테스트 | — | ✅ 완료 |
+| TEST-01 | Vitest 4.1.7 + 61개 단위 테스트 | — | ✅ 완료 |
 | DSK-05 | 데스크탑 커스터마이징 (배경/테마/설정 UI) | ADR-0012 | ✅ 완료 |
 
 | REFAC-01 | 설계 리팩토링 8/8 (Error Boundary + 에러 플러밍 + NS Registry + Manifest v2 + Persistence Hook + Validation Chain + ContentLoader + Desktop 분리) | — | ✅ 완료 |
@@ -167,7 +172,9 @@
 ### 블로커
 - 없음
 
-### 다음 작업
+### 다음 작업 (Phase 1 당시 기록 — historical)
+
+> ⚠️ 아래는 Phase 1 시점의 다음 작업 기록이며 모두 완료됨. 현재 다음 작업은 상단 "REFAC-02 진입 → P2" 참조.
 
 남은 모든 작업은 **재구성된 10명 에이전트 팀** 워크플로(`.claude/agents/_workflow.md`)로 진행:
 
@@ -175,7 +182,7 @@
 2. **작업 3 — CSP/Permissions-Policy 헤더 (SBX-02)**: architect → research-analyst(CSP/Permissions-Policy 스펙) → fe-developer(next.config.ts) → 검증 → self-verifier → doc-updater
 3. **ADR-0002 — 윈도우 매니저 라이브러리 선택**: architect → research-analyst(react-rnd/dnd-kit/자작 비교) → 사용자 결정 → 작업 4 진입
 
-### 다음 진입 지점 (Phase 2 후보)
+### 다음 진입 지점 (Phase 2 당시 — historical)
 - 앱 패키지 포맷 (APP-02): itch.io식 ZIP 처리
 - 설치한 앱 목록 (APP-03): IndexedDB CRUD
 - 스토어 UI (STR-01, STR-02)

@@ -84,12 +84,12 @@
 
 ---
 
-## ⚠️ v2 진입 — Ports & Adapters 모델 대기 (2026-05-26 결정)
+## ✅ v2 진입 — Ports & Adapters 채택 완료 (ADR-0017~0023, 2026-05-27)
 
-**현재**: 모노레포 + 로컬 어댑터(StorageAdapter)만 일부 존재. 인증/스토어 백엔드 미구현.
-**ADR-0017 대기**: 5개 Port 정의 (AuthProvider / AppRepository / BlobStorage / SyncProvider / ModerationProvider) → ADR-0018~0023에서 각 Port의 LocalAdapter 명세.
+**현재**: 모노레포 + **REFAC-02-P1**로 5 Port 인터페이스 SSOT 확정 (`packages/core/src/ports/`) + `@zm/adapters-local` 골조. 인증/스토어 백엔드는 REFAC-02-P2~P5에서 구현.
+**채택 완료**: 5개 Port 정의 (AuthProvider / AppRepository / BlobStorage / SyncProvider / ModerationProvider) + ADR-0018~0023 각 Port의 LocalAdapter 명세.
 
-`packages/storage`는 이미 BlobStorage Port의 prototype 역할. 다른 4개 Port는 ADR-0017 작성 시 인터페이스 확정 후 구현 진입.
+`packages/storage`는 BlobStorage Port로 REFAC-02-P2에서 흡수 예정.
 
 ---
 
