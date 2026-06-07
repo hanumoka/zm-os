@@ -23,7 +23,19 @@
       "Skill(zm-unit-done)",
       "Skill(zm-troubleshoot)",
       "Skill(zm-doc-status)",
-      "Skill(zm-roadmap)"
+      "Skill(zm-roadmap)",
+      "Skill(zm-wu-start)",
+      "Skill(zm-wu-stop)",
+      "Skill(zm-wu-next)",
+      "Skill(zm-handoff)",
+      "Skill(zm-setup)",
+      "Skill(zm-team)",
+      "Skill(zm-onboarding)",
+      "Skill(zm-agent-teams)",
+      "Bash(python -X utf8 .claude/hooks/wu_claim_manager.py *)",
+      "Bash(python -X utf8 scripts/setup-git-hooks.py)",
+      "Bash(python -X utf8 scripts/derive-wu-state.py)",
+      "Bash(bash scripts/install-merge-drivers.sh)"
     ],
     "deny": []
   },
@@ -42,6 +54,11 @@
       {
         "matcher": "Write|Edit",
         "hooks": [
+          {
+            "type": "command",
+            "command": "python -X utf8 \"${CLAUDE_PROJECT_DIR}/.claude/hooks/mistake_guard_edit.py\"",
+            "timeout": 5
+          },
           {
             "type": "command",
             "command": "python -X utf8 \"${CLAUDE_PROJECT_DIR}/.claude/hooks/category_guard.py\"",
@@ -68,6 +85,11 @@
             "type": "command",
             "command": "python -X utf8 \"${CLAUDE_PROJECT_DIR}/.claude/hooks/emit_event.py\"",
             "timeout": 3
+          },
+          {
+            "type": "command",
+            "command": "python -X utf8 \"${CLAUDE_PROJECT_DIR}/.claude/hooks/wu_claim_manager.py\" touch",
+            "timeout": 5
           }
         ]
       }
@@ -117,9 +139,18 @@
             "type": "command",
             "command": "python -X utf8 \"${CLAUDE_PROJECT_DIR}/.claude/hooks/notify_done.py\"",
             "timeout": 3
+          },
+          {
+            "type": "command",
+            "command": "python -X utf8 \"${CLAUDE_PROJECT_DIR}/.claude/hooks/wu_claim_manager.py\" mark-stopped",
+            "timeout": 5
           }
         ]
       }
     ]
+  },
+  "worktree": {
+    "baseRef": "head",
+    "cleanupPeriodDays": 1
   }
 }

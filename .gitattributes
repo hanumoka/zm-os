@@ -1,1 +1,24 @@
 * text=auto eol=lf
+
+# ── Parallel-write conflict prevention (sonix_docs 이식) ──────────────
+# append-only Events (Category D) — union+dedup+ts정렬 커스텀 드라이버.
+# 등록: bash scripts/install-merge-drivers.sh (미등록 시 union fallback — 안전, dedup만 미작동)
+events/*.jsonl merge=jsonl-append
+events/**/*.jsonl merge=jsonl-append
+
+# roadmap 마커 / troubleshooting 선두추가형 — union (충돌 회피)
+docs/04-planning/02-roadmap.md merge=union
+docs/13-troubleshooting/index.md merge=union
+docs/13-troubleshooting/entries.md merge=union
+
+# LOCAL 개인 메모리 — host-bound, 머지 시 우리쪽(untrack 결정) 우선
+.project-memory/context-*.md merge=ours
+
+# 바이너리 명시 (autocrlf 오작동 예방)
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.pdf  binary
+*.zip  binary

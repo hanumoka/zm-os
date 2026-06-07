@@ -10,7 +10,8 @@
 ## 카테고리 B: 실행 환경
 | ID | 심각도 | 실수 | 올바른 방법 | 탐지 |
 |----|--------|------|------------|------|
-| (등록 없음) |  |  |  |  |
+| M-002 | [BLOCK] | `git add -A` 또는 `git add .` — 본 작업 무관/타 세션 변경물 우연 포함 (sonix M-119 이식) | `git add <명시파일>` 개별 지정 (공백 구분) | Bash |
+| M-003 | [BLOCK] | `--no-verify` — pre-push secret 스캔(gitleaks/regex) 우회 (sonix M-120 이식) | hook 실패 시 secret 제거 후 재push. hook 자체 문제면 별건으로 수정 | Bash |
 
 ## 카테고리 C: 작업 방식
 | ID | 심각도 | 실수 | 올바른 방법 | 탐지 |

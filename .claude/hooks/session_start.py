@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""SessionStart hook — docs/10-session/{quick-ref,current-phase}.md + 최근 git 상태 표시."""
+"""SessionStart hook — docs/10-session/{quick-ref,current-phase}.md + git 상태
++ WU claim 현황 + 개인 컨텍스트 포커스 (sonix_docs 협업 인프라 이식)."""
 import sys
 import json
 import subprocess
@@ -34,6 +35,44 @@ def _read_head(path, limit_lines=40):
         return ''
 
 
+def _extract_section(path, header, max_lines=10):
+    """context-{user}.md 의 '## {header}' 섹션 본문을 추출."""
+    try:
+        text = path.read_text(encoding='utf-8')
+    except Exception:
+        return ''
+    lines = text.splitlines()
+    out, capture, count = [], False, 0
+    for ln in lines:
+        if ln.strip().startswith('## '):
+            if capture:
+                break
+            capture = header in ln
+            continue
+        if capture:
+            if ln.strip():
+                out.append(ln)
+                count += 1
+                if count >= max_lines:
+                    break
+    return '\n'.join(out).rstrip()
+
+
+def _wu_status(cwd):
+    """wu_claim_manager.py status (read-only) 출력. 활성 claim 없으면 빈 문자열."""
+    try:
+        r = subprocess.run(
+            [sys.executable, '-X', 'utf8', str(cwd / '.claude' / 'hooks' / 'wu_claim_manager.py'), 'status'],
+            capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=5, cwd=str(cwd),
+        )
+        out = (r.stdout or '').strip()
+        if out and 'no active claims' not in out:
+            return out
+    except Exception:
+        pass
+    return ''
+
+
 def main():
     try:
         data = json.load(sys.stdin)
@@ -42,7 +81,6 @@ def main():
 
     cwd = Path(data.get('cwd', '.'))
     session_dir = cwd / 'docs' / '10-session'
-
     output = []
 
     quick_ref = session_dir / 'quick-ref.md'
@@ -58,6 +96,24 @@ def main():
         if text:
             output.append('=== CURRENT-PHASE ===')
             output.append(text)
+
+    # 개인 컨텍스트 포커스 (LOCAL, 협업 인프라) — context-kyb.md 등
+    for ctx in sorted((cwd / '.project-memory').glob('context-*.md')) if (cwd / '.project-memory').is_dir() else []:
+        focus = _extract_section(ctx, '현재 포커스', 8)
+        todo = _extract_section(ctx, '다음 TODO', 12)
+        if focus or todo:
+            output.append(f'=== MY CONTEXT ({ctx.stem}) ===')
+            if focus:
+                output.append('[현재 포커스]\n' + focus)
+            if todo:
+                output.append('[다음 TODO]\n' + todo)
+        break  # 본 호스트의 단일 사용자 컨텍스트만
+
+    # 활성 WU claim 현황 (멀티 세션 협업)
+    wu = _wu_status(cwd)
+    if wu:
+        output.append('=== WU CLAIMS (active) ===')
+        output.append(wu)
 
     if (cwd / '.git').is_dir():
         branch = _git(cwd, 'branch', '--show-current')

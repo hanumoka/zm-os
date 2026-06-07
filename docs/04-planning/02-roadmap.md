@@ -5,6 +5,8 @@
 **Version**: 0.10.0
 **Last Updated**: 2026-05-27
 
+> 🔵 **진행 중 WU claim**: [`_derived-wu-state.md`](_derived-wu-state.md) — 자동 생성(누가 어느 작업 점유 중). `/zm-wu-start`·`/zm-wu-stop` 시 갱신.
+
 ---
 
 ## §1. 대시보드

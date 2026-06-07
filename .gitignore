@@ -41,10 +41,19 @@ yarn-error.log*
 .claude/logs/
 .claude/plans/
 .claude/settings.local.json
+.claude/pre-compact-recovery.md
 **/.claude/agent-memory/
 
-# Event stream (local session log, JSONL append-only)
-events/
+# Collaboration (sonix_docs 이식) — events/claims 는 추적(공유 SSOT), lock·개인메모리는 LOCAL
+# events/*.jsonl 와 .project-memory/claims/*.json 은 tracked (commit/push 로 세션·팀 간 전파)
+events/*.lock
+events/.append*
+.project-memory/claims/*.lock
+.project-memory/claims/*.tmp.json
+.project-memory/context-*.md
+.project-memory/pre-compact-recovery.md
+.project-memory/handoffs/
+.project-memory/wu-claims.json.lock
 
 # Scratch / temp
 .scratch/

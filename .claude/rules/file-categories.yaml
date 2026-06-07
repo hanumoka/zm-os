@@ -65,3 +65,47 @@ cross_validation:
   - rule: "_digest.md 파일은 docs/03-policy/ 에만 존재"
   - rule: "quick-ref.md, current-phase.md는 docs/10-session/ 에만 존재"
   - rule: "entries.md는 docs/13-troubleshooting/ 에만 존재"
+
+# ─────────────────────────────────────────────────────────────────────
+# 거버넌스 카테고리 (A~E) — 헌법 3 (domain-separation) / sonix_docs 이식
+# {PREFIX} = team-config.json 의 ctx_suffix (현재 KYB 1인, 확장가능)
+# ─────────────────────────────────────────────────────────────────────
+governance_categories:
+  HUMAN:        # A — 사람 전용 (자동화 편집은 [WARN])
+    patterns:
+      - "docs/01-architecture/**/*.md"
+      - "docs/03-policy/**/*.md"
+      - "docs/05-analysis/**/*.md"
+      - "docs/06-security/**/*.md"
+      - "docs/07-testing/**/*.md"
+      - "CLAUDE.md"
+      - "AGENTS.md"
+      - "README.md"
+  SYSTEM:       # B — 자동화 전용 (사람 직접 편집 [WARN]→[BLOCK])
+    patterns:
+      - ".project-memory/claims/*.json"
+      - "docs/03-policy/_digest.md"
+      - "docs/04-planning/_derived-wu-state.md"
+  SHARDED:      # C — 개인별 (본인 PREFIX 만)
+    patterns:
+      - ".project-memory/context-{PREFIX}.md"
+      - ".project-memory/handoffs/{PREFIX}/**"
+    enforcement:
+      cross_prefix_edit: block
+  EVENTS:       # D — append-only (수정/삭제 금지)
+    patterns:
+      - "events/*.jsonl"
+    enforcement:
+      append_only: true
+  LOCAL:        # E — 호스트별 local (gitignored)
+    patterns:
+      - ".project-memory/context-*.md"
+      - ".project-memory/pre-compact-recovery.md"
+      - ".claude/settings.local.json"
+      - ".claude/plans/**"
+      - ".claude/pre-compact-recovery.md"
+
+# 강제 프로파일 (현재: SYSTEM/EVENTS [WARN], category_guard.py)
+governance_enforcement:
+  phase: 1
+  note: "단일 개발자 + 확장가능 구조. SHARDED cross_prefix 는 팀원 추가 시 활성."

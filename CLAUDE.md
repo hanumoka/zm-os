@@ -232,6 +232,35 @@ Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
 2. [BLOCK] 수준이면 백틱 인용 패턴으로 등록 (mistake_guard.py가 자동 차단)
 3. MEMORY.md "최근 결정사항"에 1줄 기록
 
+### WU Claim Protocol (MANDATORY — 멀티 세션 협업)
+> sonix_docs 협업 인프라 이식. 상세: `.claude/rules/wu-claim.md` + `.claude/rules/constitution/`
+
+여러 Claude 세션·팀원이 충돌 없이 동시 작업하기 위한 작업 점유 체계.
+- **작업 시작**: `/zm-wu-start <WU>` — claim + git worktree 진입 + 🔵 마커 + events
+- **작업 종료**: `/zm-wu-stop <WU> [완료|중단|차단]` — release + 마커 + events
+- **WU 식별자**: zm-os 기존 ID 그대로 (REFAC-02-P2, USR-01, Epic-J 등). 자동 번호 없음.
+- **격리(헌법 1)**: 같은 파일 동시 편집 방지 — WU 작업은 worktree 안에서.
+- **SSOT(헌법 2)**: `.project-memory/claims/<WU>.json` + append-only `events/*.jsonl`.
+- **금지**: `git push --no-verify`(M-003), `git add -A`/`git add .`(M-002), claims/ 수동 편집.
+- **팀원 추가**: `/zm-onboarding` (team-config.json 본인 세션 등록). 1회 셋업: `/zm-setup`.
+
+---
+
+## 🤝 12. 멀티 세션 협업 인프라 (요약)
+
+| 영역 | 도구 |
+|------|------|
+| 작업 점유 | `wu_claim_manager.py` + `/zm-wu-start` / `/zm-wu-stop` / `/zm-wu-next` |
+| 격리 | git worktree (`.worktreeinclude`, `settings.json` worktree) |
+| 동시성 | `file_lock.py`(배타 락) + heartbeat 5분 TTL + stale sweep |
+| 감사 | `emit_event.py` + `events/*.jsonl` + `merge_jsonl.py`(union+dedup 머지) |
+| 멀티유저 | `team-config.json` + `_resolve-user.py` (현재 KYB 1인, 확장가능) |
+| 인계 | `/zm-handoff` (draft ↔ --share) |
+| 거버넌스 | 헌법 3종 (`.claude/rules/constitution/`) + 카테고리 A~E |
+| 보안 | `scripts/git-hooks/pre-push` (secret scan) |
+
+> 머신/clone 최초 1회: `/zm-setup` (git-hooks + merge driver 등록).
+
 ---
 
 *프로젝트: zm-os 브라우저 가상 데스크탑 POC*

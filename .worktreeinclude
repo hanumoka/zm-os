@@ -1,0 +1,31 @@
+# .worktreeinclude — files copied into new Claude Code worktrees (sonix_docs 이식)
+#
+# Syntax: same as .gitignore. ONLY applies to files that are gitignored
+# in the main repo (tracked files are already carried by `git worktree add`).
+#
+# Reference: https://code.claude.com/docs/en/worktrees#worktreeinclude
+# 헌법 1 (Isolation-First) Category E (LOCAL): host-bound 개인 메모리가
+# 작업자를 따라 worktree 로 들어가야 세션 메모리가 유지된다.
+# ─────────────────────────────────────────────────────────────────────
+
+# 개인 세션 메모리 (per-user, gitignored)
+.project-memory/context-*.md
+
+# 호스트별 Claude Code override (gitignored)
+.claude/settings.local.json
+
+# Pre-compact recovery payload (pre_compact.py 가 생성)
+.claude/pre-compact-recovery.md
+.project-memory/pre-compact-recovery.md
+
+# 세션 로컬 plans (/plan)
+.claude/plans/
+
+# ─────────────────────────────────────────────────────────────────────
+# 의도적 제외 — 새 worktree 로 복사하지 않음.
+#   - .project-memory/handoffs/   LOCAL handoff 초안 (/zm-handoff), task-scoped
+#   - .project-memory/claims/     공유 SSOT (tracked — worktree add 가 운반)
+#   - events/                     공유 SSOT (tracked)
+#   - tmp/, .scratch/             transient 출력
+# 각 worktree 는 clean 진단 상태로 부팅돼야 cross-instance 오염을 막는다.
+# ─────────────────────────────────────────────────────────────────────

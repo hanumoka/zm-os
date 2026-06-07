@@ -1,0 +1,82 @@
+#!/usr/bin/env bash
+# pre-push hook: secret scan of pushed commits. (sonix_docs 이식)
+# Strategy: prefer gitleaks (if installed), fallback to regex patterns.
+# Bypass with --no-verify is forbidden by team policy (see .claude/rules/wu-claim.md).
+
+set -e
+
+remote="$1"
+remote_url="$2"
+
+zero='0000000000000000000000000000000000000000'
+
+scan_with_gitleaks() {
+    local range="$1"
+    gitleaks detect --no-banner --redact --log-level error --source . --log-opts "$range" 2>&1
+    return $?
+}
+
+scan_with_regex() {
+    local range="$1"
+    local patterns
+    # AWS access key, GitHub token, OpenAI key, Slack tokens, generic private keys, GCP service account, Stripe live key
+    patterns='(AKIA[0-9A-Z]{16}|ghp_[0-9a-zA-Z]{36}|gho_[0-9a-zA-Z]{36}|sk-[0-9a-zA-Z]{20,}|xox[bpars]-[0-9a-zA-Z-]+|-----BEGIN (RSA |EC |OPENSSH |PGP )?PRIVATE KEY-----|"type":\s*"service_account"|sk_live_[0-9a-zA-Z]{24,})'
+    # 자기 자신(secret 패턴이 정의된 hook 파일들)은 scan 대상에서 제외
+    # 추가된 라인(+)만 검사 — 삭제 라인(-) 내 placeholder 토큰 오탐 방지
+    if git log --patch "$range" -- ':!scripts/git-hooks/pre-push' ':!.gitleaksignore' 2>/dev/null | grep '^+' | grep -E -i "$patterns" >/dev/null; then
+        return 1
+    fi
+    return 0
+}
+
+found_secret=0
+found_race=0
+while read -r local_ref local_sha remote_ref remote_sha; do
+    if [ "$local_sha" = "$zero" ]; then
+        continue  # branch deletion
+    fi
+    if [ "$remote_sha" = "$zero" ]; then
+        # new branch — limit scan to last 50 commits to avoid scanning unrelated history
+        range="${local_sha}~50..${local_sha}"
+        if ! git rev-parse "${local_sha}~50" >/dev/null 2>&1; then
+            range="$local_sha"
+        fi
+    else
+        range="${remote_sha}..${local_sha}"
+    fi
+
+    if command -v gitleaks >/dev/null 2>&1; then
+        if ! scan_with_gitleaks "$range"; then
+            echo ""
+            echo "[BLOCK] gitleaks가 시크릿을 감지했습니다. push 차단."
+            echo "  - 시크릿을 제거하거나 .gitleaksignore에 정당화 사유 추가 후 재시도"
+            echo "  - --no-verify 우회는 팀 정책 위반 (.claude/rules/wu-claim.md)"
+            found_secret=1
+        fi
+    else
+        if ! scan_with_regex "$range"; then
+            echo ""
+            echo "[BLOCK] secret 패턴 감지 (fallback regex)"
+            echo "  - 시크릿 제거 후 재시도"
+            echo "  - 정밀 검사: gitleaks 설치 권장 https://github.com/gitleaks/gitleaks"
+            echo "  - --no-verify 우회는 팀 정책 위반 (.claude/rules/wu-claim.md)"
+            found_secret=1
+        else
+            echo "[INFO] secret scan PASS (fallback regex; gitleaks 미설치)"
+        fi
+    fi
+
+    # WU claim 경합 가드 (낙관적 잠금, 구조적 안전망)
+    branch="${local_ref#refs/heads/}"
+    if [ -n "$branch" ] && command -v python >/dev/null 2>&1 && [ -f .claude/hooks/check_wu_race.py ]; then
+        if ! python .claude/hooks/check_wu_race.py "$branch"; then
+            found_race=1
+        fi
+    fi
+done
+
+if [ $found_secret -ne 0 ] || [ $found_race -ne 0 ]; then
+    exit 1
+fi
+
+exit 0

@@ -26,6 +26,11 @@
 | [ADR-0021](adr-0021-local-noop-sync.md) | LocalNoOpSync — 동기화 비활성 어댑터 (SyncProvider Local) | accepted | 2026-05-27 |
 | [ADR-0022](adr-0022-local-static-moderation.md) | LocalStaticModeration — HTML 정적 분석 어댑터 (ModerationProvider Local) | accepted | 2026-05-27 |
 | [ADR-0023](adr-0023-adapter-resolver-composition-root.md) | Adapter Resolver + Composition Root — createPorts() + PortsContext + 동적 import | accepted | 2026-05-27 |
+| [ADR-0030](adr-0030-isolation-first.md) | 멀티 세션 협업 — Isolation-First (worktree 격리) | accepted | 2026-06-07 |
+| [ADR-0031](adr-0031-ssot-and-derived.md) | 멀티 세션 협업 — SSOT + Append-Only Events | accepted | 2026-06-07 |
+| [ADR-0032](adr-0032-domain-separation.md) | 멀티 세션 협업 — 영역 분리 + 명시적 Lifecycle + Fail-Safe | accepted | 2026-06-07 |
+
+> **0024~0029 결번(예약)**: CloudAdapter 옵션 트랙 — 아래 "보류" 참조. 협업 헌법 ADR 은 예약 회피를 위해 0030~0032 사용.
 
 ## 다음 번호 가이드
 

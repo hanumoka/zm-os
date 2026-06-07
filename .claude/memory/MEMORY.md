@@ -5,11 +5,11 @@
 - 현재 상태: **POC ✅ 완료 + Post-POC ✅ 완료 + v2 진입** (로컬-우선 전환, ADR-0017 대기)
 - 코드 LOC: `apps/web/src + packages/*/src`만 산정, 샘플(`public/sample-*`) 제외 — 약 5200 LOC (TS) + samples ~1500 LOC (HTML/JS)
 - 구조: 모노레포 `apps/web` + `packages/{core,storage,ipc}` (pnpm 11 + Turborepo 2.7)
-- 에이전트: 13개 (architect, research-analyst, design-reviewer, lib-developer, fe-developer, build-checker, code-reviewer, app-sandbox-auditor, constraint-checker, integration-tester, perf-monitor, self-verifier, doc-updater) + workflow 문서
+- 에이전트: 14개 (architect, research-analyst, design-reviewer, lib-developer, fe-developer, build-checker, code-reviewer, app-sandbox-auditor, constraint-checker, integration-tester, perf-monitor, self-verifier, doc-updater, **zm-context-guardian**) + workflow 문서
 - 모델 전략: architect/design-reviewer/self-verifier=opus / 구현·리뷰·감사·통합검증=sonnet / 빌드·문서·제약·성능=haiku
-- 스킬: 9개 (zm-commit, zm-unit-done, zm-session, zm-troubleshoot, zm-memory-save, zm-work-intake, zm-work-completion, zm-doc-status, zm-roadmap)
-- 규칙: 10개 (frontend, security, work-units, known-mistakes, doc-naming, file-categories, quality-standard, self-review, auto-memory-protocol, troubleshoot-auto)
-- 훅: 10개 Python (mistake_guard, post_review, session_start, notify_done, category_guard, emit_event, prompt_context, pre_compact, post_compact, post_review_checks)
+- 스킬: 17개 (기존 9 + 협업 8: zm-wu-start/stop/next, zm-handoff, zm-setup, zm-team, zm-onboarding, zm-agent-teams)
+- 규칙: 11개 + constitution/ 3 (frontend, security, work-units, known-mistakes, doc-naming, file-categories, quality-standard, self-review, auto-memory-protocol, troubleshoot-auto, **wu-claim** + **constitution/{01-isolation-first,02-ssot-and-derived,03-domain-separation}**)
+- 훅: 17개 Python (기존 10 + 협업 7: file_lock, idgen, merge_jsonl, _resolve-user, check_wu_race, wu_claim_manager, mistake_guard_edit)
 - 단위 테스트: Vitest 61개 (6파일 ALL PASS) | E2E: Playwright 6개 (모두 PASS)
 - 의존성: next 16, react 19, tailwind 4, zod 4.4.3, typescript 5, react-rnd v10.5.3, phaser@3.90.0, idb@8.0.3, jszip@3.10.1, pixi.js@8.18.1, three@0.184.0, vitest@4.1.7 (dev), playwright (dev)
 
@@ -56,6 +56,7 @@
 - **다음 후보**: **REFAC-02-P2 진입** — BlobStorage Port + LocalOPFS 어댑터 이전 (`packages/storage` 흡수 + AbortSignal 매 entry 폴링 + `BlobStorageError extends PortError` + `@zm/storage` deprecation shell). 5일 추정.
 
 ## 최근 결정사항 (최대 10, FIFO)
+- 2026-06-07: **sonix_docs 협업 인프라 이식 완료 (4 Phase, 37 산출물)** — 다중 세션·팀원 협업(격리·직렬화·감사 3층). file_lock/idgen/merge_jsonl/_resolve-user verbatim + wu_claim_manager(ML→WU 일반화, 기존 ID claim) + emit_event 교체(append API, actor dict 수정) + 헌법 3(ADR-0030~0032) + 카테고리 A~E + M-002/M-003 BLOCK + 협업 스킬 8 + zm-context-guardian + team-config(KYB만) + worktree/merge-driver/pre-push. events/ 추적 전환. 검증: 훅 smoke + claim 왕복 + merge driver + type-check 5/5 + vitest 5/5 회귀 0.
 - 2026-05-27: **REFAC-02-P1 완료** — Ports & Adapters 코드 마이그레이션 첫 작업. 13 파일 변경 (신규 10 + 수정 3). `packages/core/src/ports/` 7 파일 (common/auth/app-repository/blob-storage/sync/moderation/index) + `@zm/adapters-local` 신규 패키지 골조 + namespace-registry adapterPolicies 배열 reshape (호환 alias `getLegacyAdapterPolicy` 제공) + system namespace 추가 + indexeddb.ts v5 upgrade + resolve-adapter.ts alias 사용. lib-developer + architect 검증 + 직접 보완 (lib-developer 토큰 한도로 일부 누락). turbo type-check 5/5 + test 5/5 PASS.
 - 2026-05-27: **v2 plan v0.3.0 작성** — ADR-0017~0023 채택 반영. 10 Epic + 58 작업 + 24주 추정 (REFAC-02 3주 + M5~M10 21주). 각 작업에 LocalAdapter 필수 / CloudAdapter 옵션 표기. 신규 Epic J REFAC-02 (P1~P5 = M5 진입 전 선행). Local-only v2.0 출시 옵션 명시.
 - 2026-05-27: **ADR-0018~0023 Local 어댑터 6건 일괄 채택** — LocalAuth(crypto.randomUUID + system namespace + BroadcastChannel) + LocalRepo IDB(installed-apps/user-apps 2 namespace, cascade remove, contentRef inline v2.0) + LocalOPFS BlobStorage(packages/storage 흡수, AbortSignal 매 entry, BlobStorageError extends PortError) + LocalNoOpSync(silent no-op ~30 LOC) + LocalStaticModeration(정규식 7 패턴 fail-closed + ConfirmDialog 재사용) + Adapter Resolver(createLocalPorts + PortsContext + 동적 import Suspense + adapterPolicies Port+namespace 2차원). architect 2회 병렬 호출 + 사용자 결정 26건 추천 일괄 채택.
@@ -65,4 +66,4 @@
 - 2026-05-26: **SRV-00 실행 완료** — 모노레포 마이그레이션 (src/ → apps/web + packages/{core,storage,ipc} + pnpm workspaces + Turborepo). 검증: turbo type-check 4/4 + turbo test 61/61 + next build ✅.
 - 2026-05-26: ADR-0016 (v2 모노레포) — pnpm 11 + Turborepo 2.7. 구조 apps/web + packages/{core,storage,ipc}. ARCH-01 reshape + TECH-10 등재.
 - 2026-05-26: v2 ADR 3건 일괄 작성 — ADR-0013(Auth: Supabase Auth) + ADR-0014(DB: Supabase Postgres + Drizzle) + ADR-0015(Sync: LWW + 서버 권위 시계). 이후 2026-05-27 모두 superseded by ADR-0017.
-> **최종 갱신**: 2026-05-27 — REFAC-02-P1 완료 (Port SSOT + adapters-local 골조 + namespace reshape)
+> **최종 갱신**: 2026-06-07 — sonix_docs 협업 인프라 이식 (다중 세션·팀원 협업: worktree 격리 + file_lock + WU claim + events SSOT + 헌법 + 협업 스킬 8)

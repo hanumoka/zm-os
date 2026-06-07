@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "members": {
+    "KYB": {
+      "id": "M01",
+      "name": "김영빈",
+      "ctx_suffix": "kyb",
+      "git_patterns": ["hanumoka", "kyb1987", "kyb", "김영빈"]
+    }
+  },
+  "defaults": {
+    "prefix_rule": "성+이름 3자리 대문자 (예: 이민수→LMS)",
+    "note": "팀원 추가 시 zm-onboarding 스킬로 본인 세션에서 등록. sonix_docs 와 동일 스키마(확장가능)."
+  }
+}

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""PostCompact hook — quick-ref + _digest.md 재로드."""
+"""PostCompact hook — quick-ref + _digest.md 재로드 + 개인 컨텍스트 recovery 복원.
+(sonix_docs 협업 인프라 이식: pre-compact-recovery.md 가 있으면 복원 표시)"""
 import sys
 import json
 from pathlib import Path
@@ -30,6 +31,14 @@ def main():
 
     cwd = Path(data.get('cwd', '.'))
     output = []
+
+    # 개인 컨텍스트 recovery 복원 (compaction 으로 잃은 작업 맥락)
+    recovery = cwd / '.project-memory' / 'pre-compact-recovery.md'
+    if recovery.is_file():
+        text = recovery.read_text(encoding='utf-8').strip()
+        if text:
+            output.append('=== [RECOVERY] Compact 후 작업 컨텍스트 복원 ===')
+            output.append(text)
 
     quick_ref = cwd / 'docs' / '10-session' / 'quick-ref.md'
     if quick_ref.is_file():

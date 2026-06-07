@@ -31,8 +31,13 @@ def main():
 
     norm = file_path.replace('\\', '/').lower()
 
-    if 'docs/' not in norm and 'events/' not in norm:
+    if 'docs/' not in norm and 'events/' not in norm and '.project-memory/claims/' not in norm:
         sys.exit(0)
+
+    # .project-memory/claims/<WU>.json 직접 편집 경고 (SYSTEM — wu_claim_manager 전담)
+    if '.project-memory/claims/' in norm and norm.endswith('.json'):
+        print('[WARN] .project-memory/claims/ 는 SYSTEM 영역입니다. '
+              '직접 편집 대신 /zm-wu-start · /zm-wu-stop 또는 wu_claim_manager.py 를 사용하세요.')
 
     for pattern, expected_dir in CROSS_VALIDATION.items():
         basename = norm.rsplit('/', 1)[-1] if '/' in norm else norm
