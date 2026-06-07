@@ -3,7 +3,7 @@ import { securityHeaders } from './src/lib/security/csp';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  transpilePackages: ['@zm/core', '@zm/storage', '@zm/ipc'],
+  transpilePackages: ['@zm/core', '@zm/storage', '@zm/ipc', '@zm/adapters-local'],
 
   async headers() {
     const mode =

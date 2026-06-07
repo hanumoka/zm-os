@@ -10,11 +10,11 @@
   },
   "scripts": {
     "type-check": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
     "@zm/core": "workspace:*",
-    "idb": "^8.0.3"
+    "@zm/adapters-local": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5",

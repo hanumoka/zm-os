@@ -8,6 +8,7 @@ export default defineConfig({
       '@zm/core': path.resolve(__dirname, '../../packages/core/src'),
       '@zm/storage': path.resolve(__dirname, '../../packages/storage/src'),
       '@zm/ipc': path.resolve(__dirname, '../../packages/ipc/src'),
+      '@zm/adapters-local': path.resolve(__dirname, '../../packages/adapters-local/src'),
     },
   },
   test: {

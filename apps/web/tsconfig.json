@@ -31,7 +31,9 @@
       "@zm/storage": ["../../packages/storage/src"],
       "@zm/storage/*": ["../../packages/storage/src/*"],
       "@zm/ipc": ["../../packages/ipc/src"],
-      "@zm/ipc/*": ["../../packages/ipc/src/*"]
+      "@zm/ipc/*": ["../../packages/ipc/src/*"],
+      "@zm/adapters-local": ["../../packages/adapters-local/src"],
+      "@zm/adapters-local/*": ["../../packages/adapters-local/src/*"]
     }
   },
   "include": [

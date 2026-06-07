@@ -8,8 +8,9 @@
  * - P4: auth/ + sync/ + moderation/ (ADR-0018/0021/0022)
  * - P5: resolver.ts (Adapter Resolver, ADR-0023)
  *
- * 외부 의존성: @zm/core (workspace) — DIP 준수 (ADR-0017 §D3)
+ * 외부 의존성: @zm/core (workspace) + idb — DIP 준수 (ADR-0017 §D3)
  * 호출 패키지: apps/web (Composition Root) — 단방향 import
  */
 
-export {};
+// P2 (ADR-0020): BlobStorage Local 어댑터. 서브패스 '@zm/adapters-local/blob-storage' 권장.
+export * from './blob-storage';

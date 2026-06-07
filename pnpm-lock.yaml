@@ -90,6 +90,9 @@ importers:
       '@zm/core':
         specifier: workspace:*
         version: link:../core
+      idb:
+        specifier: ^8.0.3
+        version: 8.0.3
     devDependencies:
       typescript:
         specifier: ^5
@@ -126,12 +129,12 @@ importers:
 
   packages/storage:
     dependencies:
+      '@zm/adapters-local':
+        specifier: workspace:*
+        version: link:../adapters-local
       '@zm/core':
         specifier: workspace:*
         version: link:../core
-      idb:
-        specifier: ^8.0.3
-        version: 8.0.3
     devDependencies:
       typescript:
         specifier: ^5

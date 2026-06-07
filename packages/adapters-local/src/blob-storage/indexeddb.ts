@@ -1,17 +1,16 @@
 /**
- * IndexedDB 추상화 계층 (STG-01)
+ * IndexedDB 저수준 추상화 (STG-01) — BlobStorage Local 어댑터 raw CRUD
+ *
+ * ADR-0020: packages/storage → @zm/adapters-local/blob-storage 흡수 (코드 변경 없이 이동).
  *
  * 정책:
- * - P1=B: idb library v8.0.3 사용
- * - P2: 단일 DB `zm-os` v1, store `installed-apps`
- * - P3=A: 메서드별 자동 트랜잭션
- * - P4=A: 단일 버전 v1, store 추가 시 bump
- * - P5=B: IDB 미사용 환경 → 메모리 폴백 (Safari Private Browsing 등)
- * - P6: structured clone raw (Zod 검증은 호출자 책임)
- * - P7: throw 표준 Error
+ * - idb library v8.0.3 사용
+ * - 메서드별 자동 트랜잭션
+ * - 단일 DB `zm-os`, store 추가 시 DB_VERSION bump
+ * - IDB 미사용 환경 → 메모리 폴백 (Safari Private Browsing 등)
+ * - structured clone raw (Zod 검증은 호출자 책임)
  *
- * SSR 안전: 'use client' 디렉티브 없음 — lib 모듈, 호출자가 client 컴포넌트에서 사용
- * 모든 IDB 접근 전 isIDBAvailable() 체크 → 메모리 폴백
+ * SSR 안전: 'use client' 없음 — 모든 IDB 접근 전 isIDBAvailable() 체크 → 메모리 폴백
  */
 
 import { type DBSchema, type IDBPDatabase, openDB as idbOpenDB } from 'idb';
@@ -34,7 +33,7 @@ export {
 
 // ─── DB / Store 상수 ─────────────────────────────────────────────────────────
 export const DB_NAME = 'zm-os';
-/** DB 버전. store 추가 시 bump (v2: STORE_USER_APPS, v3: STORE_DESKTOP_LAYOUT, v4: STORE_DESKTOP_SETTINGS, v5: STORE_SYSTEM ADR-0018 LocalAuth) */
+/** DB 버전. store 추가 시 bump (v2: user-apps, v3: desktop-layout, v4: desktop-settings, v5: system) */
 export const DB_VERSION = 5;
 
 // ─── 타입 ─────────────────────────────────────────────────────────────────────
@@ -42,10 +41,8 @@ export type IDBStoreName = NamespaceId;
 
 /**
  * idb DBSchema 타입 정의 — value를 any로 두어야 idb 내부 타입 충족
- * (idb DBSchemaValue.value: any 제약)
- * 실제 타입 안전성은 idbGet<T>/idbPut<T> 제네릭으로 보장
+ * (idb DBSchemaValue.value: any 제약). 실제 타입 안전성은 idbGet<T>/idbPut<T> 제네릭으로 보장.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface ZmOsDBSchema extends DBSchema {
   [NS_INSTALLED_APPS]: {
     key: string;
@@ -79,9 +76,7 @@ export function isIDBAvailable(): boolean {
   return typeof globalThis.indexedDB !== 'undefined' && globalThis.indexedDB !== null;
 }
 
-// ─── 메모리 폴백 (P5=B) ───────────────────────────────────────────────────────
-// IDB 미사용 환경(SSR, Safari Private Browsing 0 quota 등)에서 사용
-// 페이지 reload 시 휘발 — 호출자는 이 동작을 인지해야 함
+// ─── 메모리 폴백 ──────────────────────────────────────────────────────────────
 const _memoryStore = new Map<IDBStoreName, Map<string, unknown>>();
 
 function _memoryStoreOf(storeName: IDBStoreName): Map<string, unknown> {
@@ -107,31 +102,26 @@ export function openDB(): Promise<IDBPDatabase<ZmOsDBSchema>> {
   if (_dbPromise === null) {
     _dbPromise = idbOpenDB<ZmOsDBSchema>(DB_NAME, DB_VERSION, {
       upgrade(db, oldVersion) {
-        // v0 → v1: installed-apps 생성
         if (oldVersion < 1) {
           if (!db.objectStoreNames.contains(NS_INSTALLED_APPS)) {
             db.createObjectStore(NS_INSTALLED_APPS);
           }
         }
-        // v1 → v2: user-apps 생성 (APP-02 사용자 업로드 앱)
         if (oldVersion < 2) {
           if (!db.objectStoreNames.contains(NS_USER_APPS)) {
             db.createObjectStore(NS_USER_APPS);
           }
         }
-        // v2 → v3: desktop-layout 생성 (DSK-04 윈도우 레이아웃 영속화)
         if (oldVersion < 3) {
           if (!db.objectStoreNames.contains(NS_DESKTOP_LAYOUT)) {
             db.createObjectStore(NS_DESKTOP_LAYOUT);
           }
         }
-        // v3 → v4: desktop-settings 생성 (DSK-05 배경화면/테마)
         if (oldVersion < 4) {
           if (!db.objectStoreNames.contains(NS_DESKTOP_SETTINGS)) {
             db.createObjectStore(NS_DESKTOP_SETTINGS);
           }
         }
-        // v4 → v5: system 생성 (ADR-0018 LocalAuth anon UserId 영속화)
         if (oldVersion < 5) {
           if (!db.objectStoreNames.contains(NS_SYSTEM)) {
             db.createObjectStore(NS_SYSTEM);
@@ -145,7 +135,6 @@ export function openDB(): Promise<IDBPDatabase<ZmOsDBSchema>> {
         });
       },
       blocking(currentVersion, blockedVersion) {
-        // 다른 탭이 upgrade 요청 중 — 현재 connection 닫고 캐시 무효화
         console.warn('[zm-os IDB] blocking other tab upgrade — closing connection', {
           currentVersion,
           blockedVersion,
@@ -167,11 +156,6 @@ export function openDB(): Promise<IDBPDatabase<ZmOsDBSchema>> {
 
 // ─── CRUD ─────────────────────────────────────────────────────────────────────
 
-/**
- * 단일 레코드 조회.
- * 키가 없으면 undefined 반환.
- * IDB 미사용 환경에서는 메모리 폴백.
- */
 export async function idbGet<T = unknown>(
   storeName: IDBStoreName,
   key: string,
@@ -185,10 +169,6 @@ export async function idbGet<T = unknown>(
   return value as T | undefined;
 }
 
-/**
- * 레코드 저장 (upsert).
- * IDB 미사용 환경에서는 메모리 폴백.
- */
 export async function idbPut<T = unknown>(
   storeName: IDBStoreName,
   key: string,
@@ -199,20 +179,11 @@ export async function idbPut<T = unknown>(
     return;
   }
   const db = await openDB();
-  // idb put 시그니처: put(storeName, value, key?) — value가 ZmOsDBSchema value(any)로 할당됨
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
   await db.put(storeName, value as Parameters<typeof db.put>[1], key);
 }
 
-/**
- * 레코드 삭제.
- * 존재하지 않는 키도 에러 없이 처리.
- * IDB 미사용 환경에서는 메모리 폴백.
- */
-export async function idbDelete(
-  storeName: IDBStoreName,
-  key: string,
-): Promise<void> {
+export async function idbDelete(storeName: IDBStoreName, key: string): Promise<void> {
   if (!isIDBAvailable()) {
     _memoryStoreOf(storeName).delete(key);
     return;
@@ -221,10 +192,6 @@ export async function idbDelete(
   await db.delete(storeName, key);
 }
 
-/**
- * store 전체 목록 조회 (key + value 쌍).
- * IDB 미사용 환경에서는 메모리 폴백.
- */
 export async function idbList<T = unknown>(
   storeName: IDBStoreName,
 ): Promise<ReadonlyArray<{ key: string; value: T }>> {
@@ -233,7 +200,6 @@ export async function idbList<T = unknown>(
     return Array.from(m.entries()).map(([key, value]) => ({ key, value: value as T }));
   }
   const db = await openDB();
-  // 단일 트랜잭션에서 keys + values를 함께 조회 (원자성 보장)
   const tx = db.transaction(storeName, 'readonly');
   const store = tx.objectStore(storeName);
   const [keys, values] = await Promise.all([store.getAllKeys(), store.getAll()]);
@@ -245,10 +211,6 @@ export async function idbList<T = unknown>(
   return result;
 }
 
-/**
- * store 전체 삭제.
- * IDB 미사용 환경에서는 메모리 폴백.
- */
 export async function idbClear(storeName: IDBStoreName): Promise<void> {
   if (!isIDBAvailable()) {
     _memoryStoreOf(storeName).clear();
