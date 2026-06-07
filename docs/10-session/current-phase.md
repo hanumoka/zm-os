@@ -6,7 +6,7 @@
 - **Phase 1~3 (POC)**: ✅ 완료 (M4 마일스톤 달성, POC 공식 종료)
 - **Post-POC**: APP-04 ✅ + TEST-01 ✅ + DSK-05 ✅ + REFAC-01 8/8 ✅
 - **v2 설계**: SRV-00 모노레포 + ADR-0016~0023 채택 + v2 plan v0.3.0 ✅
-- **REFAC-02**: **P1 ✅ 완료** (commit e602623) → **다음: P2** (BlobStorage Port + LocalOPFS 어댑터)
+- **REFAC-02**: **P1 ✅ + P2 ✅ 완료** (P2: BlobStorage Port + IDB/OPFS/Memory 어댑터 → `@zm/adapters-local/blob-storage` 흡수 + AbortSignal + `@zm/storage` deprecation shell, vitest 90, build ✅) → **다음: P3** (AppRepository Port + LocalRepo IDB)
 - **협업 인프라**: sonix_docs 멀티 세션 협업 이식 ✅ 완료 (2026-06-07, commit c368b5e)
 
 > ⚠️ 아래 "## ✅ Phase 1" 이후는 POC 당시 historical 작업 로그. 현재 다음 작업은 본 섹션 하단 "REFAC-02 진입" 참조.

@@ -3,7 +3,7 @@
 > UI / 스토리지 / 샌드박싱 연결도. PRD 기능 ID(`DSK-NN` 등)와 코드 경로 매핑.
 > **모노레포 마이그레이션 후** (SRV-00, 2026-05-26): `src/` → `apps/web/src/` + `packages/{core,storage,ipc}`
 
-**Last Updated**: 2026-05-27
+**Last Updated**: 2026-06-07
 
 ---
 
@@ -16,7 +16,7 @@
   ↓ 앱 실행 요청
 [Window Manager (DSK-01)]
   ↓ 매니페스트 로드
-[App Manifest (packages/core/src/manifest.ts)] ← [StorageAdapter (packages/storage/)] ← [Store (STR-01)]
+[App Manifest (packages/core/src/manifest.ts)] ← [BlobStorage (packages/adapters-local/blob-storage/)] ← [Store (STR-01)]
   ↓ blob: URL 또는 srcdoc 생성
 [Sandbox SDK (apps/web/src/lib/apps/sandbox.ts)]
   ↓ iframe 생성 (sandbox="allow-scripts")
@@ -66,8 +66,9 @@
 ### Storage (STG)
 | ID | 위치 | 상태 |
 |----|------|------|
-| STG-01 | `packages/storage/src/indexeddb.ts` (idb v8.0.3 wrapper + 메모리 폴백) | ✅ |
-| STG-02 | `packages/storage/src/{adapter,opfs,memory}.ts` (StorageAdapter Strategy) | ✅ |
+| STG-01 | `packages/adapters-local/src/blob-storage/indexeddb.ts` (idb v8.0.3 raw CRUD + 메모리 폴백) | ✅ |
+| STG-02 | `packages/adapters-local/src/blob-storage/{idb,opfs,memory}-adapter.ts` — BlobStorage Port 구현 (IDB/OPFS/Memory + AbortSignal, ADR-0020) | ✅ |
+| STG-03 | `packages/storage` = deprecation shell (re-export, ADR-0020 §D5, v2.0~v2.1) | ✅ REFAC-02-P2 |
 
 ### Game (GAME) — 게임 엔진 매트릭스
 | ID | 위치 | 상태 |

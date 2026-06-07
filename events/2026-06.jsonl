@@ -12,3 +12,6 @@
 {"ts":"2026-06-07T14:12:32+09:00","type":"doc_change","actor":"M01","session":"3d4e4c58","source_commit":"e82c6833","details":{"file":"01-policy-registry.md","category":"policy","action":"edit"}}
 {"ts":"2026-06-07T14:12:34+09:00","type":"doc_change","actor":"M01","session":"3d4e4c58","source_commit":"e82c6833","details":{"file":"_digest.md","category":"policy","action":"edit"}}
 {"ts":"2026-06-07T14:12:36+09:00","type":"doc_change","actor":"M01","session":"3d4e4c58","source_commit":"e82c6833","details":{"file":"_digest.md","category":"policy","action":"edit"}}
+{"ts":"2026-06-07T14:43:52+09:00","type":"doc_change","actor":"M01","session":"3d4e4c58","source_commit":"6560260d","details":{"file":"05-feature-map.md","category":"architecture","action":"edit"}}
+{"ts":"2026-06-07T14:43:54+09:00","type":"doc_change","actor":"M01","session":"3d4e4c58","source_commit":"6560260d","details":{"file":"05-feature-map.md","category":"architecture","action":"edit"}}
+{"ts":"2026-06-07T14:43:56+09:00","type":"doc_change","actor":"M01","session":"3d4e4c58","source_commit":"6560260d","details":{"file":"05-feature-map.md","category":"architecture","action":"edit"}}
