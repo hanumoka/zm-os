@@ -110,6 +110,12 @@ export interface HostEndpointOptions {
    */
   expose?: HostApi;
   /**
+   * (ADR-0034, F0 seam) capability 강제 미들웨어.
+   * CALL 수신 시 allowedMethods 통과 후 추가 검증한다. `false` 반환 시 'denied' 응답.
+   * 미지정 시 검증 생략 → allowedMethods-only 동작(현행과 byte-identical). F1 broker가 주입.
+   */
+  authorize?: (method: string, args: ReadonlyArray<unknown>) => boolean;
+  /**
    * 앱→호스트 메시지 rate limit 설정 (N-08 DoS 방어).
    * 미지정 시 기본값: { maxMessages: 60, windowMs: 1000, penaltyMs: 2000 }
    * false로 설정 시 rate limit 비활성화.

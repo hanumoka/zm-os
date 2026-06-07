@@ -21,6 +21,18 @@ describe('parseIpcMsg', () => {
     expect(msg!.type).toBe(MSG_TYPE.READY);
   });
 
+  it('parses READY with optional grantedCapabilities (additive, ADR-0034)', () => {
+    const msg = parseIpcMsg({
+      type: MSG_TYPE.READY,
+      v: V,
+      hostOrigin: 'http://localhost:3000',
+      grantedMethods: ['ping'],
+      grantedCapabilities: ['demo.basic'],
+    });
+    expect(msg).not.toBeNull();
+    expect(msg!.type).toBe(MSG_TYPE.READY);
+  });
+
   it('parses valid CALL message', () => {
     const msg = parseIpcMsg({
       type: MSG_TYPE.CALL,

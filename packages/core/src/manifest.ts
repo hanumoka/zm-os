@@ -43,6 +43,9 @@ export const AppManifestV1Schema = z.object({
 export const AppManifestV2Schema = z.object({
   schemaVersion: z.literal(2),
   ...ManifestCommonFields,
+  // capabilities: CapabilityId 토큰 목록 (점-구분 'family.action' 권장; 레거시 평면 토큰 호환).
+  // 런타임 검증/강제는 capability catalog + broker가 담당 (ADR-0034, F1). v1 호환과
+  // 사용자 앱 확장성(OCP)을 위해 manifest 단계는 free-form string 유지(regex 미적용).
   capabilities: z.array(z.string()).default([]),
 });
 

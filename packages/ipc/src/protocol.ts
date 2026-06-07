@@ -13,6 +13,9 @@ import { z } from 'zod';
 
 // ─── 프로토콜 버전 ────────────────────────────────────────────────────────────
 
+// 프로토콜 진화 정책 (ADR-0036):
+// - additive-only(optional 필드 추가 / 신규 메시지 타입 예약)는 버전 유지(v1).
+// - 기존 필드 의미·타입 변경 또는 필수 필드 추가 등 breaking 변경 시에만 버전 bump.
 export const IPC_PROTOCOL_VERSION = 1 as const;
 
 // ─── Prototype Pollution 방어 ─────────────────────────────────────────────────
@@ -39,6 +42,8 @@ export const MSG_TYPE = {
   CALL: 'zm_ipc_call',
   RESULT: 'zm_ipc_result',
   ERROR: 'zm_ipc_error',
+  /** RESERVED (ADR-0036, F3): EventBus 채널. 현재 AnyIpcMsgSchema 미포함 → parseIpcMsg가 무시. */
+  EVENT: 'zm_ipc_event',
 } as const;
 
 export type MsgType = (typeof MSG_TYPE)[keyof typeof MSG_TYPE];
@@ -70,6 +75,8 @@ export const ReadyMsgSchema = z
     hostOrigin: z.string(),
     /** 호스트가 앱에게 허가한 메서드 목록 (v1: 앱이 노출한 것 중 allowedMethods 교집합) */
     grantedMethods: z.array(z.string()),
+    /** RESERVED (ADR-0034, F1): 허가된 capability 토큰 목록. F0는 host가 미전송(optional). */
+    grantedCapabilities: z.array(z.string()).optional(),
   })
   .strict()
   .refine(
@@ -139,6 +146,26 @@ export const ErrorMsgSchema = z
   );
 
 export type ErrorMsg = z.infer<typeof ErrorMsgSchema>;
+
+// ─── EVENT 메시지 (RESERVED — ADR-0036, F3 EventBus 채널) ─────────────────────
+//
+// ⚠️ 의도적으로 AnyIpcMsgSchema 유니온에 포함하지 않는다. 따라서 parseIpcMsg는
+// event 타입 메시지를 현재 null(무시)로 처리한다 → 런타임 동작 byte-identical.
+// F3에서 유니온에 추가 + host/app switch에 라우팅한다.
+export const EventMsgSchema = z
+  .object({
+    type: z.literal(MSG_TYPE.EVENT),
+    v: ProtocolVersion,
+    topic: z.string().min(1).max(64),
+    payload: z.unknown(),
+  })
+  .strict()
+  .refine(
+    (obj) => !hasDangerousKey(obj as Record<string, unknown>),
+    { message: 'Dangerous key detected' },
+  );
+
+export type EventMsg = z.infer<typeof EventMsgSchema>;
 
 // ─── 유니온 메시지 스키마 ─────────────────────────────────────────────────────
 

@@ -77,7 +77,7 @@ export function createHostEndpoint(options: HostEndpointOptions): HostEndpoint {
     throw new IpcError('unknown', 'createHostEndpoint는 브라우저 환경에서만 사용 가능합니다');
   }
 
-  const { iframe, allowedMethods, expose = {} } = options;
+  const { iframe, allowedMethods, expose = {}, authorize } = options;
 
   // ─── Rate Limiter (N-08 DoS 방어) ─────────────────────────────────────────
   let _rateLimiter: MessageRateLimiter | null = null;
@@ -129,7 +129,12 @@ export function createHostEndpoint(options: HostEndpointOptions): HostEndpoint {
     // _grantedMethods 는 'INIT 단계 앱이 announce 한 앱 메서드 ∩ allowedMethods' 로,
     // 호스트→앱 호출 가능 메서드 추적용. 앱→호스트 호출 게이트에는 부적합 →
     // allowedMethods 를 직접 사용한다 (앱 announce 와 무관하게 호스트 정책으로만 결정).
-    if (!allowedMethods.includes(method)) {
+    // 권한 게이트 1: allowedMethods 화이트리스트 + (ADR-0034 seam) optional authorize.
+    // authorize 미지정 시 allowedMethods-only 동작(현행과 byte-identical, TS-002 회귀 0).
+    if (
+      !allowedMethods.includes(method) ||
+      (authorize !== undefined && !authorize(method, args))
+    ) {
       _postToApp({
         type: MSG_TYPE.ERROR,
         v: IPC_PROTOCOL_VERSION,
