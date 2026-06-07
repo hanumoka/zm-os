@@ -1,6 +1,6 @@
 # 정책 다이제스트 (Policy Digest)
 > 세션 시작 시 자동 로드. 상세: `docs/03-policy/01-policy-registry.md`
-> 최종 갱신: 2026-05-27
+> 최종 갱신: 2026-06-07
 
 ## Active 정책
 
@@ -9,6 +9,7 @@
 | ARCH-01 | Next.js 풀스택 + v2 모노레포 (apps/web + packages/{core,storage,ipc,adapters-local}) | 2026-05-24 / reshape 2026-05-27 |
 | ARCH-02 | blob: iframe + sandbox="allow-scripts" + Comlink IPC | 2026-05-24 |
 | ARCH-03 | Ports & Adapters — 5 Port (Auth/AppRepo/Blob/Sync/Moderation) + 로컬-우선 + 클라우드 옵션 | 2026-05-27 |
+| ARCH-04 | OS 확장 — capability-우선 계약 락(F0) + 점진 (VFS/서비스/이벤트 단계적, PortName 불변) | 2026-06-07 |
 | TECH-01 | BlobStorage Port + Local 어댑터 (IDB/OPFS/Memory) — 기존 StorageAdapter 격하 | 2026-05-24 / reshape 2026-05-27 |
 | TECH-02 | Python hooks (bash sub-spawn 회피) | 2026-05-24 |
 | TECH-03 | 정적 CSP/Permissions-Policy 헤더 (nonce 미도입) | 2026-05-24 |

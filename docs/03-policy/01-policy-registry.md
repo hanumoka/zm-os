@@ -33,6 +33,14 @@
 - **재고 시점**: 새 Port 후보(예: PaymentProvider) 등장 시 ADR로 추가
 - **상세**: ADR-0017 ~ ADR-0023
 
+### ARCH-04: OS 확장 아키텍처 — capability-우선 + 점진 (2026-06-07)
+- **결정**: OS형 기능(파일/알림/클립보드/창제어 등)은 단일 load-bearing 계약(**capability 토큰 → IPC 권한**) 위에 점진 추가. 계약 SSOT = `packages/core`(capability/service/events), 구현은 추후 Composition Root(ADR-0023) 위 (microkernel-lite).
+- **F0 (계약 락, 2026-06-07)**: `manifest.capabilities` 활성화(`CAPABILITY_CATALOG` SSOT + `capabilitiesToAllowedMethods` seam, fail-closed) + IPC `HostEndpointOptions.authorize` optional hook(미지정 시 byte-identical) + READY `grantedCapabilities`·`MSG_TYPE.EVENT` additive 예약 + service/event 타입 예약. manifest 스키마 불변.
+- **금지**: `PortName` 5개 유니언 변경 (VFS는 Port 아님 — BlobStorage 위 kernel 서비스). full microkernel / ZenFS VFS / 멀티유저 ACL 선구축 (과설계).
+- **이유**: ADR-0033/0034 — 미래 기능 rework 없이 끼움 + 과설계 회피 (POC·단일사용자·로컬-우선). `@zm/core`+`@zm/ipc`만 수정 → REFAC-02 병렬 안전.
+- **재고 시점**: F1(broker 실강제, REFAC-02-P5 후) / F2(VFS) / F3(EventBus·cloud). 예약 ADR 0035~0039.
+- **상세**: ADR-0033 + ADR-0034 + `docs/01-architecture/07-os-subsystem-architecture.md`
+
 ### ARCH-02: iframe 샌드박싱 (2026-05-24, 정밀화 2026-05-24)
 - **결정**: 사용자 제출 앱은 **blob: URL iframe + `sandbox="allow-scripts"`** 에서만 실행. 호스트-앱 통신은 Comlink-style RPC.
   - POC v1: 자체 wire-compatible 어댑터 (`src/lib/apps/ipc/`), srcdoc inline 호환, esbuild 불필요

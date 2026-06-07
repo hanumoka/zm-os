@@ -10,7 +10,7 @@
 - 스킬: 17개 (기존 9 + 협업 8: zm-wu-start/stop/next, zm-handoff, zm-setup, zm-team, zm-onboarding, zm-agent-teams)
 - 규칙: 11개 + constitution/ 3 (frontend, security, work-units, known-mistakes, doc-naming, file-categories, quality-standard, self-review, auto-memory-protocol, troubleshoot-auto, **wu-claim** + **constitution/{01-isolation-first,02-ssot-and-derived,03-domain-separation}**)
 - 훅: 17개 Python (기존 10 + 협업 7: file_lock, idgen, merge_jsonl, _resolve-user, check_wu_race, wu_claim_manager, mistake_guard_edit)
-- 단위 테스트: Vitest 69개 (7파일 ALL PASS, +8 quota-monitor) | E2E: Playwright 6개 (모두 PASS)
+- 단위 테스트: Vitest 80개 (8파일 ALL PASS, +capability 10) | E2E: Playwright 6개 (모두 PASS)
 - 의존성: next 16, react 19, tailwind 4, zod 4.4.3, typescript 5, react-rnd v10.5.3, phaser@3.90.0, idb@8.0.3, jszip@3.10.1, pixi.js@8.18.1, three@0.184.0, vitest@4.1.7 (dev), playwright (dev)
 
 ## 기술 스택
@@ -30,7 +30,7 @@
 ## Key Learnings
 - [Troubleshooting Patterns](../../docs/13-troubleshooting/entries.md) — TS-000~ 현재 0건
 - [Tech Gotchas](tech-gotchas.md) — iframe sandbox / OPFS / Next.js App Router / Tailwind v4 주의사항
-- [Policy Registry](../../docs/03-policy/01-policy-registry.md) — ARCH-01/02, TECH-01~10, PROD-01~05, CONST-01/02
+- [Policy Registry](../../docs/03-policy/01-policy-registry.md) — ARCH-01~04, TECH-01~10, PROD-01~05, CONST-01/02
 
 ## PRD + 로드맵 (Living Documents)
 - **PRD**: `docs/04-planning/01-prd.md` (v2 ID 53건 등재)
@@ -57,6 +57,7 @@
 - **다음 후보**: **REFAC-02-P2 진입** — BlobStorage Port + LocalOPFS 어댑터 이전 (`packages/storage` 흡수 + AbortSignal 매 entry 폴링 + `BlobStorageError extends PortError` + `@zm/storage` deprecation shell). 5일 추정.
 
 ## 최근 결정사항 (최대 10, FIFO)
+- 2026-06-07: **OS 확장 근본 아키텍처 F0 계약 락** — 실제 OS 기능 확장 기반을 미리 확정. capability-우선(단일 load-bearing: capability 토큰→IPC 권한) + microkernel-lite + 점진. `@zm/core`에 capability/service/events 계약 SSOT + `capabilitiesToAllowedMethods` seam(fail-closed) + IPC `authorize` optional hook(byte-identical) + READY grantedCapabilities·MSG_TYPE.EVENT additive 예약. manifest 스키마 불변. ADR-0033/0034 + arch 07 + ARCH-04. VFS는 Port 아님(PortName 불변), 구현은 REFAC-02-P5 후(F1~F3). Explore 3 + Plan 2 + 사용자 Q1=A/Q2=A. type-check 5/5, vitest 69→80.
 - 2026-06-07: **요구사항·계획·실수/리스크 정밀 검토 + 보강 1차** — 보고서 `docs/05-analysis/04-requirements-and-risk-review.md` 신규. 도메인 보안(iframe/IPC/CSP) 정합 우수 확인 (웹 오탐 reconcile: Comlink #603=자체 wire-RPC라 비적용). 적용: M-004~006 등록 + D1 스토리지 쿼터 모니터링 구현(quota-monitor/use-quota-monitor/QuotaBadge, vitest 61→69, tsc 5/5) + security.md 제품 리스크 RP-1~6 신설 + D2 soft-timeout deferred 명시 + stale 경로(src/lib/apps/ipc→packages/ipc 등) 정정 + v2-plan P1 의존성 노트. 비기능 요구사항(성능/브라우저/스토리지)은 선택지만 제시(미확정).
 - 2026-06-07: **문서 메타데이터 정밀 검토 + 8건 일괄 동기화** — 코드/기능 결함 0 (type-check 5/5, test 61/61, 협업 인프라 무결성 100%). 협업 인프라 이식(c368b5e) 후 누적 stale 정정: CLAUDE.md/quick-ref/_workflow 에이전트 13→14명(zm-context-guardian) + 스킬 9→17, current-phase 테스트 56→61 + historical 섹션 표기, doc-naming ADR 0008→0032·arch 05→06, MEMORY/feature-map/roadmap "ADR-0017 대기"→채택완료. archive/snapshot 등 historical 박제 보존. Explore 3 병렬 감사 + 직접 검증. 코드 변경 0.
 - 2026-06-07: **sonix_docs 협업 인프라 이식 완료 (4 Phase, 37 산출물)** — 다중 세션·팀원 협업(격리·직렬화·감사 3층). file_lock/idgen/merge_jsonl/_resolve-user verbatim + wu_claim_manager(ML→WU 일반화, 기존 ID claim) + emit_event 교체(append API, actor dict 수정) + 헌법 3(ADR-0030~0032) + 카테고리 A~E + M-002/M-003 BLOCK + 협업 스킬 8 + zm-context-guardian + team-config(KYB만) + worktree/merge-driver/pre-push. events/ 추적 전환. 검증: 훅 smoke + claim 왕복 + merge driver + type-check 5/5 + vitest 5/5 회귀 0.
@@ -66,5 +67,4 @@
 - 2026-05-27: **ADR-0017 Ports & Adapters 채택** — 5 Port(Auth/AppRepo/Blob/Sync/Moderation) + 단일 `PortError` + `@zm/core/ports` SSOT + `@zm/adapters-local` 신규 패키지 + 하이브리드 어댑터 선택 + `@zm/storage` 1 v2 minor deprecation. ADR-0013/0014/0015 superseded. ARCH-03 신규 + ARCH-01/TECH-01 reshape + TECH-07/08/09 deprecated. 사용자 결정 8건 일괄 채택.
 - 2026-05-27: **문서 정밀 감사 + 9건 일괄 수정** — BLOCK 3 + WARN 6. 코드 변경 0, 문서만 11개 (commit f0b4eb9).
 - 2026-05-26: **로컬-우선 아키텍처 전환** — 사용자 결정. 로컬 100% 외부 의존성 0 + 클라우드 옵션은 어댑터 추상화. ADR-0013/0014/0015 reshape 대기 결정 (2026-05-27 superseded 완료).
-- 2026-05-26: **SRV-00 실행 완료** — 모노레포 마이그레이션 (src/ → apps/web + packages/{core,storage,ipc} + pnpm workspaces + Turborepo). 검증: turbo type-check 4/4 + turbo test 61/61 + next build ✅.
-> **최종 갱신**: 2026-06-07 — 요구사항·계획·실수/리스크 정밀 검토 + 보강 1차 (M-004~006 + D1 쿼터 모니터링 구현 + RP-1~6 + stale 경로 정정)
+> **최종 갱신**: 2026-06-07 — OS 확장 근본 아키텍처 F0 계약 락 (capability/IPC 계약 + ADR-0033/0034 + ARCH-04, vitest 80, type-check 5/5)

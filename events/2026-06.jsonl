@@ -5,3 +5,10 @@
 {"ts":"2026-06-07T13:19:56+09:00","type":"doc_change","actor":"M01","session":"3d4e4c58","source_commit":"e0eeeddc","details":{"file":"03-v2-plan.md","category":"planning","action":"edit"}}
 {"ts":"2026-06-07T13:20:01+09:00","type":"doc_change","actor":"M01","session":"3d4e4c58","source_commit":"e0eeeddc","details":{"file":"03-v2-plan.md","category":"planning","action":"edit"}}
 {"ts":"2026-06-07T13:33:03+09:00","type":"doc_change","actor":"M01","session":"3d4e4c58","source_commit":"e0eeeddc","details":{"file":"04-requirements-and-risk-review.md","category":"analysis","action":"edit"}}
+{"ts":"2026-06-07T14:09:38+09:00","type":"doc_change","actor":"M01","session":"3d4e4c58","source_commit":"e82c6833","details":{"file":"adr-0033-os-extension-architecture.md","category":"decisions","action":"create"}}
+{"ts":"2026-06-07T14:10:03+09:00","type":"doc_change","actor":"M01","session":"3d4e4c58","source_commit":"e82c6833","details":{"file":"adr-0034-capability-and-ipc-contract.md","category":"decisions","action":"create"}}
+{"ts":"2026-06-07T14:11:01+09:00","type":"doc_change","actor":"M01","session":"3d4e4c58","source_commit":"e82c6833","details":{"file":"07-os-subsystem-architecture.md","category":"architecture","action":"create"}}
+{"ts":"2026-06-07T14:12:19+09:00","type":"doc_change","actor":"M01","session":"3d4e4c58","source_commit":"e82c6833","details":{"file":"index.md","category":"decisions","action":"edit"}}
+{"ts":"2026-06-07T14:12:32+09:00","type":"doc_change","actor":"M01","session":"3d4e4c58","source_commit":"e82c6833","details":{"file":"01-policy-registry.md","category":"policy","action":"edit"}}
+{"ts":"2026-06-07T14:12:34+09:00","type":"doc_change","actor":"M01","session":"3d4e4c58","source_commit":"e82c6833","details":{"file":"_digest.md","category":"policy","action":"edit"}}
+{"ts":"2026-06-07T14:12:36+09:00","type":"doc_change","actor":"M01","session":"3d4e4c58","source_commit":"e82c6833","details":{"file":"_digest.md","category":"policy","action":"edit"}}
