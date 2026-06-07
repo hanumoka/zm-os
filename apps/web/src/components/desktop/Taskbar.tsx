@@ -5,7 +5,9 @@ import { useWindowManager } from './useWindowManager';
 import { TaskbarButton } from './TaskbarButton';
 import { Clock } from './Clock';
 import { SettingsPanel } from './SettingsPanel';
+import { QuotaBadge } from './QuotaBadge';
 import { findDesktopApp } from './desktopApps';
+import { useQuotaMonitor } from '@/lib/storage/use-quota-monitor';
 import type { AppIcon } from './desktopApps';
 import type { WindowState } from './types';
 
@@ -35,6 +37,7 @@ const FALLBACK_ICON: AppIcon = { kind: 'emoji', char: '🗔' };
 export function Taskbar(): React.JSX.Element {
   const manager = useWindowManager();
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const { estimate } = useQuotaMonitor({ pollIntervalMs: 60_000 });
 
   // active 윈도우: zIndex 최대값 (minimized 제외)
   const activeWindow: WindowState | undefined = manager.windows
@@ -101,8 +104,9 @@ export function Taskbar(): React.JSX.Element {
         })}
       </div>
 
-      {/* ── 우측: 설정 버튼 + Clock ─────────────────────────────────────────── */}
+      {/* ── 우측: 쿼터 배지 + 설정 버튼 + Clock ───────────────────────────── */}
       <div className="flex items-center gap-1 px-2 shrink-0">
+        <QuotaBadge estimate={estimate} />
         <button
           type="button"
           onClick={(): void => setSettingsOpen(true)}
