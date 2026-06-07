@@ -14,3 +14,5 @@
 
 // P2 (ADR-0020): BlobStorage Local 어댑터. 서브패스 '@zm/adapters-local/blob-storage' 권장.
 export * from './blob-storage';
+// P3 (ADR-0019): AppRepository Local 어댑터. 서브패스 '@zm/adapters-local/app-repository' 권장.
+export * from './app-repository';
