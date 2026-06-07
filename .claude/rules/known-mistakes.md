@@ -6,6 +6,9 @@
 | ID | 심각도 | 실수 | 올바른 방법 | 탐지 |
 |----|--------|------|------------|------|
 | M-001 | [WARN] | 객체 리터럴 `{ __proto__: true }` 로 멤버십 검사 — own property 아님 (prototype slot 설정으로 해석 부작용) | 배열 + indexOf 또는 `new Set([...])` 사용 | Write/Edit |
+| M-004 | [WARN] | iframe sandbox에 `allow-same-origin`/`allow-top-navigation`/`allow-popups-to-escape-sandbox` 추가 — 샌드박스 격리 무력화(도메인 치명). same-origin+scripts 조합 시 자식이 부모에 접근해 sandbox 속성 자체 제거 가능 (web.dev) | `ALLOWED_SANDBOX_TOKENS = ['allow-scripts']`만 유지 (`apps/web/src/lib/apps/sandbox.ts`). security.md §iframe 샌드박스 정책 준수 | Write/Edit |
+| M-005 | [WARN] | `addEventListener('message', ...)` 수신 핸들러에서 `event.origin`/`event.source` 검증 누락 — 와일드카드 수신 시 데이터 탈취/주입 | sandbox iframe은 `event.origin === 'null'` + `event.source === iframe.contentWindow` 이중 검증 (`packages/ipc/src/host.ts`). raw postMessage는 `packages/ipc` 어댑터 경유 | Write/Edit |
+| M-006 | [WARN] | `window`/`document`/`localStorage`/`navigator`를 `useEffect` 밖(SSR 렌더 경로)에서 접근 — Next.js SSR 크래시 | `useEffect` 내부 + `typeof window/document === 'undefined'` env guard (예: `sandbox.ts:70`, `host.ts:76`) | Write/Edit |
 
 ## 카테고리 B: 실행 환경
 | ID | 심각도 | 실수 | 올바른 방법 | 탐지 |

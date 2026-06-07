@@ -20,5 +20,5 @@
 - 빌드 실패 시 문서/로그 작성 중단 → 수정 후 재검증
 
 ## 보안 민감 경로 작업 시
-- `src/lib/apps/`, `src/components/desktop/`, `next.config.ts` 변경 포함 시
+- `apps/web/src/lib/apps/`, `apps/web/src/components/desktop/`, `apps/web/next.config.ts`, `packages/ipc/` 변경 포함 시
   → `app-sandbox-auditor` agent 검토 권장

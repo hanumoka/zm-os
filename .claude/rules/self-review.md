@@ -1,5 +1,5 @@
 ---
-globs: ["src/**/*.ts", "src/**/*.tsx", "docs/**/*.md"]
+globs: ["apps/web/src/**/*.ts", "apps/web/src/**/*.tsx", "packages/**/*.ts", "docs/**/*.md"]
 ---
 
 # Post-Task Self-Review (MANDATORY)
@@ -11,7 +11,7 @@ globs: ["src/**/*.ts", "src/**/*.tsx", "docs/**/*.md"]
 
 - 코드/설정/문서를 Edit/Write로 **2회 이상** 수정한 작업
 - 아키텍처/설계 결정을 내린 작업
-- 보안 민감 경로 (`src/lib/apps/`, `src/components/desktop/`, `next.config.ts`) 변경
+- 보안 민감 경로 (`apps/web/src/lib/apps/`, `apps/web/src/components/desktop/`, `apps/web/next.config.ts`, `packages/ipc/`) 변경
 
 ## 코드 변경 체크리스트
 

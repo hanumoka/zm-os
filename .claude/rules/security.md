@@ -1,9 +1,10 @@
 ---
 paths:
-  - "src/lib/apps/**"
-  - "src/components/desktop/**"
-  - "next.config.ts"
-  - "src/app/api/**"
+  - "apps/web/src/lib/apps/**"
+  - "apps/web/src/components/desktop/**"
+  - "apps/web/next.config.ts"
+  - "apps/web/src/app/api/**"
+  - "packages/ipc/**"
 ---
 
 # 보안 규칙 (가상 데스크탑 + 사용자 제출 앱 샌드박싱)
@@ -21,8 +22,8 @@ paths:
 
 ## postMessage 통신 정책
 
-- 호스트-앱 RPC는 `src/lib/apps/ipc/` 의 Comlink 기반 어댑터만 사용
-- raw `postMessage` 직접 호출 금지 (Comlink 안에 캡슐화)
+- 호스트-앱 RPC는 `packages/ipc/` 의 Comlink-호환(wire-compatible) 자체 RPC 어댑터만 사용 (실제 Comlink 라이브러리 아님 — `protocol.ts`/`host.ts`. prototype pollution 방어: `DANGEROUS_KEYS` + Zod `.strict()`)
+- raw `postMessage` 직접 호출 금지 (`packages/ipc` 어댑터 안에 캡슐화)
 - `addEventListener('message', ...)` 핸들러는 **반드시 `event.origin` 검증**
   - 와일드카드 수신 금지
   - 알려진 origin 화이트리스트와 비교
@@ -44,8 +45,8 @@ paths:
 
 ## 리소스 고갈 방어
 
-- 무한 루프 방어: iframe 단위로 **soft timeout** (예: 60초 비활성 시 사용자에게 종료 옵션)
-- 메모리 quota: `navigator.storage.estimate()`로 모니터링, 임계치 초과 시 알림
+- 무한 루프 방어: iframe 단위 **soft timeout** (예: 60초 비활성 시 종료 옵션) — ⏳ **v2 deferred (미구현)**. iframe 활동 추적 + 종료 UI 필요. 추적: 제품 리스크 RP-1.
+- 메모리 quota: `navigator.storage.estimate()`로 모니터링, 임계치(warning 0.8 / critical 0.9) 초과 시 알림 — ✅ **구현 완료**: `apps/web/src/lib/storage/quota-monitor.ts` + `use-quota-monitor.ts` + `components/desktop/QuotaBadge.tsx` (Taskbar surface)
 - localStorage 5MB 한도: 사용자 앱은 IndexedDB/OPFS만 사용하도록 가이드
 
 ## 사용자 제출 ZIP 수신 절차 (APP-02)
@@ -101,7 +102,7 @@ paths:
     - UserAppRecord = { id, manifest, htmlContent, installedAt, sourceZipSize, htmlSize }
     - IndexedDB STORE_USER_APPS에 put
 
-### 임계치 상수 (SSOT: src/lib/apps/zip-loader.ts)
+### 임계치 상수 (SSOT: apps/web/src/lib/apps/zip-loader.ts)
 
 ```typescript
 const MAX_ZIP_BYTES = 10_485_760;           // 10MB
@@ -134,11 +135,25 @@ const MAGIC_BYTES = [
 ### 내부 위협 (N-NNN)
 - **N-08** (postMessage DoS): ✅ 해결 — rate limiter 도입
   - **현상** (Phase 3 작업 2): sandbox iframe에서 parent로 postMessage 폭주 → host 전부 수신
-  - **대응**: `src/lib/apps/ipc/rate-limiter.ts` — 고정 윈도우 카운터 + 벌칙 쿨다운 (60건/초, penalty 2초)
+  - **대응**: `packages/ipc/src/rate-limiter.ts` — 고정 윈도우 카운터 + 벌칙 쿨다운 (60건/초, penalty 2초)
   - **INIT 핸드셰이크 제외** (앱 시작 보장), `onRateLimitExceeded` 콜백으로 확장 가능
   - **ADR**: ADR-0010
 
 신규 CVE는 정기 점검 필요 (브라우저 보안 공지 모니터링). JSZip 의존성 변경 시 CVE 기록 검토 의무.
+
+## 제품 리스크 레지스트리 (RP-NNN)
+
+> 제품(사용자 코드 실행 · 클라이언트 데이터) 리스크 추적. 협업 인프라 리스크(R1~R8, `wu-claim.md`)와 별개.
+> 근거: [`docs/05-analysis/04-requirements-and-risk-review.md`](../../docs/05-analysis/04-requirements-and-risk-review.md) §5.
+
+| ID | 리스크 | 상태 | 완화 / 추적 |
+|----|--------|------|------------|
+| RP-1 | 사용자 JS 정적 분석 부재 — 격리(iframe)는 견고하나 코드 내용 미검증(cryptomining/무한루프/외부 fetch). 정적 분석은 eval/난독화에 한계 → 격리+권한선언 조합이 현실적 | 🟡 격리만 | 권한 선언 스키마(SBX-v2-00) 검토. soft timeout(미구현, §리소스 고갈) |
+| RP-2 | 호스트 origin IDB/OPFS quota 고갈 → 전체 origin 데이터 일괄 삭제 | 🟢 완화 중 | ✅ quota 모니터링 구현(`quota-monitor.ts`). `persist()` 검토(RP-3) |
+| RP-3 | Safari/WebKit ITP — 스크립트 작성 스토리지 7일 미사용 시 삭제 → 설치앱/설정 유실 | 🔴 미대응 | `navigator.storage.persist()` 도입 검토 |
+| RP-4 | 멀티탭 IDB 동시 접근 race (POC 단일탭 가정) | 🔴 미추적 | v2 멀티세션/탭 진입 시 직렬화 |
+| RP-5 | 의존성 CVE 수동 추적 (npm/pnpm audit·CI 없음). JSZip 12개월+ 미배포 | 🟡 수동 | CI audit 도입 검토 |
+| RP-6 | COEP/COOP 미도입(의도적, ADR-0004) → SharedArrayBuffer 요구 게임 엔진 동작 불가 | 🟡 보류 결정됨 | `COEP: credentialless` / credentialless iframe 경로 추적 |
 
 ## 코드 리뷰 체크리스트 (app-sandbox-auditor agent와 연동)
 
@@ -147,7 +162,7 @@ const MAGIC_BYTES = [
 - [ ] postMessage 수신자에서 `event.origin` 검증
 - [ ] 호스트 origin storage 접근을 사용자 앱이 시도하지 못함
 - [ ] CSP 헤더에 unsafe-inline / unsafe-eval 없음
-- [ ] 호스트-앱 RPC가 Comlink 어댑터 경유
+- [ ] 호스트-앱 RPC가 `packages/ipc` 어댑터 경유
 
 ## 자주 발생하는 위반
 
