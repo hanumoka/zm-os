@@ -12,7 +12,7 @@
  * @module adapters-local/app-repository/local-app-repository
  */
 
-import { PortError } from '@zm/core';
+import { PortError, NS_INSTALLED_APPS, NS_USER_APPS } from '@zm/core';
 import type {
   AdapterDescriptor,
   AppListFilter,
@@ -23,8 +23,10 @@ import type {
   UserId,
 } from '@zm/core';
 
-const USER_APPS_NS = 'user-apps';
-const INSTALLED_APPS_NS = 'installed-apps';
+// 레지스트리 상수를 쓴다. 문자열 리터럴을 쓰면 namespace 이름이 바뀌어도
+// 컴파일이 통과하고, 이 어댑터의 테스트는 메모리 어댑터를 쓰므로 오타를 잡지 못한다.
+const USER_APPS_NS = NS_USER_APPS;
+const INSTALLED_APPS_NS = NS_INSTALLED_APPS;
 
 const DESCRIPTOR: AdapterDescriptor = {
   portName: 'app-repository',

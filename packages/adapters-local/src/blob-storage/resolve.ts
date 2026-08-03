@@ -2,12 +2,12 @@
  * BlobStorage 어댑터 팩토리 (ADR-0020 §D1, §D8)
  *
  * `createLocalBlobStorage()` 단일 진입점. 3개 백엔드 어댑터(IDB/OPFS/Memory)는 internal.
- * namespace별 정책은 namespace-registry(getLegacyAdapterPolicy)에서 읽어 자동 선택 —
+ * namespace별 정책은 namespace-registry(getBlobStorageAdapter)에서 읽어 자동 선택 —
  * 이 분기는 BlobStorage 내부에 보존되며, ADR-0023 PortResolver(P5)는 본 팩토리만 호출한다.
  */
 
 import type { BlobStorage } from '@zm/core';
-import { getLegacyAdapterPolicy } from '@zm/core';
+import { getBlobStorageAdapter } from '@zm/core';
 import { isOPFSAvailable, createOPFSBlobStorage } from './opfs-adapter';
 import { isIDBAdapterAvailable, createIDBBlobStorage } from './idb-adapter';
 import { createMemoryBlobStorage } from './memory-adapter';
@@ -26,13 +26,28 @@ function resolveAuto(): BlobStorage {
   return createMemoryBlobStorage();
 }
 
+/**
+ * 레지스트리의 어댑터 값을 정책으로 1:1 옮긴다.
+ *
+ * 예전에는 3값(`local-idb | local-opfs | local-memory`)을 2값으로 접어 전달해,
+ * 레지스트리에 `local-memory`로 등록해도 'auto'가 되어 OPFS가 있으면 영구 저장됐다.
+ * "휘발성으로 두겠다"는 선언이 정반대 결과를 내던 지점이다.
+ */
 function resolvePolicy(opts?: CreateLocalBlobStorageOptions): BlobStoragePolicy {
   if (opts?.policy !== undefined) return opts.policy;
-  if (opts?.namespace !== undefined) {
-    // getLegacyAdapterPolicy: 'idb-only' | 'default'
-    return getLegacyAdapterPolicy(opts.namespace) === 'idb-only' ? 'idb-only' : 'auto';
+  if (opts?.namespace === undefined) return 'auto';
+
+  switch (getBlobStorageAdapter(opts.namespace)) {
+    case 'local-idb':
+      return 'idb-only';
+    case 'local-opfs':
+      return 'opfs-only';
+    case 'local-memory':
+      return 'memory';
+    default:
+      // 미등록 namespace — 가용한 것 중 최선으로.
+      return 'auto';
   }
-  return 'auto';
 }
 
 /**
@@ -47,7 +62,9 @@ export function createLocalBlobStorage(
     case 'idb-only':
       return isIDBAdapterAvailable() ? createIDBBlobStorage() : createMemoryBlobStorage();
     case 'opfs-only':
-      return createOPFSBlobStorage();
+      // OPFS 미지원(Safari 등)에서 무조건 생성하면 첫 접근에서 깨진다. 폴백을 둔다.
+      if (isOPFSAvailable()) return createOPFSBlobStorage();
+      return isIDBAdapterAvailable() ? createIDBBlobStorage() : createMemoryBlobStorage();
     case 'memory':
       return createMemoryBlobStorage();
     case 'auto':

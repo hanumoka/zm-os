@@ -20,6 +20,8 @@ import {
   NS_DESKTOP_LAYOUT,
   NS_DESKTOP_SETTINGS,
   NS_SYSTEM,
+  NAMESPACE_REGISTRY,
+  DB_SCHEMA_VERSION,
 } from '@zm/core';
 import type { NamespaceId } from '@zm/core';
 
@@ -33,43 +35,28 @@ export {
 
 // ─── DB / Store 상수 ─────────────────────────────────────────────────────────
 export const DB_NAME = 'zm-os';
-/** DB 버전. store 추가 시 bump (v2: user-apps, v3: desktop-layout, v4: desktop-settings, v5: system) */
-export const DB_VERSION = 5;
+
+/**
+ * DB 버전 — NAMESPACE_REGISTRY에서 파생한다. 직접 수정하지 않는다.
+ * 새 namespace를 레지스트리에 추가하면 자동으로 올라간다.
+ */
+export const DB_VERSION = DB_SCHEMA_VERSION;
 
 // ─── 타입 ─────────────────────────────────────────────────────────────────────
 export type IDBStoreName = NamespaceId;
 
 /**
- * idb DBSchema 타입 정의 — value를 any로 두어야 idb 내부 타입 충족
- * (idb DBSchemaValue.value: any 제약). 실제 타입 안전성은 idbGet<T>/idbPut<T> 제네릭으로 보장.
+ * idb DBSchema — 등록된 모든 namespace를 store로 갖는 매핑 타입.
+ *
+ * value가 any인 것은 idb의 DBSchemaValue 제약 때문이다.
+ * 실제 타입 안전성은 idbGet<T>/idbPut<T> 제네릭이 담당한다.
+ * 손으로 나열하면 레지스트리에 추가해도 여기 빠뜨려 타입만 통과하고
+ * 런타임에 깨지므로 매핑으로 파생한다.
  */
-interface ZmOsDBSchema extends DBSchema {
-  [NS_INSTALLED_APPS]: {
-    key: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    value: any;
-  };
-  [NS_USER_APPS]: {
-    key: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    value: any;
-  };
-  [NS_DESKTOP_LAYOUT]: {
-    key: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    value: any;
-  };
-  [NS_DESKTOP_SETTINGS]: {
-    key: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    value: any;
-  };
-  [NS_SYSTEM]: {
-    key: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    value: any;
-  };
-}
+type ZmOsDBSchema = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [K in NamespaceId]: { key: string; value: any };
+} & DBSchema;
 
 // ─── IDB 가용성 가드 (SSR 안전) ───────────────────────────────────────────────
 export function isIDBAvailable(): boolean {
@@ -101,31 +88,13 @@ export function openDB(): Promise<IDBPDatabase<ZmOsDBSchema>> {
   }
   if (_dbPromise === null) {
     _dbPromise = idbOpenDB<ZmOsDBSchema>(DB_NAME, DB_VERSION, {
+      // 레지스트리를 순회해 아직 없는 store를 만든다.
+      // 여기에 async를 섞으면 upgrade 트랜잭션이 끊긴다 — 동기 유지 필수.
       upgrade(db, oldVersion) {
-        if (oldVersion < 1) {
-          if (!db.objectStoreNames.contains(NS_INSTALLED_APPS)) {
-            db.createObjectStore(NS_INSTALLED_APPS);
-          }
-        }
-        if (oldVersion < 2) {
-          if (!db.objectStoreNames.contains(NS_USER_APPS)) {
-            db.createObjectStore(NS_USER_APPS);
-          }
-        }
-        if (oldVersion < 3) {
-          if (!db.objectStoreNames.contains(NS_DESKTOP_LAYOUT)) {
-            db.createObjectStore(NS_DESKTOP_LAYOUT);
-          }
-        }
-        if (oldVersion < 4) {
-          if (!db.objectStoreNames.contains(NS_DESKTOP_SETTINGS)) {
-            db.createObjectStore(NS_DESKTOP_SETTINGS);
-          }
-        }
-        if (oldVersion < 5) {
-          if (!db.objectStoreNames.contains(NS_SYSTEM)) {
-            db.createObjectStore(NS_SYSTEM);
-          }
+        for (const entry of NAMESPACE_REGISTRY) {
+          if (oldVersion >= entry.sinceVersion) continue;
+          if (db.objectStoreNames.contains(entry.name)) continue;
+          db.createObjectStore(entry.name);
         }
       },
       blocked(currentVersion, blockedVersion) {
