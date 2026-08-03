@@ -17,6 +17,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@zm/adapters-local':
+        specifier: workspace:*
+        version: link:../../packages/adapters-local
       '@zm/core':
         specifier: workspace:*
         version: link:../../packages/core

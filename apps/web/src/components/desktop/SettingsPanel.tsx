@@ -2,10 +2,7 @@
 
 import React, { useEffect, useId, useRef, useState } from 'react';
 import { useDesktopSettings } from './DesktopSettingsProvider';
-import {
-  WALLPAPER_CLASSES,
-  WALLPAPER_LABELS,
-} from '@/lib/storage/desktop-settings';
+import { WALLPAPER_CLASSES, WALLPAPER_LABELS } from './wallpaper-presets';
 import type { WallpaperPreset, ThemeMode } from '@/lib/storage/desktop-settings';
 
 // ─── 타입 ─────────────────────────────────────────────────────────────────────

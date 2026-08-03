@@ -46,30 +46,6 @@ export const DEFAULT_SETTINGS: DesktopSettingsRecord = {
   savedAt: 0,
 };
 
-// 프리셋 → Tailwind 클래스 매핑
-export const WALLPAPER_CLASSES: Record<WallpaperPreset, string> = {
-  'gradient-sky': 'bg-gradient-to-br from-sky-100 to-indigo-200',
-  'gradient-sunset': 'bg-gradient-to-br from-orange-200 to-rose-300',
-  'gradient-forest': 'bg-gradient-to-br from-emerald-200 to-teal-300',
-  'gradient-purple': 'bg-gradient-to-br from-violet-200 to-purple-300',
-  'gradient-ocean': 'bg-gradient-to-br from-cyan-200 to-blue-300',
-  'solid-slate': 'bg-slate-700',
-  'solid-zinc': 'bg-zinc-800',
-  'solid-neutral': 'bg-neutral-900',
-};
-
-// 프리셋 라벨 (설정 UI용)
-export const WALLPAPER_LABELS: Record<WallpaperPreset, string> = {
-  'gradient-sky': '하늘',
-  'gradient-sunset': '석양',
-  'gradient-forest': '숲',
-  'gradient-purple': '보라',
-  'gradient-ocean': '바다',
-  'solid-slate': '슬레이트',
-  'solid-zinc': '아연',
-  'solid-neutral': '뉴트럴',
-};
-
 // ─── 영속화 함수 (desktop-layout.ts 패턴 복제) ────────────────────────────────
 
 // 에러를 삼키지 않는다. 여기서 catch하면 usePersistence가 실패를 알지 못해

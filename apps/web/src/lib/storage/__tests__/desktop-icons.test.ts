@@ -9,7 +9,7 @@ import {
   findFreeCell,
   resolveDropPosition,
   snapToGrid,
-} from '../desktop-icons';
+} from '@/components/desktop/icon-grid';
 
 describe('snapToGrid', () => {
   it('격자 위 좌표는 그대로 둔다', () => {

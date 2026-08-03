@@ -16,18 +16,13 @@ import type { WindowState } from './types';
 import { useInstalledApps } from '@/components/store/useInstalledApps';
 import { useUserApps } from '@/components/store/UserAppsProvider';
 import { useDesktopSettings } from './DesktopSettingsProvider';
-import { WALLPAPER_CLASSES } from '@/lib/storage/desktop-settings';
+import { WALLPAPER_CLASSES } from './wallpaper-presets';
 import { usePersistence } from '@/lib/storage/use-persistence';
 import { NS_DESKTOP_LAYOUT } from '@zm/core';
-import type { DesktopIconsRecord, IconPoint } from '@/lib/storage/desktop-icons';
-import {
-  arrangeInGrid,
-  cellKey,
-  clampPositions,
-  loadDesktopIcons,
-  resolveDropPosition,
-  saveDesktopIcons,
-} from '@/lib/storage/desktop-icons';
+import type { DesktopIconsRecord } from '@/lib/storage/desktop-icons';
+import type { IconPoint } from './icon-grid';
+import { loadDesktopIcons, saveDesktopIcons } from '@/lib/storage/desktop-icons';
+import { arrangeInGrid, cellKey, clampPositions, resolveDropPosition } from './icon-grid';
 
 type DesktopProps = {
   apps?: ReadonlyArray<DesktopAppEntry>;

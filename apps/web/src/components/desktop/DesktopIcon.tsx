@@ -2,7 +2,7 @@
 
 import React, { useRef } from 'react';
 import type { AppIcon } from './desktopApps';
-import { DRAG_THRESHOLD } from '@/lib/storage/desktop-icons';
+import { DRAG_THRESHOLD } from './icon-grid';
 
 // ─── 상수 ─────────────────────────────────────────────────────────────────────
 

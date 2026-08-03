@@ -26,6 +26,13 @@ export type SandboxIpcOptions = {
    * RPC 호출 기본 타임아웃 (ms). 기본값: 5000
    */
   defaultTimeoutMs?: number;
+  /**
+   * 호출별 인가 훅. allowedMethods 화이트리스트를 통과한 뒤 한 번 더 묻는다.
+   * `@zm/ipc`는 이미 이 훅을 소비한다 — 여기서 넘기지 않으면 패키지 경계에서 끊겨
+   * capability broker를 붙일 때 이 경로의 파일들을 다시 열어야 한다.
+   * 미지정 시 동작은 이전과 동일하다.
+   */
+  authorize?: (method: string, args: ReadonlyArray<unknown>) => boolean;
 };
 
 // ─── SandboxOptions ───────────────────────────────────────────────────────────
@@ -106,6 +113,7 @@ export function createSandboxedFrame(
       allowedMethods: ipcOpts.allowedMethods,
       expose: ipcOpts.expose,
       defaultTimeoutMs: ipcOpts.defaultTimeoutMs,
+      authorize: ipcOpts.authorize,
     });
   } else {
     container.appendChild(iframe);
