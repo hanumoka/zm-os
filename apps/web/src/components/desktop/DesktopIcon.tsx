@@ -24,6 +24,8 @@ type DesktopIconProps = {
   onDragMove?: (id: string, x: number, y: number) => void;
   /** 드래그 종료 좌표. 스냅·클램프는 호출자가 수행한다. */
   onDragEnd?: (id: string, x: number, y: number) => void;
+  /** 이동 없이 세션이 끝났을 때. 부모가 드래그 표시 상태를 반드시 해제하도록. */
+  onDragCancel?: (id: string) => void;
   /** 드래그 중 여부 — z-index를 올려 다른 아이콘 위에 표시한다. */
   dragging?: boolean;
   className?: string;
@@ -31,6 +33,8 @@ type DesktopIconProps = {
 
 type DragSession = {
   pointerId: number;
+  /** 세션을 시작한 버튼. 마우스는 모든 버튼이 pointerId를 공유하므로 함께 봐야 한다. */
+  button: number;
   /** 포인터와 아이콘 좌상단의 간격 — 잡은 지점을 유지하기 위함 */
   grabOffsetX: number;
   grabOffsetY: number;
@@ -61,6 +65,7 @@ export function DesktopIcon({
   onContextMenu,
   onDragMove,
   onDragEnd,
+  onDragCancel,
   dragging = false,
   className = '',
 }: DesktopIconProps): React.JSX.Element {
@@ -105,11 +110,20 @@ export function DesktopIcon({
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>): void => {
     if (!canDrag || position === undefined) return;
     if (e.button !== 0) return;
+    // 진행 중인 세션을 두 번째 포인터(멀티터치)가 덮어쓰면 첫 포인터의 종료가
+    // 유실되어 드래그 표시 상태가 영구히 남는다.
+    if (dragRef.current !== null) return;
     const area = areaOf(e.currentTarget);
     if (area === null) return;
 
+    // 새 입력이 시작됐으므로 이전 드래그의 클릭 억제는 만료시킨다.
+    // 그러지 않으면 첫 클릭이 임계값을 살짝 넘겼을 때 뒤따르는 더블클릭까지 삼켜
+    // 앱이 실행되지 않는다.
+    dragEndedAtRef.current = 0;
+
     dragRef.current = {
       pointerId: e.pointerId,
+      button: e.button,
       grabOffsetX: e.clientX - area.left - position.x,
       grabOffsetY: e.clientY - area.top - position.y,
       moved: false,
@@ -148,9 +162,14 @@ export function DesktopIcon({
     onDragMove(id, x, y);
   };
 
-  const endDrag = (e: React.PointerEvent<HTMLDivElement>, commit: boolean): void => {
+  const endDrag = (e: React.PointerEvent<HTMLDivElement>, fromCancel: boolean): void => {
     const session = dragRef.current;
     if (session === null || session.pointerId !== e.pointerId) return;
+    // 마우스는 좌/우 버튼이 같은 pointerId를 쓴다. 드래그 중 우클릭의 pointerup이
+    // 왼쪽 드래그를 중간 지점에서 확정해 버리는 것을 막는다.
+    // pointercancel에는 의미 있는 button이 없으므로 검사하지 않는다.
+    if (!fromCancel && e.button !== session.button) return;
+
     dragRef.current = null;
 
     try {
@@ -160,21 +179,25 @@ export function DesktopIcon({
     } catch {
       /* 이미 해제됨 */
     }
-    if (!session.moved) return;
+
+    if (!session.moved) {
+      // 이동이 없었어도 부모의 드래그 표시 상태는 반드시 풀어야 한다.
+      onDragCancel?.(id);
+      return;
+    }
 
     // 취소(pointercancel)도 마지막 좌표로 확정한다.
     // 원위치 복귀는 별도 요구사항이며, 확정하지 않으면 화면과 저장이 어긋난다.
-    void commit;
     dragEndedAtRef.current = Date.now();
     onDragEnd?.(id, session.lastX, session.lastY);
   };
 
   const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>): void => {
-    endDrag(e, true);
+    endDrag(e, false);
   };
 
   const handlePointerCancel = (e: React.PointerEvent<HTMLDivElement>): void => {
-    endDrag(e, false);
+    endDrag(e, true);
   };
 
   // position이 있으면 데스크탑 좌표계에 absolute 배치, 없으면 일반 흐름에 둔다.

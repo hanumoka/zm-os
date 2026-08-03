@@ -1,11 +1,13 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useWindowManager } from './useWindowManager';
 import { TaskbarButton } from './TaskbarButton';
 import { Clock } from './Clock';
 import { SettingsPanel } from './SettingsPanel';
 import { QuotaBadge } from './QuotaBadge';
+import { useUserApps } from '@/components/store/UserAppsProvider';
+import { buildCatalog } from './desktopApps';
 import { findDesktopApp } from './desktopApps';
 import { useQuotaMonitor } from '@/lib/storage/use-quota-monitor';
 import type { AppIcon } from './desktopApps';
@@ -38,6 +40,10 @@ export function Taskbar(): React.JSX.Element {
   const manager = useWindowManager();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const { estimate } = useQuotaMonitor({ pollIntervalMs: 60_000 });
+  const { userApps } = useUserApps();
+
+  // built-in + 사용자 업로드 앱을 합친 카탈로그. 사용자 앱 창의 라벨·아이콘 해석에 필요하다.
+  const catalog = useMemo(() => buildCatalog(userApps), [userApps]);
 
   // active 윈도우: zIndex 최대값 (minimized 제외)
   const activeWindow: WindowState | undefined = manager.windows
@@ -87,7 +93,10 @@ export function Taskbar(): React.JSX.Element {
       {/* ── 윈도우 버튼 목록 ─────────────────────────────────────────────────── */}
       <div className="flex items-center gap-1 flex-1 overflow-x-auto min-w-0">
         {manager.windows.map((win) => {
-          const entry = findDesktopApp(win.contentId);
+          // built-in 전용 findDesktopApp만 쓰면 사용자 업로드 앱이 해석되지 않아
+          // 복원된 창의 라벨이 raw contentId로 나온다. 전체 카탈로그를 먼저 본다.
+          const entry =
+            catalog.find((a) => a.id === win.contentId) ?? findDesktopApp(win.contentId);
           const icon: AppIcon = entry?.icon ?? FALLBACK_ICON;
           const isActive =
             activeWindow?.id === win.id && win.state !== 'minimized';

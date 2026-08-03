@@ -23,6 +23,8 @@ export type UserAppsContextValue = {
    * false 동안 userApps는 "아직 모른다"이지 "사용자 앱이 없다"가 아니다.
    */
   hydrated: boolean;
+  /** hydration이 오류로 끝났는지. true면 userApps를 '사용자 앱 없음'으로 해석하면 안 된다. */
+  hydrationFailed: boolean;
   /** id가 사용자 업로드 앱인지 확인 */
   hasUserApp: (id: string) => boolean;
   /** ZIP 파싱 완료된 앱을 추가하고 IDB에 영속화 */
@@ -96,7 +98,7 @@ const UserAppsContext = createContext<UserAppsContextValue | null>(null);
 export function UserAppsProvider({ children }: { children: React.ReactNode }): React.JSX.Element {
   const [userApps, dispatch] = useReducer(reducer, [] as ReadonlyArray<UserAppRecord>);
 
-  const { hydrated, persistAsync } = usePersistence<ReadonlyArray<UserAppRecord>>({
+  const { hydrated, hydrationFailed, persistAsync } = usePersistence<ReadonlyArray<UserAppRecord>>({
     namespace: NS_USER_APPS,
     loadFn: listUserApps,
     onHydrate: (apps) => dispatch({ type: 'HYDRATE', apps }),
@@ -132,8 +134,8 @@ export function UserAppsProvider({ children }: { children: React.ReactNode }): R
 
   // useMemo로 stable reference — userApps 변경 시에만 새 객체 생성
   const value = useMemo<UserAppsContextValue>(
-    () => ({ userApps, hydrated, hasUserApp, addUserApp, removeUserApp, updateUserApp, userAppVersions }),
-    [userApps, hydrated, hasUserApp, addUserApp, removeUserApp, updateUserApp, userAppVersions],
+    () => ({ userApps, hydrated, hydrationFailed, hasUserApp, addUserApp, removeUserApp, updateUserApp, userAppVersions }),
+    [userApps, hydrated, hydrationFailed, hasUserApp, addUserApp, removeUserApp, updateUserApp, userAppVersions],
   );
 
   return <UserAppsContext.Provider value={value}>{children}</UserAppsContext.Provider>;

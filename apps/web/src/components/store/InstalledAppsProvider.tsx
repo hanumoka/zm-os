@@ -26,6 +26,8 @@ export type InstalledAppsContextValue = {
    * 소비자는 설치 여부로 파괴적 동작(윈도우 닫기 등)을 하기 전에 반드시 확인해야 한다.
    */
   hydrated: boolean;
+  /** hydration이 오류로 끝났는지. true면 installedIds를 '설치 없음'으로 해석하면 안 된다. */
+  hydrationFailed: boolean;
   /** id가 설치된 앱인지 확인 */
   isInstalled: (id: string) => boolean;
   /** 앱을 설치 목록에 추가 */
@@ -123,7 +125,7 @@ export function InstalledAppsProvider({
     new Set<string>() as ReadonlySet<string>,
   );
 
-  const { hydrated, persistAsync } = usePersistence<ReadonlyArray<string>>({
+  const { hydrated, hydrationFailed, persistAsync } = usePersistence<ReadonlyArray<string>>({
     namespace: NS_INSTALLED_APPS,
     loadFn: listInstalledAppIds,
     onHydrate: (ids) => dispatch({ type: 'HYDRATE', ids }),
@@ -146,8 +148,8 @@ export function InstalledAppsProvider({
 
   // useMemo로 stable reference — installedIds 변경 시에만 새 객체 생성
   const value = useMemo<InstalledAppsContextValue>(
-    () => ({ installedIds, hydrated, isInstalled, install, uninstall }),
-    [installedIds, hydrated, isInstalled, install, uninstall],
+    () => ({ installedIds, hydrated, hydrationFailed, isInstalled, install, uninstall }),
+    [installedIds, hydrated, hydrationFailed, isInstalled, install, uninstall],
   );
 
   return (

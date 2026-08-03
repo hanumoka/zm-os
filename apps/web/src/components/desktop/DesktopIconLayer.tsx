@@ -18,6 +18,8 @@ type DesktopIconLayerProps = {
   draggingIconId?: string | null;
   onIconDragMove?: (id: string, x: number, y: number) => void;
   onIconDragEnd?: (id: string, x: number, y: number) => void;
+  /** 이동 없이 세션이 끝났을 때 — 드래그 표시 해제용 */
+  onIconDragCancel?: (id: string) => void;
 };
 
 const STORE_ICON_ID = '__system_store__';
@@ -33,6 +35,7 @@ export function DesktopIconLayer({
   draggingIconId = null,
   onIconDragMove,
   onIconDragEnd,
+  onIconDragCancel,
 }: DesktopIconLayerProps): React.JSX.Element {
   return (
     <>
@@ -49,6 +52,7 @@ export function DesktopIconLayer({
           onSelect={(): void => onSelectIcon(entry.id)}
           onDragMove={onIconDragMove}
           onDragEnd={onIconDragEnd}
+          onDragCancel={onIconDragCancel}
           onContextMenu={(e): void => {
             if (onContextMenuIcon === undefined) return;
             e.preventDefault();

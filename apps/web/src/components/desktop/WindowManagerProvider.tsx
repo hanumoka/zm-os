@@ -155,23 +155,35 @@ export function WindowManagerProvider({
   // 따라서 저장을 여기서 실행하지 않고 "예약"만 하고, windows가 실제로 커밋된 뒤
   // 아래 effect에서 실행한다. 이렇게 하지 않으면 OPEN 직후 저장이 이전 상태를
   // (첫 윈도우라면 빈 배열을) 기록해 열린 창이 영속화되지 않는다.
-  const pendingPersistRef = useRef<'none' | 'immediate' | 'debounced'>('none');
+  // 예약에는 '어느 상태에서 예약했는지'를 함께 담는다.
+  //
+  // 자식 컴포넌트의 effect에서 디스패치하면(예: Desktop의 APP-04 자동 닫기)
+  // passive effect가 자식→부모 순으로 flush되므로, 예약 직후 같은 커밋에서
+  // 부모의 이 effect가 돌아 버린다. 그때 windowsRef는 아직 디스패치 이전 상태라
+  // 예전 내용을 저장하고, 예약은 소비돼 실제 변경분은 영영 저장되지 않는다.
+  // 예약 당시 상태와 현재 상태가 같으면 아직 반영 전이므로 넘긴다.
+  const pendingPersistRef = useRef<
+    { mode: 'immediate' | 'debounced'; from: WindowState[] } | null
+  >(null);
 
   const dispatchWithPersist = useCallback(
     (action: Parameters<typeof dispatch>[0]): void => {
       dispatch(action);
-      pendingPersistRef.current = isStructuralAction(action.type)
-        ? 'immediate'
-        : 'debounced';
+      pendingPersistRef.current = {
+        mode: isStructuralAction(action.type) ? 'immediate' : 'debounced',
+        from: windowsRef.current,
+      };
     },
     [],
   );
 
   useEffect(() => {
-    const mode = pendingPersistRef.current;
-    if (mode === 'none') return;
-    pendingPersistRef.current = 'none';
-    if (mode === 'immediate') {
+    const pending = pendingPersistRef.current;
+    if (pending === null) return;
+    // 아직 디스패치 결과가 커밋되지 않았다 — 다음 커밋에서 처리한다.
+    if (pending.from === windows) return;
+    pendingPersistRef.current = null;
+    if (pending.mode === 'immediate') {
       persistImmediate();
     } else {
       persistDebounced();

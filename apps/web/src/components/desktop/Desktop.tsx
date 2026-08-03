@@ -22,6 +22,8 @@ import { NS_DESKTOP_LAYOUT } from '@zm/core';
 import type { DesktopIconsRecord, IconPoint } from '@/lib/storage/desktop-icons';
 import {
   arrangeInGrid,
+  cellKey,
+  clampPositions,
   loadDesktopIcons,
   resolveDropPosition,
   saveDesktopIcons,
@@ -47,22 +49,32 @@ export function Desktop({
     isInstalled,
     uninstall,
     hydrated: installedHydrated,
+    hydrationFailed: installedFailed,
   } = useInstalledApps();
   const {
     userApps,
     removeUserApp,
     hydrated: userAppsHydrated,
+    hydrationFailed: userAppsFailed,
   } = useUserApps();
   const { wallpaper } = useDesktopSettings();
 
   // 카탈로그가 실제 데이터를 반영하는 시점. 두 저장소 모두 IDB에서 hydrate되어야
   // "이 앱은 설치되지 않았다"는 판단이 참이 된다.
-  const catalogReady = installedHydrated && userAppsHydrated;
+  //
+  // 실패도 제외한다. usePersistence는 로드가 실패해도 hydrated를 true로 만들지만
+  // 그때 목록은 비어 있다. 이를 "설치된 앱 없음"으로 읽으면 복원된 윈도우를 전부
+  // 닫고, 그 빈 결과가 레이아웃으로 저장돼 사용자 배치가 영구 소실된다.
+  const catalogReady =
+    installedHydrated && !installedFailed && userAppsHydrated && !userAppsFailed;
 
   const apps = useMemo(
     () => appsProp ?? buildCatalog(userApps),
     [appsProp, userApps],
   );
+  // 이벤트 핸들러에서 최신 카탈로그를 읽기 위한 ref
+  const appsRef = useRef(apps);
+  appsRef.current = apps;
   const desktopAreaRef = useRef<HTMLDivElement>(null);
   const [selectedIconId, setSelectedIconId] = useState<string | null>(null);
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
@@ -124,21 +136,65 @@ export function Desktop({
     setDragging({ id, point: { x, y } });
   }, []);
 
+  const handleIconDragCancel = useCallback((): void => {
+    setDragging(null);
+  }, []);
+
+  // 자기 자신을 제외한 다른 아이콘이 점유한 셀 — 겹쳐 놓아 아래 아이콘이
+  // 완전히 가려지는 것을 막는다.
+  const occupiedCellsExcept = useCallback(
+    (excludeId: string): ReadonlySet<string> => {
+      const cells = new Set<string>();
+      for (const entry of appsRef.current) {
+        if (entry.id === excludeId) continue;
+        const point = iconPositionsRef.current[entry.id] ?? entry.iconPosition;
+        if (point !== undefined) cells.add(cellKey(point));
+      }
+      return cells;
+    },
+    [],
+  );
+
   const handleIconDragEnd = useCallback(
     (id: string, x: number, y: number): void => {
       setDragging(null);
       const { width, height } = desktopAreaSize();
-      const dropped = resolveDropPosition({ x, y }, width, height);
+      const dropped = resolveDropPosition(
+        { x, y },
+        width,
+        height,
+        occupiedCellsExcept(id),
+      );
       commitIconPositions({ ...iconPositionsRef.current, [id]: dropped });
     },
-    [commitIconPositions, desktopAreaSize],
+    [commitIconPositions, desktopAreaSize, occupiedCellsExcept],
   );
+
+  // 영역 크기가 줄면 저장된 좌표가 영역 밖을 가리킬 수 있다.
+  // overflow-hidden에 잘려 보이지도 잡히지도 않으므로 렌더 시점에 다시 가둔다.
+  const [areaSize, setAreaSize] = useState<{ width: number; height: number }>({
+    width: 0,
+    height: 0,
+  });
+
+  useEffect(() => {
+    const node = desktopAreaRef.current;
+    if (node === null || typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver((entries) => {
+      const rect = entries[0]?.contentRect;
+      if (rect === undefined) return;
+      setAreaSize({ width: rect.width, height: rect.height });
+    });
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
 
   // 드래그 중인 아이콘만 실시간 좌표로 덮어쓴다.
   const effectiveIconPositions = useMemo<Record<string, IconPoint>>(() => {
-    if (dragging === null) return iconPositions;
-    return { ...iconPositions, [dragging.id]: dragging.point };
-  }, [iconPositions, dragging]);
+    const clamped = clampPositions(iconPositions, areaSize.width, areaSize.height);
+    if (dragging === null) return clamped;
+    return { ...clamped, [dragging.id]: dragging.point };
+  }, [iconPositions, dragging, areaSize]);
 
   const bgClass = wallpaper.kind === 'preset' ? WALLPAPER_CLASSES[wallpaper.preset] : '';
   const bgStyle: React.CSSProperties | undefined = wallpaper.kind === 'url'
@@ -155,8 +211,8 @@ export function Desktop({
   };
 
   const handleAutoArrange = (): void => {
-    const { height } = desktopAreaSize();
-    commitIconPositions(arrangeInGrid(visibleApps.map((a) => a.id), height));
+    const { width, height } = desktopAreaSize();
+    commitIconPositions(arrangeInGrid(visibleApps.map((a) => a.id), height, width));
   };
 
   const handleResetIconPositions = (): void => {
@@ -281,6 +337,7 @@ export function Desktop({
           draggingIconId={dragging?.id ?? null}
           onIconDragMove={handleIconDragMove}
           onIconDragEnd={handleIconDragEnd}
+          onIconDragCancel={handleIconDragCancel}
         />
 
         <WindowLayer windows={manager.windows} apps={apps} manager={manager} />
