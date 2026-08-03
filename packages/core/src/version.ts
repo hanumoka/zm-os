@@ -23,12 +23,26 @@ export type SemverCompareResult = 1 | 0 | -1;
  *
  * 사전조건: /^\d+\.\d+\.\d+$/ — manifest.ts Zod 스키마가 호출 전에 검증한다.
  */
+/**
+ * 파트를 안전하게 꺼낸다. 없거나 숫자가 아니면 0으로 본다.
+ *
+ * 사전조건이 깨진 입력에서 `undefined`를 그대로 비교하면 `>`도 `<`도 false라
+ * 조용히 0(동일 버전)이 나온다. "1"과 "1.0.5"가 같다고 판정되면 업데이트가
+ * 일어나지 않는다. 사전조건은 호출자 책임이되, 깨졌을 때 결과가 예측 가능해야 한다.
+ */
+function partAt(parts: ReadonlyArray<number>, index: number): number {
+  const value = parts[index];
+  return value === undefined || Number.isNaN(value) ? 0 : value;
+}
+
 export function compareSemver(a: string, b: string): SemverCompareResult {
   const pa = a.split('.').map(Number);
   const pb = b.split('.').map(Number);
   for (let i = 0; i < 3; i++) {
-    if (pa[i] > pb[i]) return 1;
-    if (pa[i] < pb[i]) return -1;
+    const left = partAt(pa, i);
+    const right = partAt(pb, i);
+    if (left > right) return 1;
+    if (left < right) return -1;
   }
   return 0;
 }

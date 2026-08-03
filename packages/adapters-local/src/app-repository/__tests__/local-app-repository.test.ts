@@ -94,7 +94,8 @@ describe('createLocalAppRepository', () => {
   it('markInstalled / unmarkInstalled / listInstalled', async () => {
     await repo.markInstalled('a');
     await repo.markInstalled('b');
-    expect((await repo.listInstalled()).sort()).toEqual(['a', 'b']);
+    // listInstalled는 ReadonlyArray를 반환한다 — 제자리 정렬하지 않고 복사본을 정렬한다.
+    expect([...(await repo.listInstalled())].sort()).toEqual(['a', 'b']);
     await repo.unmarkInstalled('a');
     expect(await repo.listInstalled()).toEqual(['b']);
   });

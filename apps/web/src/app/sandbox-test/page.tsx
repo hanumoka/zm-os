@@ -378,7 +378,7 @@ function SandboxTestContent(): React.JSX.Element {
               messages.map((m, i) => (
                 <li key={i} className="rounded bg-gray-100 px-2 py-1">
                   <span className="text-gray-500">
-                    +{m.ts - messages[0].ts}ms
+                    +{m.ts - (messages[0]?.ts ?? m.ts)}ms
                   </span>{' '}
                   {JSON.stringify(m.data)}
                 </li>
@@ -461,7 +461,7 @@ function SandboxTestContent(): React.JSX.Element {
                     }
                   >
                     <span className="text-gray-400">
-                      +{entry.ts - ipcLog[0].ts}ms
+                      +{entry.ts - (ipcLog[0]?.ts ?? entry.ts)}ms
                     </span>{' '}
                     {entry.text}
                   </li>

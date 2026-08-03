@@ -114,7 +114,7 @@ describe('겹침 방지 (findFreeCell / resolveDropPosition occupied)', () => {
 describe('clampPositions', () => {
   it('영역이 줄면 밖으로 나간 좌표를 안으로 끌어들인다', () => {
     const result = clampPositions({ a: { x: 1630, y: 30 } }, 1280, 600);
-    expect(result.a.x).toBe(1280 - ICON_SIZE);
+    expect(result['a']).toEqual({ x: 1280 - ICON_SIZE, y: 30 });
   });
 
   it('영역 크기를 모르면(0) 좌표를 건드리지 않는다', () => {
