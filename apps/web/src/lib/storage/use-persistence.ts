@@ -22,6 +22,14 @@ export type UsePersistenceResult = {
    * 데이터를 지우게 되므로, 쓰기 전에 반드시 확인해야 한다.
    */
   readonly hydrationFailed: boolean;
+  /**
+   * 지금 저장해도 안전한가 = `hydrated && !hydrationFailed`.
+   *
+   * hydration 전이거나 실패했으면 메모리 상태는 초기값이므로, 그대로 저장하면
+   * 읽지 못했을 뿐 멀쩡한 사용자 데이터를 덮어쓴다. 소비자마다 이 판정식을
+   * 손으로 복제하면 새 소비자가 빼먹는다 — 여기 한 곳에서 제공한다.
+   */
+  readonly writable: boolean;
   readonly persistAsync: (
     operation: PersistenceErrorOperation,
     fn: () => Promise<unknown>,
@@ -72,5 +80,10 @@ export function usePersistence<T>(
     [namespace, onPersistenceError],
   );
 
-  return { hydrated, hydrationFailed, persistAsync };
+  return {
+    hydrated,
+    hydrationFailed,
+    writable: hydrated && !hydrationFailed,
+    persistAsync,
+  };
 }

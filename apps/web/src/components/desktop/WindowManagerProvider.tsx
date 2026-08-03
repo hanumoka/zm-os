@@ -84,7 +84,7 @@ export function WindowManagerProvider({
 
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const { hydrated, hydrationFailed, persistAsync } = usePersistence<DesktopLayoutRecord | undefined>({
+  const { writable, persistAsync } = usePersistence<DesktopLayoutRecord | undefined>({
     namespace: NS_DESKTOP_LAYOUT,
     loadFn: loadDesktopLayout,
     onHydrate: (record) => {
@@ -96,19 +96,16 @@ export function WindowManagerProvider({
     },
   });
 
-  const hydratedRef = useRef(hydrated);
-  hydratedRef.current = hydrated;
-  const hydrationFailedRef = useRef(hydrationFailed);
-  hydrationFailedRef.current = hydrationFailed;
+  // 저장해도 안전한 시점인가 (hydrated && !hydrationFailed) — usePersistence가 판정한다.
+  const writableRef = useRef(writable);
+  writableRef.current = writable;
 
   // ─── Persist 헬퍼 ──────────────────────────────────────────────────────────
 
   const persistNow = useCallback((): void => {
-    // hydration 전에는 저장하지 않는다. 빈 초기 상태로 저장된 레이아웃을 덮어쓰게 된다.
-    if (!hydratedRef.current) return;
-    // hydration이 실패했으면 onHydrate가 호출되지 않아 메모리 상태가 빈 배열이다.
-    // 이를 저장하면 읽지 못했을 뿐 멀쩡한 사용자 레이아웃을 지우게 된다.
-    if (hydrationFailedRef.current) return;
+    // hydration 전이거나 실패했으면 메모리 상태가 빈 배열이다.
+    // 이를 저장하면 읽지 못했을 뿐 멀쩡한 사용자 레이아웃을 지운다.
+    if (!writableRef.current) return;
     // 빈 배열도 저장한다. 마지막 윈도우를 닫은 사실이 기록되지 않으면
     // 새로고침 때 닫은 윈도우가 되살아난다.
     persistAsync('persist', () =>

@@ -90,11 +90,9 @@ export function Desktop({
   const [iconPositions, setIconPositions] = useState<Record<string, IconPoint>>({});
   const [dragging, setDragging] = useState<{ id: string; point: IconPoint } | null>(null);
 
-  const {
-    hydrated: iconsHydrated,
-    hydrationFailed: iconsHydrationFailed,
-    persistAsync: persistIcons,
-  } = usePersistence<DesktopIconsRecord | undefined>({
+  const { writable: iconsWritable, persistAsync: persistIcons } = usePersistence<
+    DesktopIconsRecord | undefined
+  >({
     namespace: NS_DESKTOP_LAYOUT,
     loadFn: loadDesktopIcons,
     onHydrate: (record) => {
@@ -103,10 +101,8 @@ export function Desktop({
     },
   });
 
-  // 저장해도 안전한 시점인가.
   // hydration 전이거나 실패했으면 iconPositions가 빈 객체이므로, 저장하면
   // 아직 읽지 못한 다른 아이콘의 좌표까지 통째로 지운다.
-  const iconsWritable = iconsHydrated && !iconsHydrationFailed;
   const iconsWritableRef = useRef(iconsWritable);
   iconsWritableRef.current = iconsWritable;
 

@@ -72,14 +72,12 @@ export const WALLPAPER_LABELS: Record<WallpaperPreset, string> = {
 
 // ─── 영속화 함수 (desktop-layout.ts 패턴 복제) ────────────────────────────────
 
+// 에러를 삼키지 않는다. 여기서 catch하면 usePersistence가 실패를 알지 못해
+// hydrationFailed가 영원히 false로 남고, 초기값이 저장된 설정을 덮어쓴다.
+// 에러 정책은 usePersistence 한 곳에 둔다 (desktop-layout.ts·desktop-icons.ts와 동일).
 export async function loadDesktopSettings(): Promise<DesktopSettingsRecord | undefined> {
-  try {
-    const adapter = resolveAdapterFor(NAMESPACE);
-    return await adapter.get<DesktopSettingsRecord>(NAMESPACE, KEY);
-  } catch (err) {
-    console.error('[desktop-settings] load failed:', err);
-    return undefined;
-  }
+  const adapter = resolveAdapterFor(NAMESPACE);
+  return adapter.get<DesktopSettingsRecord>(NAMESPACE, KEY);
 }
 
 export async function saveDesktopSettings(record: DesktopSettingsRecord): Promise<void> {

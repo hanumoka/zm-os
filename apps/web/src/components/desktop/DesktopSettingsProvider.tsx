@@ -32,19 +32,25 @@ type State = {
   themeMode: ThemeMode;
 };
 
-type Action =
-  | { type: 'HYDRATE'; settings: DesktopSettingsRecord }
-  | { type: 'SET_WALLPAPER'; config: WallpaperConfig }
-  | { type: 'SET_THEME'; mode: ThemeMode };
+/**
+ * 설정 항목마다 액션을 만들면 저장 시 나머지 필드를 손으로 재조립하게 되고,
+ * 새 항목이 늘 때마다 그 조립부를 빠뜨려 값이 유실된다.
+ * 부분 갱신 하나로 통일해 그 실수가 구조적으로 불가능하게 한다.
+ */
+export type DesktopSettingsPatch = Partial<State>;
 
-function reducer(state: State, action: Action): State {
+export type DesktopSettingsAction =
+  | { type: 'HYDRATE'; settings: DesktopSettingsRecord }
+  | { type: 'PATCH'; patch: DesktopSettingsPatch };
+
+/** 테스트를 위해 export한다 — 병합 규칙이 유실 방지의 핵심이다. */
+export function desktopSettingsReducer(state: State, action: DesktopSettingsAction): State {
   switch (action.type) {
     case 'HYDRATE':
+      // 저장 레코드에서 상태 필드만 취한다(savedAt 등 메타 제외).
       return { wallpaper: action.settings.wallpaper, themeMode: action.settings.themeMode };
-    case 'SET_WALLPAPER':
-      return { ...state, wallpaper: action.config };
-    case 'SET_THEME':
-      return { ...state, themeMode: action.mode };
+    case 'PATCH':
+      return { ...state, ...action.patch };
   }
 }
 
@@ -88,7 +94,7 @@ function useDarkModeClass(resolved: ResolvedTheme): void {
 // ─── Provider ─────────────────────────────────────────────────────────────────
 
 export function DesktopSettingsProvider({ children }: { children: React.ReactNode }): React.JSX.Element {
-  const [state, dispatch] = useReducer(reducer, {
+  const [state, dispatch] = useReducer(desktopSettingsReducer, {
     wallpaper: DEFAULT_SETTINGS.wallpaper,
     themeMode: DEFAULT_SETTINGS.themeMode,
   });
@@ -99,7 +105,7 @@ export function DesktopSettingsProvider({ children }: { children: React.ReactNod
   const stateRef = useRef(state);
   stateRef.current = state;
 
-  const { persistAsync } = usePersistence<DesktopSettingsRecord | undefined>({
+  const { writable, persistAsync } = usePersistence<DesktopSettingsRecord | undefined>({
     namespace: NS_DESKTOP_SETTINGS,
     loadFn: loadDesktopSettings,
     onHydrate: (record) => {
@@ -107,23 +113,37 @@ export function DesktopSettingsProvider({ children }: { children: React.ReactNod
     },
   });
 
-  const setWallpaper = useCallback((config: WallpaperConfig): void => {
-    dispatch({ type: 'SET_WALLPAPER', config });
-    persistAsync('persist', () => saveDesktopSettings({
-      wallpaper: config,
-      themeMode: stateRef.current.themeMode,
-      savedAt: Date.now(),
-    }));
-  }, [persistAsync]);
+  const writableRef = useRef(writable);
+  writableRef.current = writable;
 
-  const setThemeMode = useCallback((mode: ThemeMode): void => {
-    dispatch({ type: 'SET_THEME', mode });
-    persistAsync('persist', () => saveDesktopSettings({
-      wallpaper: stateRef.current.wallpaper,
-      themeMode: mode,
-      savedAt: Date.now(),
-    }));
-  }, [persistAsync]);
+  /**
+   * 부분 갱신 하나로 모든 설정 변경을 처리한다.
+   *
+   * 저장은 반드시 현재 상태 전체 위에 patch를 얹어 만든다. 필드를 손으로 나열하면
+   * 새 설정이 늘 때 빠뜨리게 되고, 그 필드는 저장 시점에 조용히 사라진다.
+   * hydration 전·실패 시에는 저장하지 않는다 — 그때 상태는 저장된 값이 아니라
+   * 기본값이라, 한 항목만 바꿔도 나머지가 기본값으로 덮어써진다.
+   */
+  const updateSettings = useCallback(
+    (patch: DesktopSettingsPatch): void => {
+      dispatch({ type: 'PATCH', patch });
+      if (!writableRef.current) return;
+      persistAsync('persist', () =>
+        saveDesktopSettings({ ...stateRef.current, ...patch, savedAt: Date.now() }),
+      );
+    },
+    [persistAsync],
+  );
+
+  const setWallpaper = useCallback(
+    (config: WallpaperConfig): void => updateSettings({ wallpaper: config }),
+    [updateSettings],
+  );
+
+  const setThemeMode = useCallback(
+    (mode: ThemeMode): void => updateSettings({ themeMode: mode }),
+    [updateSettings],
+  );
 
   const value = useMemo<DesktopSettingsContextValue>(
     () => ({
