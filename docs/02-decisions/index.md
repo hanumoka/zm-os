@@ -31,6 +31,7 @@
 | [ADR-0032](adr-0032-domain-separation.md) | 멀티 세션 협업 — 영역 분리 + 명시적 Lifecycle + Fail-Safe | accepted | 2026-06-07 |
 | [ADR-0033](adr-0033-os-extension-architecture.md) | OS 확장 아키텍처 — capability-우선 + microkernel-lite + 점진 | accepted | 2026-06-07 |
 | [ADR-0034](adr-0034-capability-and-ipc-contract.md) | App Capability 모델 + IPC 권한 계약 (load-bearing) | accepted | 2026-06-07 |
+| [ADR-0040](adr-0040-app-record-schema.md) | AppRecord 콘텐츠 표현과 레거시 레코드 승격 | accepted | 2026-08-04 |
 
 > **0024~0029 결번(예약)**: CloudAdapter 옵션 트랙 — 아래 "보류" 참조. 협업 헌법 ADR 은 예약 회피를 위해 0030~0032 사용.
 > **0035~0039 예약**: OS 확장 후속 (ADR-0033 §D6) — 0035 Service Registry / 0036 IPC 프로토콜·EVENT / 0037 VFS / 0038 Lifecycle·Boot / 0039 Event Bus. F1~F3에서 작성.

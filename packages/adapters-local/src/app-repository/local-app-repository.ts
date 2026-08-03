@@ -12,7 +12,7 @@
  * @module adapters-local/app-repository/local-app-repository
  */
 
-import { PortError, NS_INSTALLED_APPS, NS_USER_APPS } from '@zm/core';
+import { PortError, NS_INSTALLED_APPS, NS_USER_APPS, normalizeAppRecord } from '@zm/core';
 import type {
   AdapterDescriptor,
   AppListFilter,
@@ -55,8 +55,12 @@ export function createLocalAppRepository(
     ): Promise<ReadonlyArray<AppRecord>> {
       // built-in 카탈로그는 IDB 미저장 — 호출자가 static import로 별도 제공 (built-in-passthrough)
       if (filter?.source === 'built-in') return [];
-      const records = await blob.list<AppRecord>(USER_APPS_NS, callOpts);
-      let result = records.map((r) => r.value);
+      // 검증 없이 AppRecord로 캐스트하면 레거시 레코드가 source undefined로 흘러
+      // upsert 가드에 걸린다. 정규화하고, 판별 불가능한 것은 삭제하지 않고 건너뛴다.
+      const records = await blob.list<unknown>(USER_APPS_NS, callOpts);
+      let result = records
+        .map((r) => normalizeAppRecord(r.value))
+        .filter((r): r is AppRecord => r !== null);
       if (filter?.ownerId !== undefined) {
         result = result.filter((r) => r.ownerId === filter.ownerId);
       }
@@ -64,8 +68,8 @@ export function createLocalAppRepository(
     },
 
     async get(id: string, callOpts?: PortCallOptions): Promise<AppRecord | null> {
-      const record = await blob.get<AppRecord>(USER_APPS_NS, id, callOpts);
-      return record ?? null;
+      const record = await blob.get<unknown>(USER_APPS_NS, id, callOpts);
+      return record === undefined ? null : normalizeAppRecord(record);
     },
 
     async upsert(record: AppRecord, callOpts?: PortCallOptions): Promise<void> {
