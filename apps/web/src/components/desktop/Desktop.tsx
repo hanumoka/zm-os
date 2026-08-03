@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useWindowManager } from './useWindowManager';
 import { DesktopIconLayer } from './DesktopIconLayer';
 import { WindowLayer } from './WindowLayer';
@@ -17,6 +17,15 @@ import { useInstalledApps } from '@/components/store/useInstalledApps';
 import { useUserApps } from '@/components/store/UserAppsProvider';
 import { useDesktopSettings } from './DesktopSettingsProvider';
 import { WALLPAPER_CLASSES } from '@/lib/storage/desktop-settings';
+import { usePersistence } from '@/lib/storage/use-persistence';
+import { NS_DESKTOP_LAYOUT } from '@zm/core';
+import type { DesktopIconsRecord, IconPoint } from '@/lib/storage/desktop-icons';
+import {
+  arrangeInGrid,
+  loadDesktopIcons,
+  resolveDropPosition,
+  saveDesktopIcons,
+} from '@/lib/storage/desktop-icons';
 
 type DesktopProps = {
   apps?: ReadonlyArray<DesktopAppEntry>;
@@ -34,9 +43,21 @@ export function Desktop({
   className = '',
 }: DesktopProps): React.JSX.Element {
   const manager = useWindowManager();
-  const { isInstalled, uninstall } = useInstalledApps();
-  const { userApps, removeUserApp } = useUserApps();
+  const {
+    isInstalled,
+    uninstall,
+    hydrated: installedHydrated,
+  } = useInstalledApps();
+  const {
+    userApps,
+    removeUserApp,
+    hydrated: userAppsHydrated,
+  } = useUserApps();
   const { wallpaper } = useDesktopSettings();
+
+  // 카탈로그가 실제 데이터를 반영하는 시점. 두 저장소 모두 IDB에서 hydrate되어야
+  // "이 앱은 설치되지 않았다"는 판단이 참이 된다.
+  const catalogReady = installedHydrated && userAppsHydrated;
 
   const apps = useMemo(
     () => appsProp ?? buildCatalog(userApps),
@@ -48,6 +69,76 @@ export function Desktop({
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [infoApp, setInfoApp] = useState<DesktopAppEntry | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<DesktopAppEntry | null>(null);
+
+  // ─── DSK-06: 아이콘 배치 ───────────────────────────────────────────────────
+  //
+  // 저장된 좌표는 카탈로그의 iconPosition을 덮어쓴다.
+  // 드래그 중에는 dragging 상태가 실시간 좌표를 제공하고, 드롭 시점에만 영속화한다.
+
+  const [iconPositions, setIconPositions] = useState<Record<string, IconPoint>>({});
+  const [dragging, setDragging] = useState<{ id: string; point: IconPoint } | null>(null);
+
+  const {
+    hydrated: iconsHydrated,
+    hydrationFailed: iconsHydrationFailed,
+    persistAsync: persistIcons,
+  } = usePersistence<DesktopIconsRecord | undefined>({
+    namespace: NS_DESKTOP_LAYOUT,
+    loadFn: loadDesktopIcons,
+    onHydrate: (record) => {
+      if (record === undefined) return;
+      setIconPositions({ ...record.positions });
+    },
+  });
+
+  // 저장해도 안전한 시점인가.
+  // hydration 전이거나 실패했으면 iconPositions가 빈 객체이므로, 저장하면
+  // 아직 읽지 못한 다른 아이콘의 좌표까지 통째로 지운다.
+  const iconsWritable = iconsHydrated && !iconsHydrationFailed;
+  const iconsWritableRef = useRef(iconsWritable);
+  iconsWritableRef.current = iconsWritable;
+
+  const commitIconPositions = useCallback(
+    (next: Record<string, IconPoint>): void => {
+      setIconPositions(next);
+      if (!iconsWritableRef.current) return;
+      persistIcons('persist', () =>
+        saveDesktopIcons({ savedAt: Date.now(), positions: next }),
+      );
+    },
+    [persistIcons],
+  );
+
+  const desktopAreaSize = useCallback((): { width: number; height: number } => {
+    const rect = desktopAreaRef.current?.getBoundingClientRect();
+    return { width: rect?.width ?? 0, height: rect?.height ?? 0 };
+  }, []);
+
+  // 이벤트 핸들러에서 최신 좌표를 읽기 위한 ref.
+  // setState updater 안에서 저장을 호출하면 updater가 순수하지 않게 되고
+  // StrictMode 이중 실행에서 저장이 두 번 나간다.
+  const iconPositionsRef = useRef(iconPositions);
+  iconPositionsRef.current = iconPositions;
+
+  const handleIconDragMove = useCallback((id: string, x: number, y: number): void => {
+    setDragging({ id, point: { x, y } });
+  }, []);
+
+  const handleIconDragEnd = useCallback(
+    (id: string, x: number, y: number): void => {
+      setDragging(null);
+      const { width, height } = desktopAreaSize();
+      const dropped = resolveDropPosition({ x, y }, width, height);
+      commitIconPositions({ ...iconPositionsRef.current, [id]: dropped });
+    },
+    [commitIconPositions, desktopAreaSize],
+  );
+
+  // 드래그 중인 아이콘만 실시간 좌표로 덮어쓴다.
+  const effectiveIconPositions = useMemo<Record<string, IconPoint>>(() => {
+    if (dragging === null) return iconPositions;
+    return { ...iconPositions, [dragging.id]: dragging.point };
+  }, [iconPositions, dragging]);
 
   const bgClass = wallpaper.kind === 'preset' ? WALLPAPER_CLASSES[wallpaper.preset] : '';
   const bgStyle: React.CSSProperties | undefined = wallpaper.kind === 'url'
@@ -63,16 +154,40 @@ export function Desktop({
     setContextMenu({ kind: 'icon', x, y, entry });
   };
 
+  const handleAutoArrange = (): void => {
+    const { height } = desktopAreaSize();
+    commitIconPositions(arrangeInGrid(visibleApps.map((a) => a.id), height));
+  };
+
+  const handleResetIconPositions = (): void => {
+    commitIconPositions({});
+  };
+
   const buildContextMenuItems = (): ContextMenuItem[] => {
     if (contextMenu === null || contextMenu.kind === 'desktop') {
-      return [
+      const items: ContextMenuItem[] = [
         {
-          id: 'settings',
-          label: '데스크탑 설정',
-          icon: '⚙️',
-          onClick: (): void => setSettingsOpen(true),
+          id: 'auto-arrange',
+          label: '아이콘 자동 정렬',
+          icon: '🧹',
+          onClick: handleAutoArrange,
         },
       ];
+      if (Object.keys(iconPositions).length > 0) {
+        items.push({
+          id: 'reset-icons',
+          label: '아이콘 위치 초기화',
+          icon: '↩️',
+          onClick: handleResetIconPositions,
+        });
+      }
+      items.push({
+        id: 'settings',
+        label: '데스크탑 설정',
+        icon: '⚙️',
+        onClick: (): void => setSettingsOpen(true),
+      });
+      return items;
     }
 
     const { entry } = contextMenu;
@@ -106,16 +221,22 @@ export function Desktop({
   };
 
   // APP-04: 삭제된 앱의 실행 중 윈도우 자동 닫기
+  //
+  // catalogReady 가드가 없으면 DSK-04 레이아웃 복원이 깨진다.
+  // 윈도우 레이아웃과 설치 목록은 서로 다른 IDB 로드라 완료 순서가 보장되지 않는다.
+  // 레이아웃이 먼저 도착하면 isInstalled()가 아직 빈 집합을 보고 false를 반환해,
+  // 복원되자마자 모든 윈도우가 닫힌다.
   useEffect(() => {
+    if (!catalogReady) return;
     const appIds = new Set(apps.map((a) => a.id));
     for (const win of manager.windows) {
       if (!appIds.has(win.contentId) || !isInstalled(win.contentId)) {
         manager.close(win.id);
       }
     }
-  }, [apps, manager, isInstalled]);
+  }, [catalogReady, apps, manager, isInstalled]);
 
-  const visibleApps = apps.filter((a) => isInstalled(a.id));
+  const visibleApps = catalogReady ? apps.filter((a) => isInstalled(a.id)) : [];
 
   const handleLaunch = (entry: DesktopAppEntry): void => {
     const existing: WindowState | undefined = manager.windows.find(
@@ -156,6 +277,10 @@ export function Desktop({
           onSelectIcon={setSelectedIconId}
           onLaunchApp={handleLaunch}
           onContextMenuIcon={handleIconContextMenu}
+          iconPositions={effectiveIconPositions}
+          draggingIconId={dragging?.id ?? null}
+          onIconDragMove={handleIconDragMove}
+          onIconDragEnd={handleIconDragEnd}
         />
 
         <WindowLayer windows={manager.windows} apps={apps} manager={manager} />

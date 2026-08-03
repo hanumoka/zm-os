@@ -84,7 +84,7 @@ export function WindowManagerProvider({
 
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const { hydrated, persistAsync } = usePersistence<DesktopLayoutRecord | undefined>({
+  const { hydrated, hydrationFailed, persistAsync } = usePersistence<DesktopLayoutRecord | undefined>({
     namespace: NS_DESKTOP_LAYOUT,
     loadFn: loadDesktopLayout,
     onHydrate: (record) => {
@@ -98,14 +98,22 @@ export function WindowManagerProvider({
 
   const hydratedRef = useRef(hydrated);
   hydratedRef.current = hydrated;
+  const hydrationFailedRef = useRef(hydrationFailed);
+  hydrationFailedRef.current = hydrationFailed;
 
   // ─── Persist 헬퍼 ──────────────────────────────────────────────────────────
 
   const persistNow = useCallback((): void => {
+    // hydration 전에는 저장하지 않는다. 빈 초기 상태로 저장된 레이아웃을 덮어쓰게 된다.
     if (!hydratedRef.current) return;
-    const current = windowsRef.current;
-    if (current.length === 0) return;
-    persistAsync('persist', () => saveDesktopLayout(windowsToLayout(current)));
+    // hydration이 실패했으면 onHydrate가 호출되지 않아 메모리 상태가 빈 배열이다.
+    // 이를 저장하면 읽지 못했을 뿐 멀쩡한 사용자 레이아웃을 지우게 된다.
+    if (hydrationFailedRef.current) return;
+    // 빈 배열도 저장한다. 마지막 윈도우를 닫은 사실이 기록되지 않으면
+    // 새로고침 때 닫은 윈도우가 되살아난다.
+    persistAsync('persist', () =>
+      saveDesktopLayout(windowsToLayout(windowsRef.current)),
+    );
   }, [persistAsync]);
 
   const persistDebounced = useCallback((): void => {
@@ -143,17 +151,32 @@ export function WindowManagerProvider({
 
   // ─── 액션 래퍼 (persist 트리거 통합) ──────────────────────────────────────
 
+  // dispatch는 비동기다 — 호출 직후에는 windowsRef가 아직 이전 상태를 가리킨다.
+  // 따라서 저장을 여기서 실행하지 않고 "예약"만 하고, windows가 실제로 커밋된 뒤
+  // 아래 effect에서 실행한다. 이렇게 하지 않으면 OPEN 직후 저장이 이전 상태를
+  // (첫 윈도우라면 빈 배열을) 기록해 열린 창이 영속화되지 않는다.
+  const pendingPersistRef = useRef<'none' | 'immediate' | 'debounced'>('none');
+
   const dispatchWithPersist = useCallback(
     (action: Parameters<typeof dispatch>[0]): void => {
       dispatch(action);
-      if (isStructuralAction(action.type)) {
-        persistImmediate();
-      } else {
-        persistDebounced();
-      }
+      pendingPersistRef.current = isStructuralAction(action.type)
+        ? 'immediate'
+        : 'debounced';
     },
-    [persistImmediate, persistDebounced],
+    [],
   );
+
+  useEffect(() => {
+    const mode = pendingPersistRef.current;
+    if (mode === 'none') return;
+    pendingPersistRef.current = 'none';
+    if (mode === 'immediate') {
+      persistImmediate();
+    } else {
+      persistDebounced();
+    }
+  }, [windows, persistImmediate, persistDebounced]);
 
   const open = useCallback(
     (init: WindowOpenInit): void => {

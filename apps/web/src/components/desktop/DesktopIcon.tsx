@@ -1,7 +1,13 @@
 'use client';
 
-import React from 'react';
+import React, { useRef } from 'react';
 import type { AppIcon } from './desktopApps';
+import { DRAG_THRESHOLD } from '@/lib/storage/desktop-icons';
+
+// ─── 상수 ─────────────────────────────────────────────────────────────────────
+
+/** 드래그 종료 후 이 시간 안의 click/dblclick은 무시한다 (드래그가 실행으로 새지 않도록) */
+const CLICK_SUPPRESS_MS = 300;
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
@@ -14,7 +20,23 @@ type DesktopIconProps = {
   onLaunch: () => void;
   onSelect?: () => void;
   onContextMenu?: (e: React.MouseEvent) => void;
+  /** 드래그 중 실시간 좌표. 지정하면 드래그가 활성화된다 (position도 함께 필요). */
+  onDragMove?: (id: string, x: number, y: number) => void;
+  /** 드래그 종료 좌표. 스냅·클램프는 호출자가 수행한다. */
+  onDragEnd?: (id: string, x: number, y: number) => void;
+  /** 드래그 중 여부 — z-index를 올려 다른 아이콘 위에 표시한다. */
+  dragging?: boolean;
   className?: string;
+};
+
+type DragSession = {
+  pointerId: number;
+  /** 포인터와 아이콘 좌상단의 간격 — 잡은 지점을 유지하기 위함 */
+  grabOffsetX: number;
+  grabOffsetY: number;
+  moved: boolean;
+  lastX: number;
+  lastY: number;
 };
 
 // ─── DesktopIcon ─────────────────────────────────────────────────────────────
@@ -25,7 +47,7 @@ type DesktopIconProps = {
  * - 더블클릭 → onLaunch
  * - 단일클릭 → onSelect (선택 하이라이트)
  * - Enter / Space → onLaunch (a11y)
- * - absolute positioning (position prop 사용)
+ * - position 지정 시 absolute, 미지정 시 일반 흐름 (부모가 배치를 결정)
  * - 80×80px 세로 정렬 레이아웃
  */
 export function DesktopIcon({
@@ -37,13 +59,29 @@ export function DesktopIcon({
   onLaunch,
   onSelect,
   onContextMenu,
+  onDragMove,
+  onDragEnd,
+  dragging = false,
   className = '',
 }: DesktopIconProps): React.JSX.Element {
+  const dragRef = useRef<DragSession | null>(null);
+  const dragEndedAtRef = useRef(0);
+
+  const isPositioned = position !== undefined;
+  const canDrag =
+    isPositioned && onDragMove !== undefined && onDragEnd !== undefined;
+
+  /** 드래그 직후의 잔여 click/dblclick인지 */
+  const isDragEcho = (): boolean =>
+    Date.now() - dragEndedAtRef.current < CLICK_SUPPRESS_MS;
+
   const handleClick = (): void => {
+    if (isDragEcho()) return;
     onSelect?.();
   };
 
   const handleDoubleClick = (): void => {
+    if (isDragEcho()) return;
     onLaunch();
   };
 
@@ -54,10 +92,99 @@ export function DesktopIcon({
     }
   };
 
-  const positionStyle: React.CSSProperties =
-    position !== undefined
-      ? { left: position.x, top: position.y }
-      : {};
+  // ─── 드래그 ────────────────────────────────────────────────────────────────
+  //
+  // offsetParent = 가장 가까운 positioned 조상 = 데스크탑 영역(relative).
+  // 좌표를 그 영역 기준으로 환산해야 position prop과 같은 좌표계가 된다.
+
+  const areaOf = (el: HTMLElement): DOMRect | null => {
+    const parent = el.offsetParent;
+    return parent instanceof HTMLElement ? parent.getBoundingClientRect() : null;
+  };
+
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>): void => {
+    if (!canDrag || position === undefined) return;
+    if (e.button !== 0) return;
+    const area = areaOf(e.currentTarget);
+    if (area === null) return;
+
+    dragRef.current = {
+      pointerId: e.pointerId,
+      grabOffsetX: e.clientX - area.left - position.x,
+      grabOffsetY: e.clientY - area.top - position.y,
+      moved: false,
+      lastX: position.x,
+      lastY: position.y,
+    };
+    // 일부 브라우저는 알 수 없는 pointerId에 NotFoundError를 던진다.
+    // 캡처는 편의 기능이므로 실패해도 드래그 자체는 계속되어야 한다.
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {
+      /* 캡처 불가 — 이벤트는 계속 흐른다 */
+    }
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>): void => {
+    const session = dragRef.current;
+    if (session === null || session.pointerId !== e.pointerId) return;
+    if (onDragMove === undefined) return;
+    const area = areaOf(e.currentTarget);
+    if (area === null) return;
+
+    const x = e.clientX - area.left - session.grabOffsetX;
+    const y = e.clientY - area.top - session.grabOffsetY;
+
+    if (!session.moved) {
+      const movedEnough =
+        Math.abs(x - session.lastX) >= DRAG_THRESHOLD ||
+        Math.abs(y - session.lastY) >= DRAG_THRESHOLD;
+      if (!movedEnough) return;
+      session.moved = true;
+    }
+
+    session.lastX = x;
+    session.lastY = y;
+    onDragMove(id, x, y);
+  };
+
+  const endDrag = (e: React.PointerEvent<HTMLDivElement>, commit: boolean): void => {
+    const session = dragRef.current;
+    if (session === null || session.pointerId !== e.pointerId) return;
+    dragRef.current = null;
+
+    try {
+      if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      }
+    } catch {
+      /* 이미 해제됨 */
+    }
+    if (!session.moved) return;
+
+    // 취소(pointercancel)도 마지막 좌표로 확정한다.
+    // 원위치 복귀는 별도 요구사항이며, 확정하지 않으면 화면과 저장이 어긋난다.
+    void commit;
+    dragEndedAtRef.current = Date.now();
+    onDragEnd?.(id, session.lastX, session.lastY);
+  };
+
+  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>): void => {
+    endDrag(e, true);
+  };
+
+  const handlePointerCancel = (e: React.PointerEvent<HTMLDivElement>): void => {
+    endDrag(e, false);
+  };
+
+  // position이 있으면 데스크탑 좌표계에 absolute 배치, 없으면 일반 흐름에 둔다.
+  //
+  // 무조건 absolute로 두면 position 없이 쓰는 부모(스토어 아이콘의 <Link>)가
+  // 자식을 흐름에서 잃어 0×0으로 접히고, 80px 아이콘이 그 지점에서 오른쪽으로
+  // 흘러나가 화면 밖으로 잘린다.
+  const positionStyle: React.CSSProperties = isPositioned
+    ? { left: position.x, top: position.y, zIndex: dragging ? 30 : undefined }
+    : {};
 
   return (
     <div
@@ -68,7 +195,7 @@ export function DesktopIcon({
       aria-pressed={selected}
       style={positionStyle}
       className={[
-        'absolute',
+        isPositioned ? 'absolute' : 'relative',
         'flex',
         'flex-col',
         'items-center',
@@ -80,7 +207,11 @@ export function DesktopIcon({
         'cursor-pointer',
         'select-none',
         'p-1',
-        'transition-colors',
+        // 드래그 중에는 색 전환 애니메이션이 좌표 추종을 흐리게 만든다.
+        dragging ? '' : 'transition-colors',
+        // 터치에서 드래그가 스크롤·롱프레스로 가로채이지 않도록
+        canDrag ? 'touch-none' : '',
+        dragging ? 'opacity-80 scale-105' : '',
         selected
           ? 'bg-white/40 ring-2 ring-blue-400'
           : 'hover:bg-white/25',
@@ -95,6 +226,11 @@ export function DesktopIcon({
       onDoubleClick={handleDoubleClick}
       onKeyDown={handleKeyDown}
       onContextMenu={onContextMenu}
+      onPointerDown={canDrag ? handlePointerDown : undefined}
+      onPointerMove={canDrag ? handlePointerMove : undefined}
+      onPointerUp={canDrag ? handlePointerUp : undefined}
+      onPointerCancel={canDrag ? handlePointerCancel : undefined}
+      onDragStart={canDrag ? (e): void => e.preventDefault() : undefined}
     >
       {/* 아이콘 영역 */}
       <div className="flex items-center justify-center w-12 h-12 text-4xl">

@@ -11,6 +11,11 @@ type TaskbarButtonProps = {
   isActive: boolean;
   icon: AppIcon;
   onClick: () => void;
+  /**
+   * 표시할 제목. 저장된 레이아웃에는 제목이 없어 복원된 윈도우의 title은 빈 문자열이므로,
+   * 부모가 카탈로그에서 해석한 값을 넘긴다. 생략하면 window.title을 쓴다.
+   */
+  displayTitle?: string;
 };
 
 // ─── TaskbarButton ────────────────────────────────────────────────────────────
@@ -30,7 +35,10 @@ export function TaskbarButton({
   isActive,
   icon,
   onClick,
+  displayTitle,
 }: TaskbarButtonProps): React.JSX.Element {
+  const label = displayTitle ?? win.title;
+
   return (
     <button
       type="button"
@@ -58,9 +66,9 @@ export function TaskbarButton({
       ]
         .filter(Boolean)
         .join(' ')}
-      aria-label={`${win.title}${win.state === 'minimized' ? ' (최소화됨)' : ''}`}
+      aria-label={`${label}${win.state === 'minimized' ? ' (최소화됨)' : ''}`}
       aria-pressed={isActive}
-      title={win.title}
+      title={label}
     >
       {/* 아이콘 */}
       <span className="text-base shrink-0" aria-hidden="true">
@@ -77,7 +85,7 @@ export function TaskbarButton({
       </span>
 
       {/* 라벨 */}
-      <span className="truncate">{win.title}</span>
+      <span className="truncate">{label}</span>
     </button>
   );
 }

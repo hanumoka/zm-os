@@ -20,6 +20,12 @@ import { NS_INSTALLED_APPS } from '@zm/core';
 export type InstalledAppsContextValue = {
   /** 현재 설치된 앱 ID 집합 (ReadonlySet — 직접 변경 불가) */
   installedIds: ReadonlySet<string>;
+  /**
+   * IDB hydration 완료 여부.
+   * false 동안 installedIds는 "아직 모른다"이지 "설치된 앱이 없다"가 아니다.
+   * 소비자는 설치 여부로 파괴적 동작(윈도우 닫기 등)을 하기 전에 반드시 확인해야 한다.
+   */
+  hydrated: boolean;
   /** id가 설치된 앱인지 확인 */
   isInstalled: (id: string) => boolean;
   /** 앱을 설치 목록에 추가 */
@@ -117,7 +123,7 @@ export function InstalledAppsProvider({
     new Set<string>() as ReadonlySet<string>,
   );
 
-  const { persistAsync } = usePersistence<ReadonlyArray<string>>({
+  const { hydrated, persistAsync } = usePersistence<ReadonlyArray<string>>({
     namespace: NS_INSTALLED_APPS,
     loadFn: listInstalledAppIds,
     onHydrate: (ids) => dispatch({ type: 'HYDRATE', ids }),
@@ -140,8 +146,8 @@ export function InstalledAppsProvider({
 
   // useMemo로 stable reference — installedIds 변경 시에만 새 객체 생성
   const value = useMemo<InstalledAppsContextValue>(
-    () => ({ installedIds, isInstalled, install, uninstall }),
-    [installedIds, isInstalled, install, uninstall],
+    () => ({ installedIds, hydrated, isInstalled, install, uninstall }),
+    [installedIds, hydrated, isInstalled, install, uninstall],
   );
 
   return (

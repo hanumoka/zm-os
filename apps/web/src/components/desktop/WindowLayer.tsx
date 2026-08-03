@@ -17,12 +17,15 @@ export function WindowLayer({ windows, apps, manager }: WindowLayerProps): React
     <>
       {windows.map((win) => {
         const entry = apps.find((a) => a.id === win.contentId);
+        // 저장된 레이아웃에는 제목이 없다(contentId만 기록). 복원된 윈도우의
+        // 제목은 카탈로그에서 해석한다.
+        const title = win.title !== '' ? win.title : (entry?.name ?? win.contentId);
 
         return (
           <Window
             key={win.id}
             id={win.id}
-            title={win.title}
+            title={title}
             position={win.position}
             size={win.size}
             state={win.state}
@@ -43,7 +46,7 @@ export function WindowLayer({ windows, apps, manager }: WindowLayerProps): React
                 manager.setPosition(win.id, x, y);
               },
             }}
-            ariaLabel={`${win.title} 윈도우`}
+            ariaLabel={`${title} 윈도우`}
           >
             {entry !== undefined ? (
               <AppFrame key={win.id} entry={entry} />

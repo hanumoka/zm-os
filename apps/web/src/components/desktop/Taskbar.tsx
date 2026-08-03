@@ -91,6 +91,9 @@ export function Taskbar(): React.JSX.Element {
           const icon: AppIcon = entry?.icon ?? FALLBACK_ICON;
           const isActive =
             activeWindow?.id === win.id && win.state !== 'minimized';
+          // 복원된 윈도우는 저장 레이아웃에 제목이 없어 title이 빈 문자열이다.
+          const displayTitle =
+            win.title !== '' ? win.title : (entry?.name ?? win.contentId);
 
           return (
             <TaskbarButton
@@ -98,6 +101,7 @@ export function Taskbar(): React.JSX.Element {
               window={win}
               isActive={isActive}
               icon={icon}
+              displayTitle={displayTitle}
               onClick={(): void => handleButtonClick(win)}
             />
           );

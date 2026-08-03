@@ -12,6 +12,12 @@ type DesktopIconLayerProps = {
   onSelectIcon: (id: string | null) => void;
   onLaunchApp: (entry: DesktopAppEntry) => void;
   onContextMenuIcon?: (entry: DesktopAppEntry, x: number, y: number) => void;
+  /** 사용자가 옮긴 아이콘 좌표. 없는 id는 카탈로그의 iconPosition으로 폴백한다. */
+  iconPositions?: Readonly<Record<string, { x: number; y: number }>>;
+  /** 드래그 중인 아이콘 id */
+  draggingIconId?: string | null;
+  onIconDragMove?: (id: string, x: number, y: number) => void;
+  onIconDragEnd?: (id: string, x: number, y: number) => void;
 };
 
 const STORE_ICON_ID = '__system_store__';
@@ -23,6 +29,10 @@ export function DesktopIconLayer({
   onSelectIcon,
   onLaunchApp,
   onContextMenuIcon,
+  iconPositions,
+  draggingIconId = null,
+  onIconDragMove,
+  onIconDragEnd,
 }: DesktopIconLayerProps): React.JSX.Element {
   return (
     <>
@@ -32,10 +42,13 @@ export function DesktopIconLayer({
           id={entry.id}
           label={entry.name}
           icon={entry.icon}
-          position={entry.iconPosition}
+          position={iconPositions?.[entry.id] ?? entry.iconPosition}
           selected={selectedIconId === entry.id}
+          dragging={draggingIconId === entry.id}
           onLaunch={(): void => onLaunchApp(entry)}
           onSelect={(): void => onSelectIcon(entry.id)}
+          onDragMove={onIconDragMove}
+          onDragEnd={onIconDragEnd}
           onContextMenu={(e): void => {
             if (onContextMenuIcon === undefined) return;
             e.preventDefault();
