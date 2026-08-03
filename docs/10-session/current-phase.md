@@ -72,10 +72,11 @@
 
 ### REFAC-02 진입 (2026-05-27)
 - ✅ **P1 완료 (commit e602623)**: 5 Port 인터페이스 SSOT (`packages/core/src/ports/` 7 파일) + `@zm/adapters-local` 신규 패키지 골조 + namespace-registry adapterPolicies 배열 reshape + system namespace 5번째 엔트리 + indexeddb.ts DB_VERSION 4→5 + resolve-adapter.ts 호환 alias. turbo type-check 5/5 + test 5/5 PASS.
-- ⏳ **P2 (다음)**: BlobStorage Port + LocalOPFS 어댑터 이전 + AbortSignal + BlobStorageError + `@zm/storage` shell (5일)
-- ⏳ **P3**: AppRepository Port + LocalRepo + 4 wrapper 흡수 (5일)
-- ⏳ **P4**: AuthProvider + SyncProvider + ModerationProvider 3 어댑터 + patterns.ts (5일)
-- ⏳ **P5**: Adapter Resolver + PortsContext + 5 Provider reshape (5일)
+- ✅ **P2 완료**: BlobStorage Port + 어댑터 이전 + AbortSignal + `BlobStorageError extends PortError` + `@zm/storage` deprecation shell
+- ✅ **P3 완료**: AppRepository Port + LocalRepo (소비처 wrapper 흡수는 P5로 이관)
+- ⏳ **P4 (다음)**: AuthProvider + SyncProvider + ModerationProvider 3 어댑터 + patterns.ts (5일)
+- ⏳ **P5**: Adapter Resolver + PortsContext + 5 Provider reshape + `@zm/storage` 삭제 (5일)
+  — 선행 조건이던 데이터 모델 블로커는 ADR-0040으로 해소됨
 
 ### M5 진입 (REFAC-02 완료 후)
 - SRV-01~02 + USR-01~04 (인프라 + 로컬 인증 기본, 3주)

@@ -1,11 +1,19 @@
 ---
 number: "0009"
 title: 스토리지 추상화 계층 — StorageAdapter Strategy 패턴 + OPFS 어댑터
-status: accepted
+status: superseded
 date: 2026-05-25
 author: hanumoka
 related: ["0007"]
+superseded_by: ["0020"]
 ---
+
+> **superseded by ADR-0020 (2026-08-04 표기 정정)**
+> 이 ADR이 정의한 `StorageAdapter`는 ADR-0020에서 `BlobStorage` Port로 흡수됐고,
+> 어댑터 구현은 `packages/adapters-local/src/blob-storage/`로 이동했다.
+> `packages/storage/`에서 이 문서가 말하는 파일을 찾으면 존재하지 않는다.
+> Strategy 패턴과 OPFS>IDB>Memory 우선순위라는 **결정 자체는 여전히 유효**하며,
+> 위치와 타입 이름만 바뀌었다.
 
 # ADR-0009: 스토리지 추상화 계층 (StorageAdapter + OPFS)
 

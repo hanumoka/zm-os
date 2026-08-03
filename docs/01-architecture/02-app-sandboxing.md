@@ -3,7 +3,7 @@
 **Status**: 계획 (Phase 1 — 가장 중요)
 **Owner**: TBD
 **Related PRD**: §3 SBX-01, SBX-02, IPC-01
-**관련 ADR**: [adr-0001-initial-stack.md](../decisions/adr-0001-initial-stack.md)
+**관련 ADR**: [adr-0001-initial-stack.md](../02-decisions/adr-0001-initial-stack.md)
 **보안 규칙**: [`.claude/rules/security.md`](../../.claude/rules/security.md)
 
 ## 개요

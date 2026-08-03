@@ -1,21 +1,24 @@
 # Quick Reference
 
 > 1페이지 프로젝트 컨텍스트. 세션 시작 시 필독. 수치 변경 시 즉시 갱신.
-> 최종 갱신: 2026-06-07
+> 최종 갱신: 2026-08-04
 
 ## ✅ POC → Post-POC → v2 설계 완료 → v2 구현 진행 중
 - **Phase 1~3**: ✅ 전부 완료 — M4 마일스톤 달성, POC 공식 종료
 - **POC 종료 게이트**: ✅ 통과 (보안 14 페네스트 + 번들 임계치 PASS)
 - **Post-POC**: APP-04 ✅ + TEST-01 ✅ + DSK-05 ✅ + **REFAC-01 8/8 ✅** + APP-04 확장 ✅
 - **v2 설계 단계 ✅ 완료**: SRV-00 모노레포 + **ADR-0016 + ADR-0017~0023 일괄 채택** (Ports & Adapters + Local 어댑터 6건) + **v2 plan v0.3.0** (10 Epic + 58 작업)
-- **REFAC-02-P1 ✅ 완료** (2026-05-27, commit e602623) — 5 Port SSOT + `packages/adapters-local` 골조 + namespace-registry reshape
+- **REFAC-02**: **P1 ✅ + P2 ✅ + P3 ✅ 완료** — 5 Port SSOT / BlobStorage Port + `@zm/storage` deprecation shell / AppRepository Port + LocalRepo
 - **협업 인프라 ✅ 이식 완료** (2026-06-07, commit c368b5e) — sonix_docs 멀티 세션 협업 (WU claim + worktree 격리 + events SSOT + 헌법 3)
-- **다음 진입**: **REFAC-02-P2** — BlobStorage Port + LocalOPFS 어댑터 이전 (`packages/storage` 흡수)
+- **아키텍처 전면 검토 ✅ 완료** (2026-08-04) — 유연성·확장성·표준성 관점 56건 확정, G0~G3 반영 (아래 참조)
+- **다음 진입**: **REFAC-02-P4** — AuthProvider / SyncProvider / ModerationProvider 3 어댑터
 
-## 현재 상태 (2026-06-07)
+## 현재 상태 (2026-08-04)
 - **저장소**: `git@github-personal:hanumoka/zm-os.git`, branch `main`
-- **모노레포**: `apps/web` + `packages/{core,storage,ipc,adapters-local}` (pnpm 11 + Turborepo 2.7) — adapters-local은 P1 골조
-- **빌드**: `pnpm install` + `pnpm turbo type-check` 통과 / vitest 61/61 PASS / next build ✅
+- **모노레포**: `apps/web` + `packages/{core,storage,ipc,adapters-local}` (pnpm 10.33 + Turborepo 2.9)
+  — `packages/storage`는 47줄 deprecation shell (ADR-0020 §D5, P5에서 삭제)
+- **빌드**: `pnpm turbo type-check test lint` 전부 통과 / **vitest 185** / next build ✅
+- **린트**: `pnpm lint` 복구됨 (flat config, error 0 / warning 23). `next lint`는 Next 16에서 제거됨
 - **dev 서버**: `pnpm --filter @zm/web dev` (백그라운드, 재부팅 시 종료)
 
 ## ✅ 아키텍처 방향 (2026-05-26 결정 → 2026-05-27 반영 완료)
@@ -25,18 +28,19 @@
 - baseline 스냅샷: [`docs/01-architecture/06-current-snapshot-2026-05-26.md`](../01-architecture/06-current-snapshot-2026-05-26.md)
 
 ## 한 줄 요약
-브라우저 가상 데스크탑 + JS 게임 스토어 POC. 단일 사용자, blob: iframe 샌드박싱, IndexedDB/OPFS 스토리지. v2는 로컬-우선 + 옵션 클라우드 어댑터 모델.
+브라우저 가상 데스크탑 + JS 게임 스토어 POC. 단일 사용자, **srcdoc** iframe 샌드박싱(opaque origin), IndexedDB/OPFS 스토리지. v2는 로컬-우선 + 옵션 클라우드 어댑터 모델.
 
 ## 기술 스택
 - Next.js 16 + React 19 + Tailwind v4 (모노레포 `apps/web/`)
 - TypeScript strict, any 금지
-- iframe sandbox + Comlink IPC (앱 격리, `apps/web/src/lib/apps/ipc/`)
+- iframe `srcdoc` + `sandbox="allow-scripts"` + Comlink 와이어 호환 자체 IPC (`packages/ipc/`)
 - Zod (매니페스트 검증, 4.4.3)
-- idb (IndexedDB wrapper, 8.0.3) — `packages/storage/`
+- idb (IndexedDB wrapper, 8.0.3) — `packages/adapters-local/src/blob-storage/`
 - jszip (ZIP 파싱 + 보안 검증, 3.10.1)
 - Phaser 3.90.0 / Pixi.js 8.18.1 / Three.js r184 (게임 엔진 매트릭스 PASS)
 - IndexedDB / OPFS / Memory (StorageAdapter Strategy)
-- Vitest 4.1.7 + Playwright (테스트)
+- Vitest 4.1.7 (+ happy-dom, `packages/ipc`) + Playwright (e2e)
+- ESLint 9 flat config (금지 규칙 기계 검사)
 
 ## 핵심 정책
 - ARCH-01: Next.js 풀스택 + v2 pnpm/Turborepo 모노레포 (reshape 2026-05-26)
@@ -69,6 +73,34 @@ pnpm --filter @zm/web dev
 ## 에이전트 팀 (14명 — 2단계 검증 파이프라인)
 
 설계 architect+research-analyst+**design-reviewer** / 구현 lib-developer+fe-developer / 1차검증 build+code-reviewer(+SOLID)+sandbox-auditor+constraint / 2차검증 **integration-tester**+**perf-monitor** / 메타 self-verifier+**zm-context-guardian**(정합성 검증) / 문서 doc-updater. architect+design-reviewer = 필수 게이트. 워크플로: [`.claude/agents/_workflow.md`](../../.claude/agents/_workflow.md)
+
+## 2026-08-04 세션 — 아키텍처 검토 반영 (G0~G3)
+
+전면 검토 56건(high 11 / medium 28 / low 17) 확정 후 다음을 반영했다.
+
+**수정한 실제 버그**
+- 윈도우 레이아웃 복원 불가 — hydration 경합으로 복원 즉시 자동 닫힘 (DSK-04는 ✅였으나 동작 안 함)
+- 데스크탑 설정 상호 삭제 — 배경만 바꿔도 저장된 themeMode가 기본값으로 덮어써짐
+- `compareSemver`가 짧은 버전을 "동일"로 판정 → 업데이트 판정 실패
+- 레지스트리 어댑터 정책 3값이 2값으로 접혀 `local-memory` 선언이 OPFS 영구 저장으로 뒤집힘
+- 스토어 아이콘이 화면 밖 이탈, 아이콘 겹침·화면 밖 배치로 접근 불가
+
+**구조 개선**
+- 새 namespace 추가: **4파일 9곳 → 레지스트리 1항목 + NS_ 상수 1줄** (DB_VERSION·스키마·upgrade 전부 파생)
+- `lib/storage`에서 표현 로직 분리 → `components/desktop/{icon-grid,wallpaper-presets}.ts`
+- `writable` 가드를 `usePersistence`로 일원화 (세 소비자 복제 → 1곳)
+- ADR-0040: `contentRef`에 `inline-html` variant + `normalizeAppRecord` 승격 함수 (P5 게이트 해소)
+
+**안전망**
+- `pnpm lint` 복구 — 금지 규칙 4개가 주석에서 기계 검사로 (error 0 / warning 23)
+- `noUncheckedIndexedAccess` 전 패키지 적용, 테스트도 type-check 대상
+- 테스트 **133 → 185** (`host.ts` 보안 게이트 12 / `windowReducer` / CSP / 격자 / AppRecord 승격 13)
+
+**미해결로 남긴 것**
+- 잘못된 레코드 1건이 스토어 페이지 전체를 죽인다 (`defaultWidth` 크래시). 레거시 `user-apps.ts` 경로라
+  이번 정규화를 타지 않는다 — **P5 배선이 이 크래시를 "건너뛰기"로 바꾼다**
+- `system` namespace는 DB_VERSION 5까지 올려 만들었으나 **읽기·쓰기 코드 0건**. LocalAuth(P4)가 유일한 소비자
+- 배경 프리셋 버튼에 접근 가능한 이름 없음 (a11y 경고로 잡힘)
 
 ## 다음 진입 지점 — REFAC-02 (코드 마이그레이션 5 작업, ~3주)
 

@@ -47,6 +47,7 @@
 
 ## 11-archive/ — 월별 작업 로그
 - [2026-05.md](11-archive/2026-05.md) — 2026년 5월
+- [2026-08.md](11-archive/2026-08.md) — 2026년 8월 (아키텍처 검토 반영)
 
 ## 13-troubleshooting/ — 트러블슈팅
 - [index.md](13-troubleshooting/index.md) — TS 인덱스 테이블

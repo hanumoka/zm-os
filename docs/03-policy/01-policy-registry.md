@@ -146,6 +146,40 @@
 - **재고 시점**: 패키지 10+ 또는 enterprise 요구 시 Nx 검토
 - **상세**: ADR-0016
 
+### TECH-11: 금지 규칙의 기계 검사 — ESLint flat config (2026-08-04)
+- **결정**: 루트 `eslint.config.mjs` 단일 flat config. error는 금지 규칙 + `rules-of-hooks`만, 나머지는 warn.
+  `@typescript-eslint/no-explicit-any`, `no-restricted-imports`(`@zm/storage` 차단),
+  `no-restricted-syntax`(raw `postMessage` 차단, `packages/ipc` 제외).
+- **이유**: `next lint`가 Next 16에서 제거돼 `pnpm lint`가 깨져 있었고, 그 결과 금지 규칙 4개가
+  주석으로만 존재했다. 코드의 `eslint-disable` 28건은 읽는 린터가 없어 장식이었다.
+- **제외**: type-checked 규칙(`no-unsafe-*`)은 IDB·OPFS 어댑터의 정당한 캐스트에서 대량 위반이 떠 도입하지 않는다.
+- **`@zm/storage` 규칙은 현재 warn** — 아직 쓰는 5개 파일이 곧 P5 마이그레이션 체크리스트다. P5 완료 시 error로 승격.
+- **재고 시점**: 규칙을 늘릴 때는 error 승격 전에 기존 위반 수를 먼저 센다.
+
+### TECH-12: 타입 엄격도 — noUncheckedIndexedAccess (2026-08-04)
+- **결정**: 5개 tsconfig 전부에 `noUncheckedIndexedAccess: true`. `__tests__`도 type-check 대상에 포함.
+- **이유**: 도입 시 위반이 4건뿐이었고 그중 하나가 실제 결함이었다 — `compareSemver`가 짧은 버전에서
+  `undefined` 비교로 0(동일)을 반환해 업데이트 판정이 조용히 틀렸다.
+- **금지**: 위반을 `!` 단언으로 덮지 않는다. 방어적으로 확인하거나 기본값을 명시한다.
+
+### ARCH-05: 스토리지 스키마는 레지스트리에서 파생한다 (2026-08-04)
+- **결정**: `NAMESPACE_REGISTRY`가 유일한 입력이다. `DB_VERSION`(=`DB_SCHEMA_VERSION`), idb 스키마 타입,
+  upgrade 시 objectStore 생성이 전부 여기서 파생된다.
+- **새 namespace 추가**: 레지스트리 1항목 + `NS_*` 상수 1줄. 그 외 손댈 곳 없음.
+- **이유**: 이전에는 4파일 9곳을 손으로 맞춰야 했고, `DB_VERSION`이 어긋나면 objectStore가 생성되지 않아
+  런타임 `NotFoundError`가 났다. 이 비용이 이미 설계를 왜곡했다 — 아이콘 배치가 도메인상 별개인데도
+  IDB 버전 승격을 피하려고 `desktop-layout` namespace에 얹혀 있었다.
+- **불변식**: `sinceVersion`은 1부터 빈틈 없이 이어져야 한다 (`namespace-registry.test.ts`가 검사).
+- **레지스트리의 어댑터 값은 실제 결정자다**: `local-idb|local-opfs|local-memory` 3값이 리졸버까지
+  1:1로 전달된다. 이전에는 2값으로 접혀 `local-memory` 선언이 OPFS 영구 저장으로 뒤집혔다.
+
+### PROD-06: 영속화 쓰기 가드 (2026-08-04)
+- **결정**: 저장 전 `usePersistence`의 `writable`(= `hydrated && !hydrationFailed`)을 반드시 확인한다.
+- **이유**: `usePersistence`는 로드가 실패해도 `hydrated`를 true로 만든다. 그때 메모리 상태는 초기값이라
+  그대로 저장하면 읽지 못했을 뿐 멀쩡한 사용자 데이터를 지운다. 이 판정식이 세 소비자에 복제돼
+  있었고 그중 하나가 빠뜨려 데스크탑 설정이 상호 삭제됐다.
+- **금지**: 도메인 래퍼의 `loadFn`에서 에러를 catch하지 않는다. 삼키면 `hydrationFailed`가 영원히 false다.
+
 ## Deprecated / Superseded
 
 ### TECH-07 (superseded 2026-05-27): v2 사용자 인증 — Supabase Auth 단일 채택

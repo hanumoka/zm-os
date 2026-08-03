@@ -37,6 +37,7 @@
 | DSK-03 | `apps/web/src/components/desktop/{Taskbar.tsx,TaskbarButton.tsx,Clock.tsx}` | ✅ |
 | DSK-04 | 윈도우 레이아웃 영속화 (StorageAdapter 통합) | ✅ |
 | DSK-05 | 데스크탑 커스터마이징 (배경/테마/설정 UI) | ✅ |
+| DSK-06 | 아이콘 드래그 이동 + 격자 정렬 | ✅ |
 
 ### Store (STR)
 | ID | 위치 | 상태 |

@@ -2,8 +2,8 @@
 
 > **Living Document**. 기능 완료 시 즉시 갱신. 버전 bump 필수.
 
-**Version**: 0.8.0
-**Last Updated**: 2026-05-25
+**Version**: 0.9.0
+**Last Updated**: 2026-08-04
 **Status**: POC 1차 완료 — Phase 0~3 전체 완료 (M4 마일스톤)
 
 ---
@@ -28,7 +28,7 @@ zm-os는 **브라우저 안에서 동작하는 가상 데스크탑** 으로, 사
 - ✅ 가상 데스크탑 UI (윈도우 매니저, 데스크탑 영역, 작업표시줄)
 - ✅ 앱 스토어 UI (목록, 상세, 설치 버튼)
 - ✅ 앱 매니페스트 명세 (이름, 버전, entryPoint, 권한)
-- ✅ iframe 샌드박싱 (blob: URL + `sandbox="allow-scripts"`)
+- ✅ iframe 샌드박싱 (`srcdoc` + `sandbox="allow-scripts"`)
 - ✅ Comlink 기반 호스트-앱 IPC
 - ✅ 클라이언트 스토리지 (IndexedDB 폴백 + OPFS)
 - ✅ 첫 샘플 게임 1개 (Phaser 또는 Pixi)
@@ -57,15 +57,16 @@ zm-os는 **브라우저 안에서 동작하는 가상 데스크탑** 으로, 사
 | **DSK-01** | 윈도우 매니저 (드래그/리사이즈/포커스) | ✅ 완료 | `src/components/desktop/Window.tsx + useWindowManager (react-rnd v10.5.3)` |
 | **DSK-02** | 데스크탑 영역 + 아이콘 | ✅ 완료 | `src/components/desktop/Desktop.tsx + DesktopIcon.tsx + desktopApps.ts` |
 | **DSK-03** | 작업표시줄 (실행 중 앱) | ✅ 완료 | `src/components/desktop/Taskbar.tsx + TaskbarButton.tsx + Clock.tsx` |
-| **DSK-04** | 윈도우 레이아웃 영속화 | ✅ 완료 | desktop-layout.ts + WindowManagerProvider hydration (ADR-0009) |
-| **DSK-05** | 데스크탑 커스터마이징 (배경/테마/설정) | ✅ 완료 | DesktopSettingsProvider + SettingsPanel + WALLPAPER_CLASSES (ADR-0012) |
+| **DSK-04** | 윈도우 레이아웃 영속화 | ✅ 완료 | desktop-layout.ts + WindowManagerProvider hydration (ADR-0009). **2026-08-04 정정**: 저장은 되나 복원이 동작하지 않았음(hydration 경합) — 수정 완료 |
+| **DSK-05** | 데스크탑 커스터마이징 (배경/테마/설정) | ✅ 완료 | DesktopSettingsProvider + SettingsPanel + wallpaper-presets.ts (ADR-0012). **2026-08-04 정정**: 설정 상호 삭제 버그 수정, patch 병합으로 통합 |
+| **DSK-06** | 아이콘 드래그 이동 + 격자 정렬 | ✅ 완료 | icon-grid.ts(순수 기하) + desktop-icons.ts(영속화). Pointer Events, 100×100 격자 스냅, 겹침 회피, 자동 정렬·초기화 컨텍스트 메뉴 |
 | **STR-01** | 앱 카탈로그 UI | ✅ 완료 | `/store` 라우트 + AppCard + InstalledAppsProvider |
 | **STR-02** | 앱 상세 페이지 + 설치 | ✅ 완료 | AppDetail 패널 + install/uninstall 액션 |
 | **APP-01** | 앱 매니페스트 스키마 (Zod) | ✅ 완료 | `src/lib/apps/manifest.ts` v2 capabilities (REFAC-01 H-1) |
 | **APP-02** | 앱 패키지 포맷 (itch.io식 ZIP) | ✅ 완료 | JSZip 3.10.1 + 보안 검증 9 validator (REFAC-01 H-2) |
 | **APP-03** | 설치한 앱 목록 관리 | ✅ 완료 | IndexedDB hydration + fire-and-forget persist |
 | **APP-04** | 사용자 앱 삭제/업데이트 + 컨텍스트 메뉴 | ✅ 완료 | ConfirmDialog + semver + AppInfoDialog (ADR-0011) |
-| **SBX-01** | blob: URL iframe 샌드박스 SDK | ✅ 완료 | `src/lib/apps/sandbox.ts` (srcdoc + sandbox="allow-scripts") |
+| **SBX-01** | iframe 샌드박스 SDK | ✅ 완료 | `src/lib/apps/sandbox.ts` — **실제 구현은 `srcdoc`** + `sandbox="allow-scripts"`. `blob:`은 최상위 탭으로 열리면 호스트 origin 권한으로 실행되는 탈출 경로가 있어 쓰지 않는다 |
 | **SBX-02** | CSP/Permissions-Policy 헤더 | ✅ 완료 | next.config.ts headers() + src/lib/security/csp.ts |
 | **IPC-01** | Comlink wire-compatible RPC 어댑터 | ✅ 완료 | `src/lib/apps/ipc/` + rate-limiter (N-08, ADR-0010) |
 | **STG-01** | IndexedDB 추상화 | ✅ 완료 | `src/lib/storage/indexeddb.ts` (idb v8.0.3 + 메모리 폴백) |
@@ -136,6 +137,22 @@ POC 완료 = 아래 시나리오가 동작:
 ---
 
 ## §8. Change Log
+
+### 0.9.0 (2026-08-04) — 아키텍처 전면 검토 반영 (G0~G3)
+- 전면 검토 56건 확정(high 11 / medium 28 / low 17) 후 유연성·확장성·표준성 관점으로 반영
+- **DSK-04 정정**: ✅ 완료로 표기돼 있었으나 복원이 동작하지 않았다. 윈도우 레이아웃과 설치 목록이
+  서로 다른 IDB 로드라 순서가 보장되지 않아, 레이아웃이 먼저 도착하면 APP-04 자동 닫기가
+  "설치되지 않음"으로 오판해 복원된 창을 즉시 닫았다. hydration 게이트로 수정
+- **DSK-05 정정**: 설정 setter가 각자 나머지 필드를 재조립해, 배경만 바꿔도 저장된 themeMode가
+  기본값으로 덮어써졌다. patch 병합 하나로 통합
+- **DSK-06 신규**: 아이콘 드래그 이동 + 격자 정렬 (Pointer Events, 100×100 스냅, 겹침 회피)
+- **SBX-01 문서 정정**: 표제가 `blob: URL`이었으나 실제 구현은 `srcdoc`다. `blob:`은 최상위 탭으로
+  열릴 때 호스트 origin 권한으로 실행되는 탈출 경로가 있어 채택하지 않는다
+- 새 namespace 추가 비용: 4파일 9곳 → 레지스트리 1항목 + 상수 1줄 (DB_VERSION·스키마·upgrade 파생)
+- ADR-0040: `AppRecord.contentRef`에 `inline-html` variant + 레거시 승격 함수 — P5 데이터 모델 블로커 해소
+- `pnpm lint` 복구(Next 16이 `next lint` 제거), `noUncheckedIndexedAccess` 전 패키지 적용
+- 테스트 133 → 185
+
 
 ### 0.7.0 (2026-05-25) — Phase 3 작업 2 완료 (안정화)
 - Phase 3 작업 2 완료 ✅ (안정화: iframe 우회 시도 셀프 페네스트 + 번들 측정)
