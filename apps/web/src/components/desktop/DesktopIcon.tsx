@@ -22,6 +22,12 @@ type DesktopIconProps = {
    * offsetParent가 바뀌어 드래그 좌표가 어긋난다.
    */
   anchor?: 'top-right';
+  /**
+   * 단일 클릭으로도 실행한다. 스토어처럼 '앱 실행'이 아니라 '화면 이동'인
+   * 아이콘용이다. 드래그와 충돌하지 않는다 — 드래그 직후 클릭은 isDragEcho()가
+   * 막는다.
+   */
+  openOnSingleClick?: boolean;
   selected?: boolean;
   onLaunch: () => void;
   onSelect?: () => void;
@@ -66,6 +72,7 @@ export function DesktopIcon({
   icon,
   position,
   anchor,
+  openOnSingleClick = false,
   selected = false,
   onLaunch,
   onSelect,
@@ -91,10 +98,13 @@ export function DesktopIcon({
   const handleClick = (): void => {
     if (isDragEcho()) return;
     onSelect?.();
+    if (openOnSingleClick) onLaunch();
   };
 
   const handleDoubleClick = (): void => {
     if (isDragEcho()) return;
+    // 단일 클릭이 이미 실행했다. 여기서 또 부르면 같은 동작이 두 번 난다.
+    if (openOnSingleClick) return;
     onLaunch();
   };
 

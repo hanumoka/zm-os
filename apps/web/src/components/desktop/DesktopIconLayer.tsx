@@ -84,9 +84,10 @@ export function DesktopIconLayer({
        * 지금은 아이콘 자신이 anchor로 배치되고, 한 번 끌면 좌표가 저장돼
        * 그때부터는 일반 앱 아이콘과 완전히 같은 경로를 탄다.
        *
-       * 실행은 다른 아이콘과 같은 규칙(더블클릭 / Enter / Space)이다.
-       * <Link>의 단일클릭 이동은 드래그와 양립할 수 없어 걷어냈다 —
-       * 드래그를 놓는 순간 앵커가 네비게이션을 일으킨다.
+       * 실행 방식은 기존과 같다 — **단일 클릭으로 스토어가 열린다.**
+       * <Link>를 걷어낸 것은 앵커의 네이티브 이동이 드래그 종료와 충돌하기
+       * 때문이지 단일 클릭 자체가 문제여서가 아니다. 클릭 핸들러 방식은
+       * isDragEcho()가 드래그 직후 클릭을 막아 주므로 드래그와 공존한다.
        */}
       {showStoreIcon && (
         <DesktopIcon
@@ -95,6 +96,7 @@ export function DesktopIconLayer({
           icon={{ kind: 'emoji', char: '🛒' }}
           position={iconPositions?.[STORE_ICON_ID]}
           anchor="top-right"
+          openOnSingleClick
           selected={selectedIconId === STORE_ICON_ID}
           dragging={draggingIconId === STORE_ICON_ID}
           onLaunch={(): void => {
