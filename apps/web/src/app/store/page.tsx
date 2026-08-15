@@ -8,7 +8,6 @@ import { useInstalledApps } from '@/components/store/useInstalledApps';
 import { useUserApps } from '@/components/store/UserAppsProvider';
 import { AppCard } from '@/components/store/AppCard';
 import { AppDetail } from '@/components/store/AppDetail';
-import { AppUploadButton } from '@/components/store/AppUploadButton';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 
 // ─── 카테고리 필터 타입 ───────────────────────────────────────────────────────
@@ -37,8 +36,10 @@ const CATEGORY_FILTERS: ReadonlyArray<CategoryFilter> = [
  * APP-02 통합:
  * - UserAppsProvider에서 userApps 수신
  * - buildCatalog(userApps)로 built-in + 사용자 앱 통합 카탈로그 생성
- * - 헤더에 AppUploadButton 삽입 (P2=A)
  * - user 앱 상세 패널에 "영구 삭제" 버튼 추가 (P8=A+B)
+ *
+ * ZIP 업로드 UI는 제거됐다 (zm-docs DEC-0007). 배포와 로그인이 붙으면 인터넷에
+ * 노출된 업로드 경로가 되기 때문이다. 재장착은 eslint no-restricted-imports가 막는다.
  *
  * 설치 상태: useInstalledApps() (InstalledAppsProvider 하위 — layout.tsx 옵션A)
  */
@@ -114,9 +115,7 @@ export default function StorePage(): React.JSX.Element {
         <h1 className="text-base font-semibold text-neutral-900">
           zm-os 앱 스토어
         </h1>
-        {/* APP-02: ZIP 업로드 버튼 (P2=A) */}
         <div className="ml-auto flex items-center gap-3">
-          <AppUploadButton />
           <span className="text-xs text-neutral-400">
             {catalog.length}개 앱
           </span>

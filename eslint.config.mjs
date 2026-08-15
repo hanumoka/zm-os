@@ -62,6 +62,11 @@ export default tseslint.config(
               message:
                 '@zm/storage는 ADR-0020 §D5의 삭제 대상 shell이다. @zm/adapters-local/blob-storage를 쓸 것.',
             },
+            {
+              name: '@/components/store/AppUploadButton',
+              message:
+                'ZIP 업로드 UI는 zm-docs DEC-0007로 제거됐다. 배포와 로그인이 붙으면 인터넷에 노출된 업로드 경로가 된다. 재장착은 새 결정 기록이 선행이다.',
+            },
           ],
         },
       ],

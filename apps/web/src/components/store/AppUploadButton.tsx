@@ -1,5 +1,19 @@
 'use client';
 
+/**
+ * ⚠ 이 컴포넌트는 어디에도 마운트되어 있지 않다.
+ *
+ * zm-docs `DEC-0007`이 ZIP 업로드 UI 제거를 결정했다. 근거는 배포와 로그인이
+ * 붙는 순간 이 버튼이 "인터넷에 노출된 업로드 경로"가 되어, 공개 업로드 경로를
+ * 결정 게이트 뒤에 두기로 한 정책을 우회해 열어버리기 때문이다.
+ *
+ * 파일을 지우지 않고 남긴 이유는 `zip-loader`의 검증 파이프라인(크기·magic byte·
+ * path traversal·zip bomb·스키마·id 중복 등)이 재사용 가치가 있는 자산이기 때문이다.
+ *
+ * **재장착하려면 새 결정 기록이 선행이다.** import는 eslint `no-restricted-imports`가
+ * 막는다 — 주석이 아니라 기계가 강제한다.
+ */
+
 import React, { useRef, useState } from 'react';
 import { loadUserAppFromZip } from '@/lib/apps/zip-loader';
 import type { ZipLoadErrorCode, ParsedUserApp, UpdateTarget } from '@/lib/apps/zip-loader';
