@@ -36,15 +36,21 @@ const DESCRIPTOR: AdapterDescriptor = {
 };
 
 export type CreateLocalAppRepositoryOptions = {
-  /** POC: write 시 ownerId 미지정이면 채울 anon UserId (LocalAuth, ADR-0018). 기본 undefined. */
-  readonly defaultOwnerId?: UserId;
+  /**
+   * 이 저장소가 다루는 소유자. 필수다 (zm-docs `contracts.md` §2).
+   *
+   * 아래 BlobStorage는 이미 이 소유자의 파티션으로 좁혀져 있다. 따라서 여기서
+   * 다른 소유자의 레코드를 쓰면 **내 파티션에 남의 소유자 값이 든 레코드**가 생겨
+   * 키와 필드가 어긋난다. 그래서 저장소마다 소유자를 하나로 고정한다.
+   */
+  readonly ownerId: UserId;
 };
 
 export function createLocalAppRepository(
   blob: BlobStorage,
-  opts?: CreateLocalAppRepositoryOptions,
+  opts: CreateLocalAppRepositoryOptions,
 ): AppRepository {
-  const defaultOwnerId = opts?.defaultOwnerId;
+  const { ownerId } = opts;
 
   return {
     descriptor: DESCRIPTOR,
@@ -59,7 +65,7 @@ export function createLocalAppRepository(
       // upsert 가드에 걸린다. 정규화하고, 판별 불가능한 것은 삭제하지 않고 건너뛴다.
       const records = await blob.list<unknown>(USER_APPS_NS, callOpts);
       let result = records
-        .map((r) => normalizeAppRecord(r.value))
+        .map((r) => normalizeAppRecord(r.value, ownerId))
         .filter((r): r is AppRecord => r !== null);
       if (filter?.ownerId !== undefined) {
         result = result.filter((r) => r.ownerId === filter.ownerId);
@@ -69,7 +75,7 @@ export function createLocalAppRepository(
 
     async get(id: string, callOpts?: PortCallOptions): Promise<AppRecord | null> {
       const record = await blob.get<unknown>(USER_APPS_NS, id, callOpts);
-      return record === undefined ? null : normalizeAppRecord(record);
+      return record === undefined ? null : normalizeAppRecord(record, ownerId);
     },
 
     async upsert(record: AppRecord, callOpts?: PortCallOptions): Promise<void> {
@@ -80,11 +86,16 @@ export function createLocalAppRepository(
           'INVALID_SOURCE',
         );
       }
-      const toStore: AppRecord =
-        record.ownerId === undefined && defaultOwnerId !== undefined
-          ? { ...record, ownerId: defaultOwnerId }
-          : record;
-      await blob.put(USER_APPS_NS, toStore.manifest.id, toStore, callOpts);
+      // 다른 소유자의 레코드를 조용히 고쳐 쓰지 않는다. 고쳐 쓰면 호출자가 넘긴
+      // 값이 사라지고, 거부하지 않으면 키와 필드가 어긋난 레코드가 남는다.
+      if (record.ownerId !== ownerId) {
+        throw new PortError(
+          `이 저장소는 소유자 하나만 다룹니다 (기대: '${ownerId}', 받은 값: '${record.ownerId}')`,
+          'app-repository',
+          'OWNER_MISMATCH',
+        );
+      }
+      await blob.put(USER_APPS_NS, record.manifest.id, record, callOpts);
     },
 
     async remove(id: string, callOpts?: PortCallOptions): Promise<void> {

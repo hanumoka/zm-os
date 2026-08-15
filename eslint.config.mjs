@@ -80,6 +80,15 @@ export default tseslint.config(
           message:
             'raw postMessage 금지. @zm/ipc의 엔드포인트를 사용할 것 (ARCH-02).',
         },
+        {
+          // 저수준 IDB CRUD 직접 사용 금지 — 파티션 스코프 키 경계를 우회한다.
+          // zm-docs contracts.md §2가 "어댑터 경계 한 곳"을 정했고, 우회로가 있으면
+          // 그 결정이 참이 아니게 된다. 실제로 이 경로로 우회하던 래퍼가 2개 있었다.
+          selector:
+            "ImportDeclaration > ImportSpecifier[imported.name=/^(idbGet|idbPut|idbDelete|idbList|idbClear|openDB)$/]",
+          message:
+            '저수준 IDB CRUD 직접 사용 금지. 소유자 파티션 접두사를 건너뛴다. BlobStorage 어댑터(resolveAdapterFor / createLocalBlobStorage)를 경유할 것 (zm-docs contracts.md §2).',
+        },
       ],
 
       // ── React ────────────────────────────────────────────────────────────
@@ -114,6 +123,13 @@ export default tseslint.config(
   {
     files: ['packages/storage/**/*.ts', 'apps/web/src/lib/storage/**/*.ts'],
     rules: { 'no-restricted-imports': 'warn' },
+  },
+
+  // 파티션 경계를 구현하는 곳과, 그것을 re-export하는 shell은 저수준 CRUD를 쓴다.
+  // 여기가 바로 "한 곳"이므로 금지 대상이 아니다.
+  {
+    files: ['packages/adapters-local/**/*.ts', 'packages/storage/**/*.ts'],
+    rules: { 'no-restricted-syntax': 'off' },
   },
 
   // 테스트는 진단 목적의 콘솔·단언 캐스트를 허용한다.

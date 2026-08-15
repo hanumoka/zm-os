@@ -3,7 +3,7 @@ import { PortError } from '@zm/core';
 import type { AppManifest, AppRecord, AppRepository, UserId } from '@zm/core';
 import { createMemoryBlobStorage } from '../../blob-storage';
 import { createLocalAppRepository } from '../local-app-repository';
-import { createTestAppRepository } from '../testing';
+import { createTestAppRepository, TEST_OWNER_ID } from '../testing';
 
 function manifestOf(id: string): AppManifest {
   return {
@@ -24,6 +24,7 @@ function userApp(id: string, extra?: Partial<AppRecord>): AppRecord {
     source: 'user',
     installedAt: 1,
     contentRef: { kind: 'blob-ref', blobKey: id },
+    ownerId: TEST_OWNER_ID,
     ...extra,
   };
 }
@@ -32,7 +33,7 @@ describe('createLocalAppRepository', () => {
   let repo: AppRepository;
 
   beforeEach(() => {
-    repo = createLocalAppRepository(createMemoryBlobStorage());
+    repo = createLocalAppRepository(createMemoryBlobStorage(), { ownerId: TEST_OWNER_ID });
   });
 
   it('descriptor는 app-repository / local-idb', () => {
@@ -69,6 +70,7 @@ describe('createLocalAppRepository', () => {
       source: 'built-in',
       installedAt: 1,
       contentRef: { kind: 'built-in-url', url: '/x.html' },
+      ownerId: TEST_OWNER_ID,
     };
     await expect(repo.upsert(builtIn)).rejects.toBeInstanceOf(PortError);
     await expect(repo.upsert(builtIn)).rejects.toMatchObject({
@@ -100,27 +102,34 @@ describe('createLocalAppRepository', () => {
     expect(await repo.listInstalled()).toEqual(['b']);
   });
 
-  it('defaultOwnerId — ownerId 미지정 시 자동 채움', async () => {
-    const owned = createLocalAppRepository(createMemoryBlobStorage(), {
-      defaultOwnerId: 'u-1' as UserId,
-    });
-    await owned.upsert(userApp('a'));
+  it('ownerId 없는 레거시 레코드는 읽는 시점에 이 저장소의 소유자로 채워진다', async () => {
+    const blob = createMemoryBlobStorage();
+    const owned = createLocalAppRepository(blob, { ownerId: 'u-1' as UserId });
+    // 접두사·소유자 필드가 도입되기 전 형태를 어댑터를 거치지 않고 직접 심는다.
+    const { ownerId: _drop, ...legacy } = userApp('a');
+    await blob.put('user-apps', 'a', legacy);
+
     expect((await owned.get('a'))?.ownerId).toBe('u-1');
   });
 
-  it('defaultOwnerId — record.ownerId 있으면 보존', async () => {
+  it('다른 소유자의 레코드를 쓰면 거부한다 — 키와 필드가 어긋나는 것을 막는다', async () => {
     const owned = createLocalAppRepository(createMemoryBlobStorage(), {
-      defaultOwnerId: 'u-1' as UserId,
+      ownerId: 'u-1' as UserId,
     });
-    await owned.upsert(userApp('a', { ownerId: 'u-2' as UserId }));
-    expect((await owned.get('a'))?.ownerId).toBe('u-2');
+    const foreign = owned.upsert(userApp('a', { ownerId: 'u-2' as UserId }));
+    await expect(foreign).rejects.toMatchObject({
+      port: 'app-repository',
+      code: 'OWNER_MISMATCH',
+    });
   });
 
-  it('list ownerId 필터', async () => {
-    const owned = createLocalAppRepository(createMemoryBlobStorage());
+  it('list ownerId 필터 — 저장소 소유자가 아니면 비어 있다', async () => {
+    const owned = createLocalAppRepository(createMemoryBlobStorage(), {
+      ownerId: 'u-1' as UserId,
+    });
     await owned.upsert(userApp('a', { ownerId: 'u-1' as UserId }));
-    await owned.upsert(userApp('b', { ownerId: 'u-2' as UserId }));
     expect((await owned.list({ ownerId: 'u-1' as UserId })).map((r) => r.manifest.id)).toEqual(['a']);
+    expect(await owned.list({ ownerId: 'u-2' as UserId })).toEqual([]);
   });
 
   it('AbortSignal 사전 abort → reject (BlobStorage 경유)', async () => {

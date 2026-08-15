@@ -11,6 +11,7 @@ import { getBlobStorageAdapter } from '@zm/core';
 import { isOPFSAvailable, createOPFSBlobStorage } from './opfs-adapter';
 import { isIDBAdapterAvailable, createIDBBlobStorage } from './idb-adapter';
 import { createMemoryBlobStorage } from './memory-adapter';
+import { withPartition } from './partitioned';
 
 export type BlobStoragePolicy = 'auto' | 'idb-only' | 'opfs-only' | 'memory';
 
@@ -50,14 +51,7 @@ function resolvePolicy(opts?: CreateLocalBlobStorageOptions): BlobStoragePolicy 
   }
 }
 
-/**
- * Local BlobStorage 어댑터를 생성한다 (ADR-0020 §D1).
- * - policy 명시 시 그대로, 미명시 + namespace 지정 시 registry 정책으로 파생, 둘 다 없으면 'auto'.
- * - 'auto' 우선순위: OPFS > IndexedDB > Memory.
- */
-export function createLocalBlobStorage(
-  opts?: CreateLocalBlobStorageOptions,
-): BlobStorage {
+function createBackend(opts?: CreateLocalBlobStorageOptions): BlobStorage {
   switch (resolvePolicy(opts)) {
     case 'idb-only':
       return isIDBAdapterAvailable() ? createIDBBlobStorage() : createMemoryBlobStorage();
@@ -71,6 +65,23 @@ export function createLocalBlobStorage(
     default:
       return resolveAuto();
   }
+}
+
+/**
+ * Local BlobStorage 어댑터를 생성한다 (ADR-0020 §D1).
+ * - policy 명시 시 그대로, 미명시 + namespace 지정 시 registry 정책으로 파생, 둘 다 없으면 'auto'.
+ * - 'auto' 우선순위: OPFS > IndexedDB > Memory.
+ *
+ * **반환값은 항상 파티션 경계로 감싸져 있다** (zm-docs `contracts.md` §2).
+ * 백엔드 선택보다 이쪽이 중요하다 — 감싸지 않은 어댑터를 밖으로 내보내는 경로를
+ * 만들면 "접두사 없는 키는 존재할 수 없다"가 더 이상 참이 아니게 된다.
+ * 백엔드 자체가 필요한 곳(파티션을 검사하는 테스트)은 `createMemoryBlobStorage()`
+ * 같은 개별 팩토리를 직접 쓴다.
+ */
+export function createLocalBlobStorage(
+  opts?: CreateLocalBlobStorageOptions,
+): BlobStorage {
+  return withPartition(createBackend(opts));
 }
 
 // ─── 레거시 호환 (deprecation period v2.0~v2.1) ──────────────────────────────

@@ -7,10 +7,13 @@
  * @module adapters-local/app-repository/testing
  */
 
-import type { AppRepository } from '@zm/core';
+import type { AppRepository, UserId } from '@zm/core';
 import { createMemoryBlobStorage } from '../blob-storage';
 import { createLocalAppRepository } from './local-app-repository';
 
-export function createTestAppRepository(): AppRepository {
-  return createLocalAppRepository(createMemoryBlobStorage());
+/** 테스트용 고정 소유자. 실제 부트스트랩(UUID 생성)과 무관하게 결과를 재현 가능하게 한다. */
+export const TEST_OWNER_ID = '00000000-0000-4000-8000-000000000001' as UserId;
+
+export function createTestAppRepository(ownerId: UserId = TEST_OWNER_ID): AppRepository {
+  return createLocalAppRepository(createMemoryBlobStorage(), { ownerId });
 }

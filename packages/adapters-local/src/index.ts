@@ -16,3 +16,6 @@
 export * from './blob-storage';
 // P3 (ADR-0019): AppRepository Local 어댑터. 서브패스 '@zm/adapters-local/app-repository' 권장.
 export * from './app-repository';
+// 파티션 스코프 키 (zm-docs contracts.md §2) — 소유자 ID 부트스트랩과 1회 흡수.
+export { getOwnerId, OWNER_ID_KEY } from './partition/owner-id';
+export { ensurePartitionMigrated, PARTITION_MIGRATION_KEY } from './partition/migrate';

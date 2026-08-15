@@ -15,6 +15,9 @@ export {
   type CreateLocalBlobStorageOptions,
 } from './resolve';
 
+// 파티션 경계 (contracts.md §2) — 적용 지점은 createLocalBlobStorage 하나뿐이다.
+export { withPartition, type PartitionOptions } from './partitioned';
+
 // 에러
 export { BlobStorageError, type BlobStorageErrorCode } from './errors';
 

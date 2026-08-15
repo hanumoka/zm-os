@@ -27,7 +27,15 @@ export type AppRecord = {
   readonly source: 'built-in' | 'user';
   readonly installedAt: number;
   readonly contentRef: AppContentRef;
-  readonly ownerId?: UserId; // v2 Cloud 어댑터 RLS용
+  /**
+   * 소유자. optional이 아니다 (zm-docs `contracts.md` §2).
+   *
+   * 저장 키 접두사와 중복이지만 둘 다 둔다 — 접두사는 로컬 KV의 격리 수단이고
+   * 이 필드는 서버 행의 격리 수단(RLS)이다. 클라우드 어댑터가 붙을 때 필드가
+   * 없으면 행 단위 정책을 걸 근거가 없다. 두 값이 어긋나지 않도록 채우는 지점을
+   * 어댑터 하나로 좁힌다.
+   */
+  readonly ownerId: UserId;
 };
 
 /**
@@ -44,8 +52,12 @@ export type AppRecord = {
  *
  * 순수 함수다. 판별 불가능한 값에는 null을 돌려주고, 호출자가 건너뛴다.
  * 삭제하지 않는 것이 중요하다 — 읽지 못한 것과 없는 것은 다르다.
+ *
+ * `ownerId`가 없는 레코드는 접두사가 도입되기 전에 쓰인 것이므로 `fallbackOwnerId`로
+ * 채운다. 인자로 받는 이유는 이 함수가 순수해야 하기 때문이고, 넘기는 쪽이 어댑터
+ * 하나뿐이라 채우는 지점은 여전히 한 곳이다.
  */
-export function normalizeAppRecord(value: unknown): AppRecord | null {
+export function normalizeAppRecord(value: unknown, fallbackOwnerId: UserId): AppRecord | null {
   if (typeof value !== 'object' || value === null) return null;
   const raw = value as Record<string, unknown>;
 
@@ -61,13 +73,18 @@ export function normalizeAppRecord(value: unknown): AppRecord | null {
   const contentRef = normalizeContentRef(raw);
   if (contentRef === null) return null;
 
-  const ownerId = raw['ownerId'];
+  const rawOwnerId = raw['ownerId'];
+  const ownerId =
+    typeof rawOwnerId === 'string' && rawOwnerId.length > 0
+      ? (rawOwnerId as UserId)
+      : fallbackOwnerId;
+
   return {
     manifest: manifest as AppManifest,
     source,
     installedAt,
     contentRef,
-    ...(typeof ownerId === 'string' ? { ownerId: ownerId as UserId } : {}),
+    ownerId,
   };
 }
 

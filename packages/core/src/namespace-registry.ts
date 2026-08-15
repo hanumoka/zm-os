@@ -7,7 +7,8 @@
  *
  * 새 namespace 추가 시:
  * 1. NAMESPACE_REGISTRY에 1항목 추가 (`sinceVersion` = 직전 최대값 + 1)
- * 2. NS_* 상수 1줄 추가
+ * 2. `partition`을 판단한다 — 사용자 데이터면 'scoped'. 'global'은 이유가 필요하다
+ * 3. NS_* 상수 1줄 추가
  *
  * 그 외에는 손댈 곳이 없다. `DB_VERSION`, IDB 스키마 타입, upgrade 시 objectStore 생성은
  * 전부 이 레지스트리에서 파생된다(`indexeddb.ts`). 예전에는 세 곳을 손으로 맞춰야 했고,
@@ -23,10 +24,21 @@ export type AdapterPolicy =
 
 // ─── NamespaceEntry 타입 ──────────────────────────────────────────────────────
 
+/**
+ * 파티션 정책 — 저장 키에 소유자 접두사를 붙일 것인가.
+ *
+ * `global`은 예외이고 이유가 필요하다. `system`이 global인 것은 소유자 ID 자체가
+ * 거기 보관되기 때문이며(접두사를 알려면 접두사가 필요해지는 순환), 그 외에는
+ * 전부 `scoped`다.
+ */
+export type PartitionPolicy = 'scoped' | 'global';
+
 type NamespaceEntry = {
   readonly name: string;
   readonly sinceVersion: number;
   readonly adapterPolicies: ReadonlyArray<AdapterPolicy>;
+  /** 필수다 — 새 namespace를 추가할 때 파티션 여부를 반드시 판단하게 한다. */
+  readonly partition: PartitionPolicy;
 };
 
 // ─── NAMESPACE_REGISTRY (ADR-0023 §D5 + ADR-0018 §D1) ───────────────────────
@@ -35,6 +47,7 @@ export const NAMESPACE_REGISTRY = [
   {
     name: 'installed-apps',
     sinceVersion: 1,
+    partition: 'scoped',
     adapterPolicies: [
       { port: 'blob-storage', adapter: 'local-idb' },
       { port: 'app-repository', adapter: 'local-idb' },
@@ -44,6 +57,7 @@ export const NAMESPACE_REGISTRY = [
   {
     name: 'user-apps',
     sinceVersion: 2,
+    partition: 'scoped',
     adapterPolicies: [
       { port: 'blob-storage', adapter: 'local-idb' },
       { port: 'app-repository', adapter: 'local-idb' },
@@ -53,6 +67,7 @@ export const NAMESPACE_REGISTRY = [
   {
     name: 'desktop-layout',
     sinceVersion: 3,
+    partition: 'scoped',
     adapterPolicies: [
       { port: 'blob-storage', adapter: 'local-idb' },
       { port: 'sync', adapter: 'local-noop' },
@@ -61,6 +76,7 @@ export const NAMESPACE_REGISTRY = [
   {
     name: 'desktop-settings',
     sinceVersion: 4,
+    partition: 'scoped',
     adapterPolicies: [
       { port: 'blob-storage', adapter: 'local-idb' },
       { port: 'sync', adapter: 'local-noop' },
@@ -69,6 +85,7 @@ export const NAMESPACE_REGISTRY = [
   {
     name: 'system',
     sinceVersion: 5,
+    partition: 'global',
     adapterPolicies: [
       { port: 'blob-storage', adapter: 'local-idb' },
     ],
@@ -106,6 +123,23 @@ export function getNamespaceEntry(name: string): (typeof NAMESPACE_REGISTRY)[num
 
 export function isRegisteredNamespace(name: string): name is NamespaceId {
   return NAMESPACE_REGISTRY.some((e) => e.name === name);
+}
+
+// ─── 파티션 정책 조회 ────────────────────────────────────────────────────────
+
+/**
+ * namespace의 파티션 정책. 미등록 namespace는 `scoped`로 본다.
+ *
+ * 기본값이 `scoped`인 것이 중요하다 — 빠뜨렸을 때 "격리를 덜 하는" 쪽이 아니라
+ * "더 하는" 쪽으로 기울어야 한다. 덜 한 쪽으로 기울면 누락이 조용히 통과한다.
+ */
+export function getPartitionPolicy(namespace: string): PartitionPolicy {
+  return getNamespaceEntry(namespace)?.partition ?? 'scoped';
+}
+
+/** 소유자 접두사를 붙여야 하는 namespace인가. */
+export function isPartitionedNamespace(namespace: string): boolean {
+  return getPartitionPolicy(namespace) === 'scoped';
 }
 
 // ─── 어댑터 정책 조회 ────────────────────────────────────────────────────────

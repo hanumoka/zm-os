@@ -11,7 +11,11 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "verify:dynamic": "node scripts/verify-dynamic-rendering.mjs"
+    "verify:dynamic": "node scripts/verify-dynamic-rendering.mjs",
+    "e2e:partition": "node e2e/e2e-partition.mjs",
+    "e2e:hydration": "node e2e/e2e-hydration.mjs",
+    "e2e:snake": "node e2e/e2e-snake.mjs",
+    "e2e": "pnpm e2e:hydration && pnpm e2e:snake && pnpm e2e:partition"
   },
   "dependencies": {
     "@zm/adapters-local": "workspace:*",
