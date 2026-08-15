@@ -23,7 +23,7 @@ concurrency:
 
 jobs:
   check:
-    name: type-check · lint · test
+    name: type-check · lint · test · build
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -51,3 +51,10 @@ jobs:
       - run: pnpm lint
 
       - run: pnpm test
+
+      # build를 여기서 돌리는 이유는 산출물이 아니라 **검사** 때문이다.
+      # `verify-dynamic-rendering.mjs`가 `apps/web`의 build 스크립트에만 붙어 있어서,
+      # build를 CI에서 돌리지 않으면 그 검사가 **자동으로 도달하는 경로가 0**이 된다.
+      # 라우트가 정적으로 바뀌면 셸이 조용히 hydration을 멈추는데, 그것을 막으려고 만든
+      # 검사가 로컬 빌드에서만 도는 상태였다.
+      - run: pnpm build
