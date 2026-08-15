@@ -4,13 +4,14 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && node scripts/verify-dynamic-rendering.mjs",
     "start": "next start",
     "lint": "eslint src",
     "type-check": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "verify:dynamic": "node scripts/verify-dynamic-rendering.mjs"
   },
   "dependencies": {
     "@zm/adapters-local": "workspace:*",

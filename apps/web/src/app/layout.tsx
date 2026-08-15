@@ -6,6 +6,7 @@ import { InstalledAppsProvider } from '@/components/store/InstalledAppsProvider'
 import { WindowManagerProvider } from '@/components/desktop/WindowManagerProvider';
 import { DesktopSettingsProvider } from '@/components/desktop/DesktopSettingsProvider';
 import { PersistenceErrorProvider } from '@/lib/errors/PersistenceErrorContext';
+import { CspViolationReporter } from '@/components/security/CspViolationReporter';
 
 export const metadata: Metadata = {
   title: 'zm-os',
@@ -39,6 +40,7 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body>
+        <CspViolationReporter />
         <PersistenceErrorProvider>
           <DesktopSettingsProvider>
             <UserAppsProvider>
