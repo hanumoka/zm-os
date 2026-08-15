@@ -258,17 +258,44 @@ export const IPC_RUNTIME_IIFE: string = /* js */ `
  * IPC_RUNTIME_IIFE 자체가 이미 (function(){...})()  IIFE 이므로
  * 추가로 감싸지 않는다 (이중 IIFE 회피).
  */
-export function buildIpcScriptTag(): string {
-  return `<script>${IPC_RUNTIME_IIFE}</script>`;
+export function buildIpcScriptTag(runtimeUrl: string = IPC_RUNTIME_URL): string {
+  return `<script src="${runtimeUrl}"></script>`;
 }
+
+/**
+ * 호스트가 IPC 런타임을 서빙하는 절대 경로.
+ *
+ * **절대 경로여야 한다.** 앱은 `srcdoc` 문서라 base URI가 부모 문서의 URL이므로
+ * 상대 경로는 앱 디렉터리가 아니라 호스트 루트를 기준으로 해석된다.
+ */
+export const IPC_RUNTIME_URL = '/ipc-runtime.js';
 
 /**
  * HTML 문자열의 <head> 태그 직후에 IPC 런타임 script를 삽입한다.
  * <head>가 없으면 <html> 직후에 삽입.
  * 그것도 없으면 문서 맨 앞에 prepend.
+ *
+ * ## 왜 inline이 아니라 external인가 (2026-08-15 실측)
+ *
+ * 예전에는 `<script>${IPC_RUNTIME_IIFE}</script>` 로 인라인 주입했다. 그런데
+ * 호스트 CSP가 `srcdoc` 문서에 **상속**되고 앱 문서에는 nonce가 없으므로,
+ * 프로덕션에서 이 인라인 script가 차단되어 **앱이 호스트와 통신할 채널 자체를
+ * 갖지 못했다.**
+ *
+ * 같은 실측에서 **절대 경로 external classic script는 opaque origin 안에서도
+ * `'self'`로 통과한다**는 것이 확인됐다. 그래서 external로 바꿨다.
+ *
+ * `async`/`defer`를 붙이지 않는다. classic script는 파싱을 막으므로 `<head>`에
+ * 넣으면 body의 앱 코드보다 반드시 먼저 실행된다 — 인라인 시절의 실행 순서가
+ * 그대로 유지된다.
+ *
+ * 근거: `zm-docs`의 `docs/research/2026-08-15-zm-os-prod-build-measurement.md`
  */
-export function injectIpcRuntime(html: string): string {
-  const scriptTag = `<script>${IPC_RUNTIME_IIFE}</script>`;
+export function injectIpcRuntime(
+  html: string,
+  runtimeUrl: string = IPC_RUNTIME_URL,
+): string {
+  const scriptTag = buildIpcScriptTag(runtimeUrl);
 
   if (html.includes('</head>')) {
     return html.replace('</head>', `${scriptTag}</head>`);

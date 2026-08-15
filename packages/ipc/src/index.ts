@@ -26,7 +26,14 @@ export { IpcError } from './types';
 export { createHostEndpoint } from './host';
 
 // 런타임 IIFE 주입 (sandbox.ts가 iframe srcdoc에 삽입)
-export { injectIpcRuntime } from './runtime-iife';
+export {
+  injectIpcRuntime,
+  buildIpcScriptTag,
+  // 호스트가 `/ipc-runtime.js` 라우트에서 이 문자열을 그대로 서빙한다.
+  // 빌드 단계로 파일을 복사하지 않으므로 상수와 서빙본이 갈라질 수 없다.
+  IPC_RUNTIME_IIFE,
+  IPC_RUNTIME_URL,
+} from './runtime-iife';
 
 // 프로토콜 상수 (외부에서 메시지 타입을 참조해야 할 경우용)
 export { IPC_PROTOCOL_VERSION, MSG_TYPE } from './protocol';
