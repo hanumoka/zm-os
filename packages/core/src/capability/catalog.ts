@@ -20,7 +20,18 @@ export type CapabilityMeta = {
   /** 사용자 grant UI 표시명 (F1). */
   readonly title: string;
   readonly risk: CapabilityRisk;
-  /** false = 시스템 자동 grant. true = 사용자 승인 필요 (F1에서 UI가 붙는다). */
+  /**
+   * false = 시스템 자동 grant. true = 사용자 승인 필요 (F1에서 UI가 붙는다).
+   *
+   * ⚠ **현재 전부 `false`다.** 앱이 모두 소유자 본인의 모듈이므로(`DEC-0007`) 승인을 받을
+   * 제3자가 없고, 본인이 만든 앱에 본인이 승인하는 프롬프트는 클릭을 늘릴 뿐 보호하는 것이
+   * 없다 — 오히려 *"일단 허용"* 습관을 만든다.
+   *
+   * ★**되돌리는 조건**: 다중 사용자 게이트를 열거나 외부 앱 유통 경로가 생기는 순간.
+   * 둘 다 새 결정 기록이 선행이므로 그 결정에서 이 값들을 함께 올린다.
+   *
+   * 필드를 지우지 않고 두는 이유는 F1 승인 엔진의 입력 형태가 이미 정해져 있어서다.
+   */
   readonly requiresUserGrant: boolean;
   /**
    * `planned` = 타입과 토큰만 동결했고 핸들러가 없다.
@@ -37,12 +48,13 @@ export type CapabilityMeta = {
  *
  * 키 누락도 잉여도 컴파일 에러다 — 표면에 네임스페이스를 늘리면 여기 작성을 강제당한다.
  *
- * ⚠ `risk`와 `requiresUserGrant` 값은 아직 소유자 확인을 받지 않았다. F1의 승인 UI가
- *   없는 지금은 어느 값이어도 런타임 동작이 같다.
+ * `requiresUserGrant`는 2026-08-15 소유자 결정으로 **전부 `false`** 다 — 근거와 되돌리는
+ * 조건은 위 필드 주석 참조. `risk`는 표시용이며 승인 요구와 다른 축이다.
  */
 export const CAPABILITY_CATALOG = {
   'notes.read': { title: '노트 읽기', risk: 'low', requiresUserGrant: false, status: 'planned' },
-  'notes.write': { title: '노트 쓰기', risk: 'high', requiresUserGrant: true, status: 'planned' },
+  // risk는 high로 남긴다 — 위험도 표기와 승인 요구는 다른 축이다.
+  'notes.write': { title: '노트 쓰기', risk: 'high', requiresUserGrant: false, status: 'planned' },
   'shell.window': {
     title: '창 제목 변경·닫기',
     risk: 'low',
