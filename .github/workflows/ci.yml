@@ -1,0 +1,53 @@
+# zm-os CI
+#
+# 이 저장소의 규칙 대부분은 기계가 검사할 수 있는 형태로 만들어져 있다. 다만 그중
+# **자동으로 도는 것은 타입 검사 하나뿐**이었다 — `next build`가 `tsc`를 태우기 때문이고,
+# lint와 테스트는 사람이 명령을 칠 때만 돌았다. 켜 두었는데 도달하지 않는 가드는
+# 없는 가드와 같으므로 여기에 올린다.
+#
+# e2e는 일부러 빼 두었다. 프로덕션 빌드·서버 기동·Playwright 브라우저 캐시가 필요해
+# 실패 원인이 코드가 아닌 경우가 섞이고(로컬에서도 번들 브라우저가 깨져 있던 적이 있다),
+# 그런 실패가 반복되면 "CI는 원래 빨갛다"는 습관이 생겨 나머지 검사까지 무력해진다.
+# 붙일 때는 별도 job으로 분리해 이 job의 신뢰도를 떨어뜨리지 않는다.
+
+name: CI
+
+on:
+  push:
+  pull_request:
+
+# 같은 브랜치에 새 push가 오면 이전 실행을 취소한다. 결과가 어차피 낡기 때문이다.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: type-check · lint · test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # 버전은 package.json의 packageManager 필드에서 읽는다. 여기 숫자를 적으면
+      # 그 필드와 어긋날 수 있고, 어긋나도 아무도 알려주지 않는다.
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      # --frozen-lockfile: lockfile과 package.json이 어긋나면 조용히 해결하지 말고 실패한다.
+      - run: pnpm install --frozen-lockfile
+
+      # 계약 위반(호스트 API 표면·capability 1:1·JSON-safe·비동기)이 여기서 걸린다.
+      - run: pnpm type-check
+
+      # 저수준 IDB 직접 사용 같은 경계 우회가 여기서 걸린다.
+      # 경고는 실패로 만들지 않는다 — 지금 26건이 있고, 그것을 정리하는 것은 별건이다.
+      # 새 error 규칙은 즉시 빨간불이 된다.
+      - run: pnpm lint
+
+      - run: pnpm test
