@@ -16,11 +16,17 @@ type DesktopIconProps = {
   label: string;
   icon: AppIcon;
   position?: { x: number; y: number };
+  /**
+   * 저장된 좌표가 아직 없을 때의 기본 자리. 지정하면 아이콘 **자신이** absolute로
+   * 데스크탑 영역 모서리에 붙는다. 부모를 positioned로 감싸면 안 된다 —
+   * offsetParent가 바뀌어 드래그 좌표가 어긋난다.
+   */
+  anchor?: 'top-right';
   selected?: boolean;
   onLaunch: () => void;
   onSelect?: () => void;
   onContextMenu?: (e: React.MouseEvent) => void;
-  /** 드래그 중 실시간 좌표. 지정하면 드래그가 활성화된다 (position도 함께 필요). */
+  /** 드래그 중 실시간 좌표. 지정하면 드래그가 활성화된다. */
   onDragMove?: (id: string, x: number, y: number) => void;
   /** 드래그 종료 좌표. 스냅·클램프는 호출자가 수행한다. */
   onDragEnd?: (id: string, x: number, y: number) => void;
@@ -59,6 +65,7 @@ export function DesktopIcon({
   label,
   icon,
   position,
+  anchor,
   selected = false,
   onLaunch,
   onSelect,
@@ -73,8 +80,9 @@ export function DesktopIcon({
   const dragEndedAtRef = useRef(0);
 
   const isPositioned = position !== undefined;
-  const canDrag =
-    isPositioned && onDragMove !== undefined && onDragEnd !== undefined;
+  // 저장된 좌표가 없어도 끌 수 있어야 한다. 시작 좌표는 pointerdown 시점에
+  // 엘리먼트의 실제 위치에서 읽는다(handlePointerDown 참조).
+  const canDrag = onDragMove !== undefined && onDragEnd !== undefined;
 
   /** 드래그 직후의 잔여 click/dblclick인지 */
   const isDragEcho = (): boolean =>
@@ -108,7 +116,7 @@ export function DesktopIcon({
   };
 
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>): void => {
-    if (!canDrag || position === undefined) return;
+    if (!canDrag) return;
     if (e.button !== 0) return;
     // 진행 중인 세션을 두 번째 포인터(멀티터치)가 덮어쓰면 첫 포인터의 종료가
     // 유실되어 드래그 표시 상태가 영구히 남는다.
@@ -121,14 +129,21 @@ export function DesktopIcon({
     // 앱이 실행되지 않는다.
     dragEndedAtRef.current = 0;
 
+    // 저장된 좌표가 있으면 그것이 시작점이다. 없으면(앵커로만 배치된 아이콘,
+    // 예: 스토어) 엘리먼트의 실제 위치를 영역 좌표계로 환산해 쓴다.
+    // 그래야 처음 끌 때 아이콘이 원래 자리에서 튀지 않는다.
+    const rect = e.currentTarget.getBoundingClientRect();
+    const startX = position?.x ?? rect.left - area.left;
+    const startY = position?.y ?? rect.top - area.top;
+
     dragRef.current = {
       pointerId: e.pointerId,
       button: e.button,
-      grabOffsetX: e.clientX - area.left - position.x,
-      grabOffsetY: e.clientY - area.top - position.y,
+      grabOffsetX: e.clientX - area.left - startX,
+      grabOffsetY: e.clientY - area.top - startY,
       moved: false,
-      lastX: position.x,
-      lastY: position.y,
+      lastX: startX,
+      lastY: startY,
     };
     // 일부 브라우저는 알 수 없는 pointerId에 NotFoundError를 던진다.
     // 캡처는 편의 기능이므로 실패해도 드래그 자체는 계속되어야 한다.
@@ -200,14 +215,20 @@ export function DesktopIcon({
     endDrag(e, true);
   };
 
-  // position이 있으면 데스크탑 좌표계에 absolute 배치, 없으면 일반 흐름에 둔다.
+  // 배치 규칙
   //
-  // 무조건 absolute로 두면 position 없이 쓰는 부모(스토어 아이콘의 <Link>)가
-  // 자식을 흐름에서 잃어 0×0으로 접히고, 80px 아이콘이 그 지점에서 오른쪽으로
-  // 흘러나가 화면 밖으로 잘린다.
+  // 1. position 있음  → 데스크탑 좌표계에 absolute (사용자가 옮긴 좌표)
+  // 2. position 없고 anchor 있음 → 데스크탑 영역 모서리에 absolute
+  //    스토어처럼 저장된 좌표가 아직 없는 시스템 아이콘의 기본 자리다.
+  //    **부모가 아니라 아이콘 자신이 absolute여야 한다** — 부모를 positioned로
+  //    감싸면 offsetParent가 그 부모가 되어 areaOf()가 데스크탑 영역 대신
+  //    래퍼를 잡고, 드래그 좌표가 통째로 어긋난다.
+  // 3. 둘 다 없음 → 일반 흐름 (부모가 배치를 결정)
   const positionStyle: React.CSSProperties = isPositioned
     ? { left: position.x, top: position.y, zIndex: dragging ? 30 : undefined }
-    : {};
+    : anchor === 'top-right'
+      ? { right: 30, top: 30, zIndex: dragging ? 30 : undefined }
+      : {};
 
   return (
     <div
@@ -218,7 +239,7 @@ export function DesktopIcon({
       aria-pressed={selected}
       style={positionStyle}
       className={[
-        isPositioned ? 'absolute' : 'relative',
+        isPositioned || anchor !== undefined ? 'absolute' : 'relative',
         'flex',
         'flex-col',
         'items-center',

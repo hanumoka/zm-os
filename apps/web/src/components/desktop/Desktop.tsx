@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useWindowManager } from './useWindowManager';
-import { DesktopIconLayer } from './DesktopIconLayer';
+import { DesktopIconLayer, STORE_ICON_ID } from './DesktopIconLayer';
 import { WindowLayer } from './WindowLayer';
 import { Taskbar } from './Taskbar';
 import { ContextMenu } from './ContextMenu';
@@ -141,6 +141,13 @@ export function Desktop({
         const point = iconPositionsRef.current[entry.id] ?? entry.iconPosition;
         if (point !== undefined) cells.add(cellKey(point));
       }
+      // 스토어도 같은 좌표계에 있으므로 그 위에 앱을 떨어뜨리면 안 된다.
+      // 아직 옮긴 적이 없으면(anchor 배치) 좌표가 없고, 그때는 우상단이라
+      // 좌측 column과 겹치지 않는다.
+      if (excludeId !== STORE_ICON_ID) {
+        const storePoint = iconPositionsRef.current[STORE_ICON_ID];
+        if (storePoint !== undefined) cells.add(cellKey(storePoint));
+      }
       return cells;
     },
     [],
@@ -203,7 +210,9 @@ export function Desktop({
 
   const handleAutoArrange = (): void => {
     const { width, height } = desktopAreaSize();
-    commitIconPositions(arrangeInGrid(visibleApps.map((a) => a.id), height, width));
+    // 스토어를 빼면 정렬된 앱이 그 자리에 겹칠 수 있다.
+    const ids = [...visibleApps.map((a) => a.id), STORE_ICON_ID];
+    commitIconPositions(arrangeInGrid(ids, height, width));
   };
 
   const handleResetIconPositions = (): void => {

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { DesktopIcon } from './DesktopIcon';
 import type { DesktopAppEntry } from './desktopApps';
 
@@ -22,7 +22,13 @@ type DesktopIconLayerProps = {
   onIconDragCancel?: (id: string) => void;
 };
 
-const STORE_ICON_ID = '__system_store__';
+/**
+ * 스토어 시스템 아이콘의 id.
+ *
+ * 일반 앱과 같은 좌표·영속화 경로를 쓰므로 `Desktop.tsx`도 이 id를 알아야 한다
+ * (충돌 회피 셀 계산, 자동 정렬 대상).
+ */
+export const STORE_ICON_ID = '__system_store__';
 
 export function DesktopIconLayer({
   apps,
@@ -37,6 +43,8 @@ export function DesktopIconLayer({
   onIconDragEnd,
   onIconDragCancel,
 }: DesktopIconLayerProps): React.JSX.Element {
+  const router = useRouter();
+
   return (
     <>
       {apps.map((entry) => (
@@ -65,32 +73,38 @@ export function DesktopIconLayer({
       {/*
        * 좌표 컨벤션 (code-reviewer C-01 fix, 2026-05-24):
        * - 데스크탑 좌측 column 좌표 = { x: 30, y: 30, 130, 230, ... } (앱 아이콘용)
-       * - 스토어 시스템 아이콘 = 데스크탑 우상단 고정 (right:30, top:30)
+       * - 스토어 시스템 아이콘 = 저장된 좌표가 없으면 우상단(anchor)
        *   → 일반 앱 아이콘과 시각적/공간적 분리
        *   → 좌측 column 아이콘이 N개여도 충돌 없음
        * desktopApps.ts 의 iconPosition 은 `x ≤ 30, y < 1000` 좌측 column 만 사용 권장.
+       *
+       * 스토어도 다른 아이콘과 동일하게 끌 수 있다. 예전에는 <Link>로 감싸 고정
+       * 배치했는데, 그러면 두 가지가 막혔다 — position이 없어 드래그가 비활성이었고,
+       * 설령 켜도 <Link>가 positioned 조상이 되어 드래그 좌표가 어긋났다.
+       * 지금은 아이콘 자신이 anchor로 배치되고, 한 번 끌면 좌표가 저장돼
+       * 그때부터는 일반 앱 아이콘과 완전히 같은 경로를 탄다.
+       *
+       * 실행은 다른 아이콘과 같은 규칙(더블클릭 / Enter / Space)이다.
+       * <Link>의 단일클릭 이동은 드래그와 양립할 수 없어 걷어냈다 —
+       * 드래그를 놓는 순간 앵커가 네비게이션을 일으킨다.
        */}
       {showStoreIcon && (
-        <Link
-          href="/store"
-          aria-label="앱 스토어 열기"
-          onClick={(e): void => {
-            e.stopPropagation();
+        <DesktopIcon
+          id={STORE_ICON_ID}
+          label="스토어"
+          icon={{ kind: 'emoji', char: '🛒' }}
+          position={iconPositions?.[STORE_ICON_ID]}
+          anchor="top-right"
+          selected={selectedIconId === STORE_ICON_ID}
+          dragging={draggingIconId === STORE_ICON_ID}
+          onLaunch={(): void => {
+            router.push('/store');
           }}
-          className="absolute right-[30px] top-[30px] block"
-        >
-          <DesktopIcon
-            id={STORE_ICON_ID}
-            label="스토어"
-            icon={{ kind: 'emoji', char: '🛒' }}
-            position={undefined}
-            selected={selectedIconId === STORE_ICON_ID}
-            onLaunch={(): void => {
-              // Link의 href가 네비게이션 처리 — 추가 동작 불필요.
-            }}
-            onSelect={(): void => onSelectIcon(STORE_ICON_ID)}
-          />
-        </Link>
+          onSelect={(): void => onSelectIcon(STORE_ICON_ID)}
+          onDragMove={onIconDragMove}
+          onDragEnd={onIconDragEnd}
+          onDragCancel={onIconDragCancel}
+        />
       )}
     </>
   );
