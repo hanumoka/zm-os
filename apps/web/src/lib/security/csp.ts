@@ -98,15 +98,50 @@ const PERMISSIONS_SELF: ReadonlyArray<string> = [
  *
  * - dev:  unsafe-eval + unsafe-inline 허용 (HMR / Fast Refresh 필요)
  * - prod: unsafe-eval / unsafe-inline 제거, frame-ancestors 'none'
+ * - nonce가 주어지면 script-src에만 추가한다 (`src/proxy.ts`가 요청마다 발급).
  *
- * nonce 기반 strict CSP는 Next.js middleware 필요 → v2에서 도입 검토 (ADR-0004 §Alternatives-C).
+ * ## 왜 nonce가 필요한가 (2026-08-15 실측)
+ *
+ * prod에서 Next.js prerender 산출물에 nonce 없는 inline `<script>` 6개가 들어간다.
+ * `script-src 'self'` 만으로는 전부 차단되어 RSC 페이로드가 전달되지 않고 **셸이
+ * hydration되지 않는다.** 그 6개는 프레임워크 산출물이라 외부 파일로 뺄 수 없다.
+ * nonce는 페이지가 **동적 렌더링**될 때만 주입되므로 라우트가 static이면 안 된다.
+ *
+ * ## ⚠ `'strict-dynamic'`을 절대 추가하지 마라
+ *
+ * Next.js 공식 예시에는 들어 있지만 zm-os에서는 **앱을 죽인다.**
+ * `'strict-dynamic'`이 있으면 `'self'` 같은 host allowlist가 **무시**된다.
+ * 그런데 호스트 CSP는 `srcdoc` 샌드박스 iframe에 **상속**되고(실측 확인), 앱 문서에는
+ * nonce가 없다. 따라서 앱이 로드하는 절대경로 external script가 전부 차단된다.
+ *
+ * 현재 조합이 정확히 원하는 상태를 만든다:
+ *   - 호스트 inline  → nonce로 실행됨
+ *   - 호스트 external → 'self'로 실행됨
+ *   - 앱 inline      → nonce가 없으므로 차단 (격리 유지)
+ *   - 앱 external    → 'self'로 통과 (IPC 런타임 외부화 경로)
+ *
+ * 이 불변식은 `__tests__/csp.test.ts`가 기계적으로 검사한다.
+ *
+ * ## ⚠ style-src에는 nonce를 넣지 마라
+ *
+ * CSP는 한 지시어에 nonce나 hash가 있으면 그 지시어의 `'unsafe-inline'`을 **무시**한다.
+ * style-src는 Tailwind v4 빌드 아티팩트 때문에 `'unsafe-inline'`이 필요하므로,
+ * nonce를 넣는 순간 스타일이 전부 깨진다.
+ *
+ * @see ADR-0004
  */
-export function buildCsp(mode: 'development' | 'production'): string {
+export function buildCsp(
+  mode: 'development' | 'production',
+  nonce?: string,
+): string {
   const isProd = mode === 'production';
 
-  const scriptSrc = isProd
-    ? CSP_SCRIPT_SRC_BASE
-    : `${CSP_SCRIPT_SRC_BASE} ${CSP_DEV_SCRIPT_EXTRAS}`;
+  // dev에서 nonce를 쓰면 'unsafe-inline'이 무시되어 HMR이 깨진다.
+  // 그래서 nonce는 prod 전용이며, dev는 기존 허용 정책을 그대로 둔다.
+  const scriptSrcParts: string[] = [CSP_SCRIPT_SRC_BASE];
+  if (nonce) scriptSrcParts.push(`'nonce-${nonce}'`);
+  if (!isProd) scriptSrcParts.push(CSP_DEV_SCRIPT_EXTRAS);
+  const scriptSrc = scriptSrcParts.join(' ');
 
   const connectSrc = isProd ? CSP_CONNECT_SRC_PROD : CSP_CONNECT_SRC_DEV;
 
@@ -168,14 +203,23 @@ export type SecurityHeader = {
  */
 export function securityHeaders(
   mode: 'development' | 'production',
+  options?: { readonly includeCsp?: boolean },
 ): ReadonlyArray<SecurityHeader> {
   const isProd = mode === 'production';
+  // CSP는 요청마다 nonce가 달라지므로 정적 헤더 설정이 아니라 `src/proxy.ts`가 소유한다.
+  // next.config.ts는 includeCsp: false로 호출해 나머지 헤더만 싣는다.
+  const includeCsp = options?.includeCsp ?? true;
 
-  const headers: SecurityHeader[] = [
-    {
+  const headers: SecurityHeader[] = [];
+
+  if (includeCsp) {
+    headers.push({
       key: 'Content-Security-Policy',
       value: buildCsp(mode),
-    },
+    });
+  }
+
+  headers.push(
     {
       key: 'Permissions-Policy',
       value: buildPermissionsPolicy(),
@@ -189,7 +233,7 @@ export function securityHeaders(
       key: 'X-Content-Type-Options',
       value: 'nosniff',
     },
-  ];
+  );
 
   // X-Frame-Options: prod only (frame-ancestors CSP 폴백, 구형 브라우저 대응)
   // dev에서는 로컬 iframe 테스트를 위해 미적용
