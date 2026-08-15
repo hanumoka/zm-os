@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useWindowManager } from './useWindowManager';
 import { DesktopIconLayer, STORE_ICON_ID } from './DesktopIconLayer';
+import { launchApp } from './launch-app';
 import { WindowLayer } from './WindowLayer';
 import { Taskbar } from './Taskbar';
 import { ContextMenu } from './ContextMenu';
@@ -12,7 +13,6 @@ import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { buildCatalog } from './desktopApps';
 import type { DesktopAppEntry } from './desktopApps';
 import type { ContextMenuItem } from './ContextMenu';
-import type { WindowState } from './types';
 import { useInstalledApps } from '@/components/store/useInstalledApps';
 import { useUserApps } from '@/components/store/UserAppsProvider';
 import { useDesktopSettings } from './DesktopSettingsProvider';
@@ -294,25 +294,9 @@ export function Desktop({
 
   const visibleApps = catalogReady ? apps.filter((a) => isInstalled(a.id)) : [];
 
+  // 시작 메뉴와 같은 동작이어야 하므로 로직은 launch-app.ts 한 곳에 둔다.
   const handleLaunch = (entry: DesktopAppEntry): void => {
-    const existing: WindowState | undefined = manager.windows.find(
-      (w) => w.id === entry.id,
-    );
-    if (existing !== undefined) {
-      if (existing.state === 'minimized') {
-        manager.restore(entry.id);
-      }
-      manager.focus(entry.id);
-      return;
-    }
-
-    manager.open({
-      id: entry.id,
-      title: entry.name,
-      contentId: entry.id,
-      initialPosition: entry.windowDefaults?.position,
-      initialSize: entry.windowDefaults?.size,
-    });
+    launchApp(manager, entry);
   };
 
   return (

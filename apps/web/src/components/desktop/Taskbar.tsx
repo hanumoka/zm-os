@@ -1,7 +1,11 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useWindowManager } from './useWindowManager';
+import { StartMenu } from './StartMenu';
+import { launchApp } from './launch-app';
+import { useInstalledApps } from '@/components/store/useInstalledApps';
 import { TaskbarButton } from './TaskbarButton';
 import { Clock } from './Clock';
 import { SettingsPanel } from './SettingsPanel';
@@ -23,7 +27,7 @@ const FALLBACK_ICON: AppIcon = { kind: 'emoji', char: '🗔' };
  * Taskbar — 작업표시줄 컴포넌트.
  *
  * 레이아웃:
- *   - 좌측: 시작 버튼 (POC placeholder)
+ *   - 좌측: 시작 버튼 → 시작 메뉴 (설치된 앱 · 스토어 · 설정)
  *   - 중앙: 열린 윈도우 TaskbarButton 목록
  *   - 우측: Clock
  *
@@ -38,7 +42,10 @@ const FALLBACK_ICON: AppIcon = { kind: 'emoji', char: '🗔' };
  */
 export function Taskbar(): React.JSX.Element {
   const manager = useWindowManager();
+  const router = useRouter();
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [startMenuOpen, setStartMenuOpen] = useState(false);
+  const { isInstalled } = useInstalledApps();
   const { estimate } = useQuotaMonitor({ pollIntervalMs: 60_000 });
   const { userApps } = useUserApps();
 
@@ -64,28 +71,48 @@ export function Taskbar(): React.JSX.Element {
     }
   };
 
-  const handleStartClick = (): void => {
-    // POC placeholder: 시작 메뉴 미구현
-    // eslint-disable-next-line no-console
-    console.log('[zm-os] 시작 버튼 클릭 — 시작 메뉴 미구현 (POC)');
-  };
+  // 데스크탑에 보이는 것과 같은 목록이어야 한다 — 시작 메뉴에만 있는 앱이
+  // 생기면 "설치"의 의미가 두 곳에서 갈린다.
+  const installedApps = useMemo(
+    () => catalog.filter((a) => isInstalled(a.id)),
+    [catalog, isInstalled],
+  );
 
   return (
     <div
-      className="flex items-center h-12 px-2 gap-2 bg-black/40 backdrop-blur-sm select-none"
+      className="relative flex items-center h-12 px-2 gap-2 bg-black/40 backdrop-blur-sm select-none"
       role="toolbar"
       aria-label="작업표시줄"
     >
-      {/* ── 시작 버튼 (POC placeholder) ──────────────────────────────────────── */}
+      {/* ── 시작 버튼 ────────────────────────────────────────────────────────── */}
+      {/* data-start-button: StartMenu의 외부 클릭 닫기가 이 버튼을 제외해야
+          토글이 "닫고 다시 열기"로 이중 처리되지 않는다. */}
       <button
         type="button"
-        onClick={handleStartClick}
-        className="flex items-center justify-center w-9 h-9 rounded bg-white/10 hover:bg-white/20 text-white text-lg transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-white shrink-0"
-        aria-label="시작 메뉴 열기 (미구현)"
-        title="시작 (POC)"
+        data-start-button
+        onClick={(): void => setStartMenuOpen((v) => !v)}
+        className={[
+          'flex items-center justify-center w-9 h-9 rounded text-white text-lg shrink-0',
+          'transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-white',
+          startMenuOpen ? 'bg-white/25' : 'bg-white/10 hover:bg-white/20',
+        ].join(' ')}
+        aria-label="시작 메뉴"
+        aria-haspopup="menu"
+        aria-expanded={startMenuOpen}
+        title="시작"
       >
         ⊞
       </button>
+
+      {startMenuOpen && (
+        <StartMenu
+          apps={installedApps}
+          onLaunchApp={(entry): void => launchApp(manager, entry)}
+          onOpenStore={(): void => router.push('/store')}
+          onOpenSettings={(): void => setSettingsOpen(true)}
+          onClose={(): void => setStartMenuOpen(false)}
+        />
+      )}
 
       {/* ── 구분선 ────────────────────────────────────────────────────────────── */}
       <div className="w-px h-6 bg-white/20 shrink-0" aria-hidden="true" />
