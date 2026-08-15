@@ -1,5 +1,22 @@
 # v2 Plan — 로컬-우선 + 옵션 클라우드 어댑터
 
+> ## ⚠ 2026-08-15 동결됨 — 정본이 이 저장소에 없다
+>
+> 실행 계획의 정본은 **`zm-docs` 저장소의 `docs/projects/zm-os/`** 다 (`DEC-0005`).
+> 아래 내용은 그 시점까지의 기록으로 보존하며 **갱신하지 않는다.** Living Document가 아니다.
+>
+> | 찾는 것 | 정본 (`zm-docs`) |
+> |---|---|
+> | 무엇을 만드는가 / 성공 기준 / 비목표 | `docs/projects/zm-os/requirements.md` |
+> | 경계와 기술 스택 | `docs/projects/zm-os/architecture.md` |
+> | 코드보다 먼저 동결하는 계약 | `docs/projects/zm-os/contracts.md` |
+> | 지금 무엇을 할 차례인가 | `docs/projects/zm-os/index.md` |
+>
+> **아래 계획의 전제는 대부분 소멸했다.** `DEC-0006`이 이전 전략을 폐기하고 브라우저가 강제하는 기술 제약 16건만 승계했으며,
+> `DEC-0007`·`DEC-0008`이 계정 1개·배포·앱=모듈·Spring Boot 백엔드·첫 앱을 새로 확정했다.
+> **"24주"라는 숫자를 어떤 문서에서도 인용하지 마라.** Epic B·C·D·G는 대상이 소멸했다.
+
+
 > **Living Document**. ADR-0017~0023 채택 (2026-05-27) 반영.
 > 각 작업은 LocalAdapter 필수 / CloudAdapter 옵션 구조를 따른다.
 

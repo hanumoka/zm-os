@@ -1,5 +1,22 @@
 # Product Requirements Document (PRD)
 
+> ## ⚠ 2026-08-15 동결됨 — 정본이 이 저장소에 없다
+>
+> 제품 요구사항의 정본은 **`zm-docs` 저장소의 `docs/projects/zm-os/`** 다 (`DEC-0005`).
+> 아래 내용은 그 시점까지의 기록으로 보존하며 **갱신하지 않는다.** Living Document가 아니다.
+>
+> | 찾는 것 | 정본 (`zm-docs`) |
+> |---|---|
+> | 무엇을 만드는가 / 성공 기준 / 비목표 | `docs/projects/zm-os/requirements.md` |
+> | 경계와 기술 스택 | `docs/projects/zm-os/architecture.md` |
+> | 코드보다 먼저 동결하는 계약 | `docs/projects/zm-os/contracts.md` |
+> | 지금 무엇을 할 차례인가 | `docs/projects/zm-os/index.md` |
+>
+> **아래 계획의 전제는 대부분 소멸했다.** `DEC-0006`이 이전 전략을 폐기하고 브라우저가 강제하는 기술 제약 16건만 승계했으며,
+> `DEC-0007`·`DEC-0008`이 계정 1개·배포·앱=모듈·Spring Boot 백엔드·첫 앱을 새로 확정했다.
+> **§1 제품 정의와 §7 수용 기준은 대상을 잃었다.**
+
+
 > **Living Document**. 기능 완료 시 즉시 갱신. 버전 bump 필수.
 
 **Version**: 0.9.0

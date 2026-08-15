@@ -1,5 +1,15 @@
 # 정책 레지스트리 (Policy Registry)
-> 확정 정책의 SSOT (Single Source of Truth). 사용자 결정 후 append/update.
+
+> ## ⚠ 2026-08-15 동결됨 — 정본이 이 저장소에 없다
+>
+> 정책의 정본은 **`zm-docs` 저장소의 `docs/projects/zm-os/policies.md`** 다. `zm-docs`의 `DEC-0005`가 그렇게 정했다.
+>
+> 이 파일은 그 시점까지의 기록으로 보존한다. **새 정책을 여기에 추가하지 않는다.**
+>
+> 어느 항목이 유효하고 어느 항목이 폐기·재작성 대상인지는 [`_digest.md`](_digest.md)의 상태 표를 보라.
+> 특히 **PROD-01(게임 스토어)과 PROD-05(사용자 ZIP 업로드)는 폐기**됐고, **CONST-01·CONST-02는 적용 대상이 사라졌다.**
+
+> 확정 정책의 기록. 동결 전까지는 사용자 결정 후 append/update 방식이었다.
 
 ## 정책 ID 규칙
 - **ARCH-NN**: 아키텍처 결정

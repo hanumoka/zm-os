@@ -41,28 +41,40 @@
 > **2026-05-26 방향 전환**: 로컬-우선 + 외부 의존성 옵션 아키텍처. 클라우드 단독 가정 ADR은 reshape.
 > **2026-05-27**: ADR-0017~0023 7건 채택 완료 (Ports & Adapters + Local 어댑터 6건) + ADR-0013/0014/0015 superseded 처리 완료.
 
-### 다음 단계 — v2 plan v0.3.0 재작성 + 구현 진입
-- **v2 plan v0.3.0**: 9 Epic 유지 + 작업마다 LocalAdapter 필수 / CloudAdapter 옵션 표기
-- **REFAC-02** (5 작업 분할): packages/adapters-local 신규 + 5 Provider Port 호출 reshape
-- **M5 진입**: SRV-01~02 + USR-01~04 로컬 인증 기본
+> ## ⚠ 2026-08-15 — 아래 보류 목록을 닫는다
+>
+> 이 절은 2026-05-27 시점의 계획이었고 **전제가 소멸했다.** `zm-docs`의 `DEC-0006`이 이전 전략을 폐기하고
+> 브라우저가 강제하는 기술 제약 16건만 승계했으며, `DEC-0007`·`DEC-0008`이 새 방향을 확정했다.
+>
+> **다음에 무엇을 할 차례인지는 `zm-docs`의 `docs/projects/zm-os/index.md`가 정본이다.**
+> 이 목록을 보고 죽은 트랙을 재개하지 마라 — 그것을 막는 것이 이 표기의 목적이다.
 
-### 보류 — ADR-0024+ (CloudAdapter 옵션 트랙, v2 CLD Epic 진입 시점)
-- ADR-0024+: CloudAuth-Supabase (ADR-0013 정보 흡수)
-- ADR-0025+: CloudRepo-Supabase (ADR-0014 정보 흡수)
-- ADR-0026+: CloudSync-LWW (ADR-0015 정보 흡수)
-- ADR-0027+: Migration utility (Local↔Cloud 데이터 전환)
-- ADR-0028+: CloudBlob (R2 / Supabase Storage)
-- ADR-0029+: CloudModeration (VirusTotal 등)
-- ADR-Permission (manifest capabilities + grant 영속화)
-- ADR-Hosting (Vercel / CF Pages)
-- ADR-API-Auth (Server Action / JWT cookie)
-- IPC-02 (Comlink 직접 통합)
-  - ADR-Permission (manifest capabilities + grant 영속화)
-  - ADR-API-Auth (Server Action vs Route Handler, JWT cookie 위치)
-  - ADR-Hosting (Vercel / CF Pages / 정적 export)
-  - ADR-Storage-Cloud (R2 / Supabase Storage / S3 어댑터)
-  - ADR-Migration (로컬 v1 → v2)
-  - ADR-Moderation-Cloud (VirusTotal 등 옵션 어댑터)
+### 다음 단계 — **닫힘**
+
+이전 내용(v2 plan v0.3.0 재작성 / REFAC-02 5작업 분할 / M5 진입)은 효력이 없다.
+REFAC-02의 Ports & Adapters 골격만 자산으로 살아남았고, 그 위에 파티션 키·소유자 필드·딥링크가 추가된다.
+
+**현재 1순위는 호스트 셸의 hydration 복구다.** 프로덕션 빌드에서 셸이 뜨지 않는다(2026-08-15 실측).
+
+### 보류 목록 — **전부 닫힘**
+
+| 보류 항목 | 처분 |
+|---|---|
+| ADR-0024+ CloudAuth-Supabase | **소멸.** Supabase 트랙 폐기. 백엔드는 Spring Boot + Kotlin, 인증 스택은 미정 |
+| ADR-0025+ CloudRepo-Supabase | **소멸.** 동일 |
+| ADR-0026+ CloudSync-LWW | **소멸.** 다기기 실시간 동기화는 결정 게이트 뒤 |
+| ADR-0027+ Migration utility (Local↔Cloud) | **소멸.** 기존 로컬 POC 데이터를 보존하지 않기로 했다 |
+| ADR-0028+ CloudBlob (R2 / Supabase Storage) | **소멸.** 동일 트랙 |
+| ADR-0029+ CloudModeration (VirusTotal 등) | **대상 상실.** 앱이 전부 소유자 것이라 모더레이션 대상이 없다 |
+| ADR-Permission (capabilities + grant 영속화) | **살아 있다.** 단 승인 UI 없이 **실강제와 영속화만** 먼저. grant UI는 분리 |
+| ADR-Hosting (Vercel / CF Pages / 정적 export) | **재정의.** 배포는 하기로 했으나(`DEC-0007`) 도메인·운영비 상한이 미정. **`output: 'export'`는 금지** — 보안 헤더가 무력화된다 |
+| ADR-API-Auth (Server Action / JWT cookie) | **재정의.** Next route handler가 아니라 `server/`의 Spring Boot가 맡는다 |
+| IPC-02 (Comlink 직접 통합) | **소멸.** Comlink를 쓰지 않는다(의존성 0). 대신 **MessagePort 단일 채널 전환**이 승계 제약 6이다 |
+| ADR-Storage-Cloud (R2 / S3 어댑터) | **소멸.** 동일 트랙 |
+| ADR-Migration (로컬 v1 → v2) | **소멸.** 동일 |
+| ADR-Moderation-Cloud | **대상 상실.** 동일 |
+
+**결번 0024~0029는 회수하지 않는다.** 재사용하면 위 기록과 번호가 충돌한다.
 
 ## 작성 규칙
 
