@@ -243,9 +243,38 @@ export function WindowManagerProvider({
     [dispatchWithPersist],
   );
 
+  const setTitle = useCallback(
+    (id: string, title: string): void => {
+      dispatchWithPersist({ type: 'SET_TITLE', payload: { id, title } });
+    },
+    [dispatchWithPersist],
+  );
+
   const manager = useMemo<WindowManager>(
-    () => ({ windows, open, close, minimize, maximize, restore, focus, setPosition, setSize }),
-    [windows, open, close, minimize, maximize, restore, focus, setPosition, setSize],
+    () => ({
+      windows,
+      open,
+      close,
+      minimize,
+      maximize,
+      restore,
+      focus,
+      setPosition,
+      setSize,
+      setTitle,
+    }),
+    [
+      windows,
+      open,
+      close,
+      minimize,
+      maximize,
+      restore,
+      focus,
+      setPosition,
+      setSize,
+      setTitle,
+    ],
   );
 
   return (

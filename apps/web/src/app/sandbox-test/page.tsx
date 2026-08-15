@@ -159,24 +159,24 @@ function SandboxTestContent(): React.JSX.Element {
           width: 480,
           height: 280,
           ipc: {
-            allowedMethods: ['ping', 'getTime', 'echo'],
+            // 진단 페이지도 프로덕션과 **같은 구현**을 쓴다. 예전에는 여기에 핸들러 사본이
+            // 있었고, 그래서 진단이 통과해도 실제 앱 경로가 같은지 알 수 없었다.
+            capabilities: ['demo.basic', 'shell.window'],
             defaultTimeoutMs: 5000,
-            expose: {
-              ping: (): Promise<'pong'> => {
-                addLog('ok', '[호스트 수신] ping → pong 응답');
-                return Promise.resolve('pong');
+            context: {
+              // 이 페이지에는 창이 없다. 부수 효과 대신 로그로 관측한다.
+              setTitle: (text: string): void => {
+                addLog('ok', `[호스트 수신] shell.setTitle("${text}") — 이 페이지엔 창이 없어 기록만 합니다`);
               },
-              getTime: (): Promise<string> => {
-                const now = new Date().toISOString();
-                addLog('ok', `[호스트 수신] getTime → ${now}`);
-                return Promise.resolve(now);
+              close: (): void => {
+                addLog('ok', '[호스트 수신] shell.close() — 이 페이지엔 창이 없어 기록만 합니다');
               },
-              echo: (...args: unknown[]): Promise<string> => {
-                const msg = typeof args[0] === 'string' ? args[0] : String(args[0] ?? '');
-                const reply = 'host echoed: ' + msg;
-                addLog('ok', `[호스트 수신] echo("${msg}") → "${reply}"`);
-                return Promise.resolve(reply);
-              },
+            },
+            // 호출 관측 지점. `authorize`는 좁히기만 할 수 있으므로 항상 true를 돌려주면
+            // 동작을 바꾸지 않고 기록만 남는다.
+            authorize: (method, args): boolean => {
+              addLog('ok', `[호스트 수신] ${method}(${args.map((a) => JSON.stringify(a)).join(', ')})`);
+              return true;
             },
           },
         });
@@ -436,7 +436,7 @@ function SandboxTestContent(): React.JSX.Element {
               {statusLabel(ipcStatus)}
             </span>
             <span className="ml-auto text-xs text-gray-500">
-              호스트 expose: <code>ping</code> · <code>getTime</code> · <code>echo</code>
+              호스트 expose: <code>demo.ping</code> · <code>demo.getTime</code> · <code>demo.echo</code> · <code>shell.setTitle</code> · <code>shell.close</code>
             </span>
           </div>
 

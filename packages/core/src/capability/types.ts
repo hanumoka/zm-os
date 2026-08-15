@@ -11,18 +11,23 @@
  */
 
 /**
- * Capability 토큰. 점/콜론-구분 'family.action'(예: 'notify.post', 'fs:read') 권장.
- * 레거시 평면 토큰('gamepad', 'audio')도 허용한다 (v1 매니페스트 호환).
+ * Capability 토큰.
  *
- * 현재는 string alias — 값 집합을 enum으로 고정하지 않는다(OCP: 사용자 앱이 새 토큰
- * 선언 가능). 알려진 시스템 capability는 CAPABILITY_CATALOG가 SSOT.
+ * **값 집합은 닫혀 있다.** `host-api/contract.ts`의 `HostApiSurface`에서 파생되므로
+ * 표면에 없는 토큰은 타입으로 존재하지 않는다.
+ *
+ * ADR-0034는 원래 이것을 `string` alias로 두었다 — 근거는 "사용자 앱이 새 토큰을 선언할
+ * 수 있어야 한다"(OCP)였다. 그 근거는 `DEC-0007`로 ZIP 업로드 경로가 제거되면서 대상을
+ * 잃었다. 앱은 전부 `zm-os` 저장소 안의 모듈이므로 토큰을 모르는 앱이 존재할 수 없다.
+ * 열어 두면 오타가 조용히 "권한 없음"이 되고, 그것을 잡을 수단이 없다.
  */
-export type CapabilityId = string;
+import type { CapabilityId } from '../host-api/contract';
+
+export type { CapabilityId };
 
 /**
- * 토큰 형식 검증 정규식.
- * - 평면: `gamepad`, `audio`
- * - 점/콜론 구분: `notify.post`, `fs:read`, `window.control`
+ * 토큰 **형식** 검증 정규식. 카탈로그 소속 여부는 보지 않는다 — 그쪽은
+ * `isKnownCapability`가 판정한다. 둘을 섞으면 형식이 맞는 미등록 토큰이 통과한다.
  */
 export const CAPABILITY_TOKEN_REGEX = /^[a-z][a-z0-9]*([._:][a-z0-9]+)*$/;
 
@@ -31,18 +36,6 @@ export function isValidCapabilityToken(token: string): boolean {
 }
 
 export type CapabilityRisk = 'low' | 'medium' | 'high';
-
-/** capability 카탈로그 엔트리 — 시스템이 아는 capability 정의 (CAPABILITY_CATALOG 원소). */
-export type CapabilityDef = {
-  readonly id: CapabilityId;
-  /** 사용자 grant UI 표시명 (F1). */
-  readonly title: string;
-  readonly risk: CapabilityRisk;
-  /** false = 시스템 자동 grant (Android 'normal' 권한 유사). true = 사용자 승인 필요 (F1). */
-  readonly requiresUserGrant: boolean;
-  /** 이 capability가 노출하는 IPC 메서드 — allowedMethods 파생의 SSOT. */
-  readonly ipcMethods: ReadonlyArray<string>;
-};
 
 /** 매니페스트 선언 → grant 결정 입력 (Chrome MV3 permissions 유사). scope는 Tauri v2 JSON scope. */
 export type CapabilityRequest = {

@@ -4,12 +4,18 @@ import React, { useEffect, useRef, useState } from 'react';
 import { parseManifest } from '@zm/core';
 import { createSandboxedFrame } from '@/lib/apps/sandbox';
 import { createContentLoader, type ContentSource } from '@/lib/apps/content-loader';
+import type { HostApiContext } from '@/lib/apps/host-api';
 import type { DesktopAppEntry } from './desktopApps';
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
 type AppFrameProps = {
   entry: DesktopAppEntry;
+  /**
+   * 호스트 API가 부수 효과를 낼 창구. 대상 창이 이미 고정되어 있다.
+   * 없으면 IPC를 배선하지 않는다 — 창 밖(진단 페이지 등)에서 쓰는 경우다.
+   */
+  host?: HostApiContext;
 };
 
 // ─── AppFrame ─────────────────────────────────────────────────────────────────
@@ -36,7 +42,7 @@ type LoadStatus =
   | 'mounted'
   | 'error';
 
-export function AppFrame({ entry }: AppFrameProps): React.JSX.Element {
+export function AppFrame({ entry, host }: AppFrameProps): React.JSX.Element {
   const containerRef = useRef<HTMLDivElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<LoadStatus>('idle');
@@ -101,11 +107,16 @@ export function AppFrame({ entry }: AppFrameProps): React.JSX.Element {
 
         // 3. iframe 생성
         setStatus('creating');
+        // IPC 배선 여부를 **매니페스트가 결정한다.** 예전에는 앱 카탈로그의 별도 필드가
+        // 허용 메서드와 핸들러를 직접 들고 있어, 매니페스트의 capabilities 선언이
+        // 아무 데서도 읽히지 않았다.
+        const capabilities = manifest.capabilities;
+        const wireIpc = capabilities.length > 0 && host !== undefined;
         const handle = createSandboxedFrame(container, {
           html,
           width: manifest.size.defaultWidth,
           height: manifest.size.defaultHeight,
-          ...(entry.ipc !== undefined ? { ipc: entry.ipc } : {}),
+          ...(wireIpc ? { ipc: { capabilities, context: host } } : {}),
         });
         handleRef.current = handle;
         setStatus('mounted');

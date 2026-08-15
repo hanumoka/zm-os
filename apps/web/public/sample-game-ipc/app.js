@@ -17,6 +17,7 @@
   var btnPing     = document.getElementById('btn-ping');
   var btnTime     = document.getElementById('btn-time');
   var btnEcho     = document.getElementById('btn-echo');
+  var btnTitle    = document.getElementById('btn-title');
 
   var _callCount = 0;
 
@@ -37,6 +38,7 @@
     btnPing.disabled = !enabled;
     btnTime.disabled = !enabled;
     btnEcho.disabled = !enabled;
+    btnTitle.disabled = !enabled;
   }
 
   function appendResult(text, type) {
@@ -92,9 +94,14 @@
   }
 
   // ── 버튼 이벤트 ──────────────────────────────────────────────────────────
-  btnPing.addEventListener('click', function () { rpcCall('ping'); });
-  btnTime.addEventListener('click', function () { rpcCall('getTime'); });
-  btnEcho.addEventListener('click', function () { rpcCall('echo', ['hello from app']); });
+  // 메서드 이름은 '{네임스페이스}.{메서드}' 형태다. 네임스페이스가 곧 capability이고,
+  // 매니페스트가 그 capability를 선언하지 않으면 호출이 거부된다.
+  btnPing.addEventListener('click', function () { rpcCall('demo.ping'); });
+  btnTime.addEventListener('click', function () { rpcCall('demo.getTime'); });
+  btnEcho.addEventListener('click', function () { rpcCall('demo.echo', ['hello from app']); });
+  btnTitle.addEventListener('click', function () {
+    rpcCall('shell.setTitle', ['IPC Demo — ' + new Date().toLocaleTimeString()]);
+  });
 
   // ── 초기화 ────────────────────────────────────────────────────────────────
   // DOMContentLoaded 후 IPC 런타임이 INIT을 전송하므로 약간 뒤에 폴링 시작

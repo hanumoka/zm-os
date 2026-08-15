@@ -49,7 +49,20 @@ export function WindowLayer({ windows, apps, manager }: WindowLayerProps): React
             ariaLabel={`${title} 윈도우`}
           >
             {entry !== undefined ? (
-              <AppFrame key={win.id} entry={entry} />
+              <AppFrame
+                key={win.id}
+                entry={entry}
+                // 호스트 API의 대상 창을 여기서 고정한다. 앱이 창 ID를 인자로 넘기게 하면
+                // 남의 창을 지목할 수 있다.
+                host={{
+                  setTitle: (text: string): void => {
+                    manager.setTitle(win.id, text);
+                  },
+                  close: (): void => {
+                    manager.close(win.id);
+                  },
+                }}
+              />
             ) : (
               <div className="flex items-center justify-center w-full h-full text-sm text-neutral-500">
                 알 수 없는 앱: {win.contentId}

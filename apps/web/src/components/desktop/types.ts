@@ -121,7 +121,14 @@ export type WindowOpenInit = {
 
 /**
  * useWindowManager() 훅이 반환하는 공개 인터페이스.
- * §3.2 시그니처 그대로 — 변경 금지.
+ *
+ * ADR-0005가 이 타입을 동결했다. **동결의 목적은 구현 교체 가능성**이다 — Zustand 등으로
+ * 상태 라이브러리를 갈아탈 때 `WindowManagerProvider` 내부만 바꾸면 되게 하려는 것이다
+ * (ADR-0005 §결과 3·4·5).
+ *
+ * 따라서 **기존 멤버의 시그니처 변경·제거는 금지**이고, 멤버 추가는 그 목적을 해치지
+ * 않으므로 허용한다. `setTitle`이 그 사례다 — zm-docs `contracts.md` §3의 `shell.setTitle`이
+ * 호스트 API로 요구한다. 정본이 충돌하면 zm-docs가 이긴다(AGENTS.md §4).
  */
 export type WindowManager = {
   windows: WindowState[];
@@ -133,4 +140,6 @@ export type WindowManager = {
   focus: (id: string) => void;
   setPosition: (id: string, x: number, y: number) => void;
   setSize: (id: string, width: number, height: number) => void;
+  /** 창 제목 변경. 호스트 API `shell.setTitle`의 구현 대상이다. */
+  setTitle: (id: string, title: string) => void;
 };

@@ -31,6 +31,11 @@ zm-os POC 1차 작업 4(DSK-01)에서 가상 데스크탑의 다중 윈도우 �
 2. **React 19 표준**: `useReducer` + `createContext` + `useCallback`으로 구성 — 프레임워크 표준 범위 안.
 3. **POC 단순성 우선**: 5-10개 윈도우 규모에서 Provider 재렌더링 비용이 실질적 문제가 되지 않는다(가정 A4).
 4. **인터페이스 안정성**: `WindowManager` 타입(§3.2)을 변경하지 않으므로 v2 reshape 시 내부 구현만 교체 가능.
+
+   > **2026-08-15 명확화**: 여기서 말하는 "변경하지 않는다"는 **기존 멤버의 시그니처 변경·제거**를 뜻한다.
+   > 동결의 목적이 구현 교체 가능성(Zustand 전환 시 provider 내부만 교체)이므로, **멤버 추가는 그 목적을 해치지 않는다.**
+   > 실제로 `setTitle`이 추가됐다 — zm-docs `contracts.md` §3의 호스트 API `shell.setTitle`이 요구하며,
+   > 정본이 충돌하면 zm-docs가 이긴다(AGENTS.md §4).
 5. **테스트 용이성**: React Testing Library로 `renderWithProvider` 패턴 적용 가능, 모킹 불필요.
 
 ## Consequences

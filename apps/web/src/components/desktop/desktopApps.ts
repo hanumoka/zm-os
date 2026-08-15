@@ -2,7 +2,6 @@
 // P1=A: 하드코딩 desktopApps (POC v1, ADR-0006).
 // ADR-0006: v2 단계에서 API 기반 앱 레지스트리로 교체 예정.
 
-import type { SandboxIpcOptions } from '@/lib/apps/sandbox';
 import type { UserAppRecord } from '@/lib/storage/user-apps';
 
 // ─── AppIcon ──────────────────────────────────────────────────────────────────
@@ -48,8 +47,6 @@ export type DesktopAppEntry = {
    * built-in 앱만 contentUrl을 사용한다.
    */
   contentUrl?: string;
-  /** IPC 설정 (선택적 — IPC 앱만) */
-  ipc?: SandboxIpcOptions;
   /** 데스크탑 아이콘 좌상단 절대 위치 (px) */
   iconPosition?: { x: number; y: number };
   /** 윈도우 초기 위치/크기 기본값 */
@@ -145,6 +142,9 @@ export const DESKTOP_APPS: ReadonlyArray<DesktopAppEntry> = [
       description: 'Comlink IPC 양방향 RPC 데모',
       entryPoint: 'index.html',
       size: { defaultWidth: 480, defaultHeight: 320 },
+      // 이 선언이 호출 가능한 호스트 메서드를 결정한다 (zm-docs contracts.md §3).
+      // 여기 없는 네임스페이스의 메서드는 호출이 거부된다.
+      capabilities: ['demo.basic', 'shell.window'],
     },
     // STR-01 메타데이터
     description: 'Comlink 기반 host-app 양방향 RPC 통신 데모',
@@ -156,23 +156,6 @@ export const DESKTOP_APPS: ReadonlyArray<DesktopAppEntry> = [
     category: 'demo',
     author: 'zm-os team',
     version: '1.0.0',
-    ipc: {
-      allowedMethods: ['ping', 'getTime', 'echo'],
-      defaultTimeoutMs: 5000,
-      expose: {
-        ping: (): Promise<'pong'> => {
-          return Promise.resolve('pong');
-        },
-        getTime: (): Promise<string> => {
-          return Promise.resolve(new Date().toISOString());
-        },
-        echo: (...args: unknown[]): Promise<string> => {
-          const msg =
-            typeof args[0] === 'string' ? args[0] : String(args[0] ?? '');
-          return Promise.resolve('host echoed: ' + msg);
-        },
-      },
-    },
   },
 
   // ── Snake Game (Phaser 3) ──────────────────────────────────────────────────

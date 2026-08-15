@@ -1,5 +1,6 @@
 import { createHostEndpoint, injectIpcRuntime } from '@zm/ipc';
-import type { HostEndpoint, HostApi } from '@zm/ipc';
+import type { HostEndpoint } from '@zm/ipc';
+import { resolveHostApi, type HostApiContext } from './host-api';
 
 const ALLOWED_SANDBOX_TOKENS = ['allow-scripts'] as const;
 
@@ -10,18 +11,22 @@ export const SANDBOX_ORIGIN = 'null' as const;
 /**
  * 샌드박스 IPC 설정.
  * SandboxOptions.ipc 필드로 전달한다.
+ *
+ * **허용 메서드 목록과 핸들러 구현을 여기서 받지 않는다.** 둘 다 `capabilities`에서
+ * 파생되며 그 파생은 `host-api/`의 합성 루트 한 곳에서만 일어난다. 예전에는 이 자리에
+ * `allowedMethods`와 `expose`가 있었고, 그 결과 두 호출자가 같은 배열을 각각 하드코딩한
+ * 채 capability 시스템은 아무도 부르지 않는 상태로 남아 있었다.
  */
 export type SandboxIpcOptions = {
   /**
-   * 앱(iframe)이 호출할 수 있는 호스트 메서드 화이트리스트 (v1 권한 모델).
-   * 미지정 시 빈 배열 → 모든 앱 → 호스트 호출 거부.
+   * 앱 매니페스트가 선언한 capability 토큰.
+   * 카탈로그에 없는 토큰은 무시된다(fail-closed).
    */
-  allowedMethods: ReadonlyArray<string>;
+  capabilities: ReadonlyArray<string>;
   /**
-   * 호스트에서 앱으로 노출할 메서드 맵.
-   * 앱은 window.__zmosIpc.call(method) 로 호출한다.
+   * 호스트 API가 부수 효과를 낼 창구. 대상 창은 여기서 이미 고정되어 있다.
    */
-  expose?: HostApi;
+  context: HostApiContext;
   /**
    * RPC 호출 기본 타임아웃 (ms). 기본값: 5000
    */
@@ -124,10 +129,22 @@ export function createSandboxedFrame(
     const ipcOpts = opts.ipc;
     // iframe이 DOM에 추가된 후 contentWindow가 생기므로 먼저 append 후 생성
     container.appendChild(iframe);
+    const resolved = resolveHostApi(ipcOpts.capabilities, ipcOpts.context);
+    if (resolved.unknownCapabilities.length > 0) {
+      // 조용히 버리면 오타가 "권한 없음"으로만 나타나 원인을 찾을 수 없다.
+      console.warn(
+        '[zm-os] 알 수 없는 capability 토큰을 무시했습니다:',
+        resolved.unknownCapabilities,
+      );
+    }
     ipcEndpoint = createHostEndpoint({
       iframe,
-      allowedMethods: ipcOpts.allowedMethods,
-      expose: ipcOpts.expose,
+      allowedMethods: resolved.allowedMethods,
+      expose: resolved.expose,
+      // 호스트→앱 방향은 앱의 이름 공간이다. 지금 호스트가 앱을 호출하는 경로가 없으므로
+      // 닫아 둔다. 여는 것은 그 경로를 실제로 만들 때다.
+      callableAppMethods: [],
+      reportUnimplemented: resolved.hasPlanned,
       defaultTimeoutMs: ipcOpts.defaultTimeoutMs,
       authorize: ipcOpts.authorize,
     });

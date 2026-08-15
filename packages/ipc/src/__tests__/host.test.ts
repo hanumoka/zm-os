@@ -60,6 +60,19 @@ const initMsg = (methods: ReadonlyArray<string>) => ({
   methods,
 });
 
+const callMsg = (method: string, args: ReadonlyArray<unknown> = []) => ({
+  type: MSG_TYPE.CALL,
+  v: IPC_PROTOCOL_VERSION,
+  callId: 'c1',
+  method,
+  args,
+});
+
+const errorOf = (sent: Sent[]): { code?: string } | undefined =>
+  sent
+    .map((s) => s.data as { type?: string; code?: string })
+    .find((d) => d.type === MSG_TYPE.ERROR);
+
 describe('출처 검증', () => {
   let iframe: HTMLIFrameElement;
   let sent: Sent[];
@@ -136,19 +149,6 @@ describe('호스트 → 앱 호출 게이트 (TS-002 회귀 잠금)', () => {
 });
 
 describe('앱 → 호스트 호출 인가', () => {
-  const callMsg = (method: string, args: ReadonlyArray<unknown> = []) => ({
-    type: MSG_TYPE.CALL,
-    v: IPC_PROTOCOL_VERSION,
-    callId: 'c1',
-    method,
-    args,
-  });
-
-  const errorOf = (sent: Sent[]): { code?: string } | undefined =>
-    sent
-      .map((s) => s.data as { type?: string; code?: string })
-      .find((d) => d.type === MSG_TYPE.ERROR);
-
   it('allowedMethods 밖 메서드는 denied로 응답한다', () => {
     const { iframe, sent } = makeIframe();
     createHostEndpoint({
@@ -201,5 +201,145 @@ describe('앱 → 호스트 호출 인가', () => {
     deliver(initMsg(['x']), {}, iframe);
     deliver(callMsg('safe', [1, 'two']), {}, iframe);
     expect(seen).toEqual([{ method: 'safe', args: [1, 'two'] }]);
+  });
+});
+
+describe('두 방향의 화이트리스트 분리', () => {
+  /**
+   * 예전에는 `allowedMethods` 하나가 양방향에 쓰였다. 두 방향은 이름 공간이 다르므로
+   * 호스트 메서드 이름이 `demo.ping` 같은 형태가 되는 순간, 앱이 announce한 이름과의
+   * 교집합이 **영구히 빈 배열**이 되어 호스트→앱 호출이 구조적으로 불가능해진다.
+   *
+   * 그때 이것이 드러나지 않는 이유는 샘플 앱이 `expose()`를 부르지 않아 그 방향이
+   * 쓰이지 않기 때문이다. 즉 **아무 테스트도 잡지 못하는 잠복 결함**이 된다.
+   * 아래가 그 자리를 메운다.
+   */
+
+  it('호스트 메서드 이름이 FQN이어도 호스트→앱 호출이 살아 있다', () => {
+    const { iframe, sent } = makeIframe();
+    const ep = createHostEndpoint({
+      iframe,
+      allowedMethods: ['demo.ping', 'shell.setTitle'], // 앱→호스트 (호스트 이름 공간)
+      callableAppMethods: ['flushNow'], // 호스트→앱 (앱 이름 공간)
+    });
+    deliver(initMsg(['flushNow']), {}, iframe);
+    expect(ep.status).toBe('ready');
+
+    void ep.call('flushNow', [], 30).catch(() => undefined);
+    const call = sent.find((s) => (s.data as { type?: string }).type === MSG_TYPE.CALL);
+    expect(call).toBeDefined();
+  });
+
+  it('두 목록을 공유하면 교집합이 비어 호출이 죽는다 — 분리의 근거', async () => {
+    const { iframe } = makeIframe();
+    // callableAppMethods를 주지 않으면 allowedMethods로 폴백한다(하위호환).
+    // 그 폴백이 FQN 이름과 만나면 이렇게 된다.
+    const ep = createHostEndpoint({ iframe, allowedMethods: ['demo.ping'] });
+    deliver(initMsg(['flushNow']), {}, iframe);
+    await expect(ep.call('flushNow')).rejects.toMatchObject({ code: 'denied' });
+  });
+
+  it('앱→호스트 게이트는 callableAppMethods의 영향을 받지 않는다', () => {
+    const { iframe, sent } = makeIframe();
+    createHostEndpoint({
+      iframe,
+      allowedMethods: ['demo.ping'],
+      callableAppMethods: [], // 호스트→앱을 완전히 닫아도
+      expose: { 'demo.ping': () => 'pong' },
+    });
+    deliver(initMsg([]), {}, iframe);
+    deliver(callMsg('demo.ping'), {}, iframe);
+    // 앱→호스트는 정상 동작해야 한다.
+    expect(errorOf(sent)).toBeUndefined();
+  });
+});
+
+describe('구현 부재와 권한 부재의 구분', () => {
+  it('reportUnimplemented면 unimplemented로 회신한다', () => {
+    const { iframe, sent } = makeIframe();
+    createHostEndpoint({
+      iframe,
+      allowedMethods: ['notes.list'], // 권한은 있고
+      expose: {}, // 핸들러는 없다 (계약의 planned 상태)
+      reportUnimplemented: true,
+    });
+    deliver(initMsg([]), {}, iframe);
+    deliver(callMsg('notes.list'), {}, iframe);
+    expect(errorOf(sent)).toMatchObject({ code: 'unimplemented' });
+  });
+
+  it('기본값은 종전대로 denied다', () => {
+    const { iframe, sent } = makeIframe();
+    createHostEndpoint({ iframe, allowedMethods: ['notes.list'], expose: {} });
+    deliver(initMsg([]), {}, iframe);
+    deliver(callMsg('notes.list'), {}, iframe);
+    expect(errorOf(sent)).toMatchObject({ code: 'denied' });
+  });
+
+  it('권한이 없으면 구현 여부와 무관하게 denied다', () => {
+    const { iframe, sent } = makeIframe();
+    createHostEndpoint({
+      iframe,
+      allowedMethods: [],
+      expose: { 'notes.list': () => [] },
+      reportUnimplemented: true,
+    });
+    deliver(initMsg([]), {}, iframe);
+    deliver(callMsg('notes.list'), {}, iframe);
+    expect(errorOf(sent)).toMatchObject({ code: 'denied' });
+  });
+});
+
+describe('리스너가 예외로 죽지 않는다', () => {
+  /**
+   * `_dispatch`에서 예외가 새면 그 메시지 처리만이 아니라 **호스트 리스너 전체**가
+   * uncaught error를 낸다. 앱이 보낸 값과 호출자가 준 콜백이 모두 여기서 실행되므로
+   * 둘 다 신뢰할 수 없다.
+   */
+
+  const tick = (): Promise<void> => new Promise((r) => setTimeout(r, 0));
+
+  it('호출자 콜백(onRateLimitExceeded)이 던져도 리스너가 살아 있다', async () => {
+    const { iframe, sent } = makeIframe();
+    createHostEndpoint({
+      iframe,
+      allowedMethods: ['ok'],
+      expose: { ok: () => 1 },
+      rateLimit: { maxMessages: 1, windowMs: 10_000, penaltyMs: 10_000 },
+      onRateLimitExceeded: () => {
+        throw new Error('호출자 콜백 폭발');
+      },
+    });
+    deliver(initMsg([]), {}, iframe);
+    deliver(callMsg('ok'), {}, iframe); // 1건 소진
+    deliver(callMsg('ok'), {}, iframe); // 상한 초과 → 콜백이 던진다
+
+    sent.length = 0;
+    // rate limit이 풀리지 않아도 리스너 자체는 살아 있어야 한다.
+    // 살아 있음의 증거로 INIT 재처리가 예외 없이 지나가는지 본다.
+    expect(() => deliver(initMsg([]), {}, iframe)).not.toThrow();
+    await tick();
+  });
+
+  it('핸들러가 던져도 다음 호출이 정상 처리된다', async () => {
+    const { iframe, sent } = makeIframe();
+    createHostEndpoint({
+      iframe,
+      allowedMethods: ['boom', 'ok'],
+      expose: {
+        boom: () => {
+          throw new Error('핸들러 폭발');
+        },
+        ok: () => 1,
+      },
+    });
+    deliver(initMsg([]), {}, iframe);
+    deliver(callMsg('boom'), {}, iframe);
+    await tick();
+
+    sent.length = 0;
+    deliver(callMsg('ok'), {}, iframe);
+    await tick(); // RESULT는 await 뒤에 나간다
+    expect(sent.some((s) => (s.data as { type?: string }).type === MSG_TYPE.RESULT)).toBe(true);
   });
 });

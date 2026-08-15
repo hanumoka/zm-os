@@ -15,7 +15,8 @@
     "e2e:partition": "node e2e/e2e-partition.mjs",
     "e2e:hydration": "node e2e/e2e-hydration.mjs",
     "e2e:snake": "node e2e/e2e-snake.mjs",
-    "e2e": "pnpm e2e:hydration && pnpm e2e:snake && pnpm e2e:partition"
+    "e2e": "pnpm e2e:hydration && pnpm e2e:snake && pnpm e2e:partition && pnpm e2e:ipc",
+    "e2e:ipc": "node e2e/e2e-ipc-contract.mjs"
   },
   "dependencies": {
     "@zm/adapters-local": "workspace:*",

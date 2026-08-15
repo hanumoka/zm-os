@@ -75,6 +75,8 @@
       .btn-time:hover:not(:disabled)  { background: #f0f9ff; }
       .btn-echo  { border-color: #10b981; color: #059669; }
       .btn-echo:hover:not(:disabled)  { background: #ecfdf5; }
+      .btn-title { border-color: #f59e0b; color: #d97706; }
+      .btn-title:hover:not(:disabled) { background: #fffbeb; }
       .result-area {
         min-height: 80px;
         background: #fff;
@@ -117,9 +119,10 @@
 
     <!-- RPC 버튼 -->
     <div class="btn-row">
-      <button class="btn-ping" id="btn-ping" disabled>ping</button>
-      <button class="btn-time" id="btn-time" disabled>getTime</button>
-      <button class="btn-echo" id="btn-echo" disabled>echo("hello from app")</button>
+      <button class="btn-ping" id="btn-ping" disabled>demo.ping</button>
+      <button class="btn-time" id="btn-time" disabled>demo.getTime</button>
+      <button class="btn-echo" id="btn-echo" disabled>demo.echo("hello from app")</button>
+      <button class="btn-title" id="btn-title" disabled>shell.setTitle</button>
     </div>
 
     <!-- 응답 영역 -->

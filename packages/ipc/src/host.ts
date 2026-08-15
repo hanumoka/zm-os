@@ -4,7 +4,7 @@
  * 책임:
  * - iframe과의 핸드셰이크 (INIT → READY)
  * - origin 검증 (event.origin === SANDBOX_ORIGIN + event.source === iframe.contentWindow)
- * - 권한 화이트리스트 검증 (allowedMethods)
+ * - 권한 화이트리스트 검증 (앱→호스트 = allowedMethods / 호스트→앱 = callableAppMethods)
  * - 앱 메서드 RPC 호출 (call)
  * - 호스트 API 노출 (expose → 앱이 CALL 메시지로 호출 가능)
  *
@@ -15,7 +15,7 @@
  * @module ipc/host
  */
 
-import type { HostEndpoint, HostEndpointOptions, HostApi } from './types';
+import type { HostEndpoint, HostEndpointOptions } from './types';
 import { IpcError } from './types';
 import {
   IPC_PROTOCOL_VERSION,
@@ -78,6 +78,9 @@ export function createHostEndpoint(options: HostEndpointOptions): HostEndpoint {
   }
 
   const { iframe, allowedMethods, expose = {}, authorize } = options;
+  // 호스트→앱 방향은 앱의 이름 공간이다. 미지정 시 폴백해 기존 호출자 동작을 보존한다.
+  const callableAppMethods = options.callableAppMethods ?? allowedMethods;
+  const reportUnimplemented = options.reportUnimplemented ?? false;
 
   // ─── Rate Limiter (N-08 DoS 방어) ─────────────────────────────────────────
   let _rateLimiter: MessageRateLimiter | null = null;
@@ -145,14 +148,17 @@ export function createHostEndpoint(options: HostEndpointOptions): HostEndpoint {
       return;
     }
 
-    // 권한 게이트 2: expose 객체에 실제 함수 존재
-    const handler = (expose as HostApi)[method];
+    // 권한 게이트 2: expose 객체에 실제 함수 존재.
+    // 여기 도달했다는 것은 권한은 통과했다는 뜻이므로, 구현 부재를 'denied'로 보고하면
+    // 앱이 "권한을 더 요청하라"는 잘못된 결론을 낸다. 계약이 핸들러 없는 capability를
+    // 허용하므로(planned) 실제로 도달 가능한 상태다.
+    const handler = (expose as Record<string, unknown>)[method];
     if (typeof handler !== 'function') {
       _postToApp({
         type: MSG_TYPE.ERROR,
         v: IPC_PROTOCOL_VERSION,
         callId,
-        code: 'denied',
+        code: reportUnimplemented ? 'unimplemented' : 'denied',
         message: `호스트 메서드 '${method}'가 존재하지 않습니다`,
       });
       return;
@@ -180,6 +186,17 @@ export function createHostEndpoint(options: HostEndpointOptions): HostEndpoint {
   // ─── 메시지 리스너 ────────────────────────────────────────────────────────
 
   const _listener = (event: MessageEvent): void => {
+    // 앱이 보낸 값은 신뢰할 수 없다. 여기서 예외가 새면 **그 메시지 처리만이 아니라
+    // 호스트 리스너 전체가 uncaught error를 낸다** — 앱이 순환 참조나 BigInt를 담아
+    // 보내는 것만으로 도달 가능하고, structured clone은 둘 다 합법적으로 전달한다.
+    try {
+      _dispatch(event);
+    } catch (err) {
+      console.error('[zm-os ipc] 앱 메시지 처리 중 예외', err);
+    }
+  };
+
+  function _dispatch(event: MessageEvent): void {
     // 보안 검증 1: 메시지 출처가 우리 iframe인지 확인
     if (event.source !== iframe.contentWindow) return;
 
@@ -221,7 +238,7 @@ export function createHostEndpoint(options: HostEndpointOptions): HostEndpoint {
       default:
         break;
     }
-  };
+  }
 
   // ─── 핸드셰이크 처리 ──────────────────────────────────────────────────────
 
@@ -229,8 +246,9 @@ export function createHostEndpoint(options: HostEndpointOptions): HostEndpoint {
     if (_status !== 'connecting') return; // 이미 ready or closed
 
     _appMethods = msg.methods;
-    // allowedMethods 교집합 계산
-    _grantedMethods = msg.methods.filter((m) => allowedMethods.includes(m));
+    // 호스트→앱 방향의 교집합이다. 앱→호스트 화이트리스트(allowedMethods)와 섞지 않는다 —
+    // 두 방향의 이름 공간이 다르므로 목록을 공유하면 한쪽이 조용히 죽는다.
+    _grantedMethods = msg.methods.filter((m) => callableAppMethods.includes(m));
 
     // READY 응답 전송
     const hostOrigin = window.location.origin;

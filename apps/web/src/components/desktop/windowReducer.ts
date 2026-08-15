@@ -28,6 +28,7 @@ export type WindowAction =
   | { type: 'FOCUS'; payload: { id: string } }
   | { type: 'SET_POSITION'; payload: { id: string; x: number; y: number } }
   | { type: 'SET_SIZE'; payload: { id: string; width: number; height: number } }
+  | { type: 'SET_TITLE'; payload: { id: string; title: string } }
   | { type: 'RESTORE_LAYOUT'; payload: { windows: WindowState[] } };
 
 // ─── 헬퍼 ─────────────────────────────────────────────────────────────────────
@@ -119,6 +120,11 @@ export function windowReducer(
               },
             }
           : w,
+      );
+
+    case 'SET_TITLE':
+      return state.map((w) =>
+        w.id === action.payload.id ? { ...w, title: action.payload.title } : w,
       );
 
     case 'RESTORE_LAYOUT':
