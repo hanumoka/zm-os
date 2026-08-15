@@ -98,9 +98,15 @@ export function Window({
   // ─── 최대화 상태 클래스 ──────────────────────────────────────────────────
   // 최대화 시 position/size는 부모(WindowManager)가 controlled 주입.
 
+  // display/flex-direction과 최소화 숨김은 **인라인 style로** 지정한다 (아래 rndProps).
+  //
+  // react-rnd가 자기 컨테이너에 인라인 style을 붙이는데, 인라인이 클래스를 이기므로
+  // 여기에 `flex flex-col`이나 `hidden`을 넣어도 적용되지 않는다. 실제로 그 상태로
+  // 오래 있었고, 그 결과 창 본문의 `flex-1`이 동작하지 않아 **본문이 내용 크기로
+  // 줄어들었다.** 창을 리사이즈하면 앱이 따라오지 않고 빈 배경이 드러나는 증상이
+  // 여기서 나왔다. 기본 크기(480 − 타이틀바 ≈ 440)가 앱 매니페스트 기본 높이 440과
+  // 우연히 같아서 처음 열 때만 정상으로 보였다.
   const outerClassName = [
-    'flex',
-    'flex-col',
     'rounded-lg',
     'shadow-xl',
     'border',
@@ -110,7 +116,6 @@ export function Window({
     'dark:bg-neutral-800',
     'overflow-hidden',
     'select-none',
-    isMinimized ? 'hidden' : '',
     className,
   ]
     .filter(Boolean)
@@ -135,7 +140,12 @@ export function Window({
     lockAspectRatio: lockAspectRatio,
     onDragStop: handleDragStop,
     onResizeStop: handleResizeStop,
-    style: { zIndex },
+    // 인라인이어야 하는 이유는 outerClassName 위의 주석에 있다.
+    style: {
+      zIndex,
+      display: isMinimized ? 'none' : 'flex',
+      flexDirection: 'column' as const,
+    },
     className: outerClassName,
   };
 

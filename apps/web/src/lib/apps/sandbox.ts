@@ -81,8 +81,24 @@ export function createSandboxedFrame(
   const iframe = document.createElement('iframe');
   iframe.setAttribute('sandbox', ALLOWED_SANDBOX_TOKENS.join(' '));
   iframe.referrerPolicy = 'no-referrer';
+  // width/height 속성은 내재 크기(fallback)로만 남긴다. 컨테이너가 크기를 갖지
+  // 못하는 예외적인 경우에도 프레임이 0으로 접히지 않게 하기 위해서다.
   iframe.width = String(opts.width ?? 800);
   iframe.height = String(opts.height ?? 600);
+
+  // 실제 크기는 컨테이너를 따라간다.
+  //
+  // 예전에는 위 속성이 곧 표시 크기였다. 그래서 창을 리사이즈해도 앱은 매니페스트의
+  // defaultWidth/defaultHeight에 고정된 채 남고, 창의 나머지 영역이 빈 배경으로
+  // 드러났다. 창 크기와 앱 크기가 어긋나 보이는 원인이 이것이다.
+  //
+  // 두 호출자(AppFrame, sandbox-test) 모두 `w-full h-full` 컨테이너를 크기가 확정된
+  // Window 안에 두므로 100%가 안전하게 해석된다.
+  iframe.style.display = 'block';
+  iframe.style.width = '100%';
+  iframe.style.height = '100%';
+  // border가 100% 위에 더해져 넘치지 않도록 한다.
+  iframe.style.boxSizing = 'border-box';
   iframe.style.border = '1px solid #d4d4d4';
   iframe.style.background = '#ffffff';
 
