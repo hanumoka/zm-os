@@ -8,6 +8,7 @@
 - **v2 설계**: SRV-00 모노레포 + ADR-0016~0023 채택 + v2 plan v0.3.0 ✅
 - **REFAC-02**: **P1 ✅ + P2 ✅ + P3 ✅ 완료** (P3: AppRepository Port + LocalRepo IDB 어댑터 `@zm/adapters-local/app-repository`, content-agnostic, cascade remove, contract test 14, vitest 104, build ✅ — 소비처 wrapper 흡수/reshape는 P5로 이관) → **다음: P4** (Auth/Sync/Moderation Local 어댑터)
 - **협업 인프라**: sonix_docs 멀티 세션 협업 이식 ✅ 완료 (2026-06-07, commit c368b5e)
+- **ADR 정리 (2026-09-03)**: 인덱스 머리에 경고 블록을 넣어 **ADR 본문 다수가 2026-08 전략 재정립 이전 상태**임을 28건에 한 번에 표시. `ADR-0004`(정적 헤더 CSP)가 코드와 정반대인 채 `accepted`였던 것을 `ADR-0041`(요청별 nonce + 동적 렌더링, 소급 기록)로 대체. `ADR-0034`의 D1·D4가 코드에서 뒤집힌 것을 정정(코드 주석이 인용하던 "ADR-0034 갱신"이 실재하지 않았다). 대상을 잃은 `ADR-0008`·`0011`·`0022`를 `deprecated`로. `ADR-0013/0014/0015`가 독자를 **소멸한 번호**(0024+/0025+/0026+)로 보내던 문장 정정. **`0010`은 예약이 아니라 유실**임을 명시. frontmatter에 `implementation`·`measured_at` 필드 도입 — `accepted`가 구현을 뜻한다고 읽혀 온 것이 이유다.
 - **데스크탑 아이콘 (2026-09-03)**: TS-007 수정 — 설치되지 않은 앱이 좌측 열 위 다섯 칸을 예약해 좌상단 드롭이 막히던 문제. 배치를 순수 함수 `placeIcons`(`icon-grid.ts`)로 분리하고 점유 계산을 화면 기준으로 통일. 함께 **스토어 아이콘 기본 자리를 우상단 → 좌상단(격자 첫 칸)으로 이동**(2026-05-24 C-01 결정을 소유자 요청으로 되돌림), built-in 좌측 열 기본 좌표는 y=130부터로 하향. `anchor` prop 제거. 단위 88 ✅ / e2e 66 ✅
 
 > ⚠️ 아래 "## ✅ Phase 1" 이후는 POC 당시 historical 작업 로그. 현재 다음 작업은 본 섹션 하단 "REFAC-02 진입" 참조.

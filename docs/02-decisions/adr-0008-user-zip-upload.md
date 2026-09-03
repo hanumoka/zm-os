@@ -1,11 +1,21 @@
 ---
 number: "0008"
 title: POC v1 사용자 ZIP 앱 업로드 모델 (JSZip + 단일 HTML + 보안 검증)
-status: accepted
+status: deprecated
 date: 2026-05-24
 author: hanumoka
 related: ["0001", "0006", "0007"]
 ---
+
+
+> ⚠️ **2026-09-03 deprecated — 대상 상실.**
+>
+> 사용자 ZIP 업로드 경로는 `zm-docs`의 `DEC-0007`로 제거됐고 `/store`의 업로드 UI는 2026-08-16 `main`에 반영됐다.
+> **공개 업로드 경로·공개 카탈로그·결제는 결정 게이트 뒤에 있으며 새 결정 기록이 선행이다**(`docs/projects/zm-os/policies.md` 3절).
+> 이 ADR을 재개 근거로 읽지 마라 — eslint `no-restricted-imports`가 `AppUploadButton` 재장착을 `error`로 막는다.
+>
+> **결정은 죽었고 코드 일부는 남았다.** `zip-loader`의 검증 파이프라인(magic byte → 파싱 → path traversal →
+> 압축비 → 필수 파일 → 매니페스트)은 재사용 가치가 있어 파일째 보존됐다. 그 자산의 존재가 결정의 부활을 뜻하지 않는다.
 
 # ADR-0008: POC v1 사용자 ZIP 앱 업로드 모델
 

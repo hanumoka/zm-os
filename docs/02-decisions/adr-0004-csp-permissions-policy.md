@@ -1,11 +1,21 @@
 ---
 number: "0004"
 title: 호스트 origin CSP / Permissions-Policy 정책 — POC 1차 정적 헤더 모델
-status: accepted
+status: superseded
 date: 2026-05-24
 author: hanumoka
 related: ["0001", "0003"]
 ---
+
+
+> ⚠️ **2026-09-03 superseded by [ADR-0041](adr-0041-nonce-csp-and-dynamic-rendering.md).**
+>
+> 이 ADR이 채택한 「정적 헤더 모델」과 기각한 「nonce」가 **코드에서 뒤바뀌어 있었다.**
+> 지금 CSP의 정본은 `apps/web/src/proxy.ts`의 요청별 nonce이고, `next.config.ts`는 CSP를 싣지 않는다.
+> 전환은 2026-08-15에 이루어졌고 상위 근거는 `zm-docs`의 `DEC-0009`다 — **그런데 이 문서는 그 사실을 모르는 채
+> `accepted`로 3개월을 서 있었다.** 이 저장소가 구현 결정의 정본이므로 그 상태가 특히 나빴다.
+>
+> 아래 본문은 2026-05-24 시점의 판단으로 보존한다. `Permissions-Policy`와 헤더 배치 결정은 여전히 유효하다.
 
 # ADR-0004: 호스트 origin CSP / Permissions-Policy 정책 — POC 1차 정적 헤더 모델
 

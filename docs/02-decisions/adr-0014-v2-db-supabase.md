@@ -11,6 +11,8 @@ superseded_by: ["0017"]
 # ADR-0014: v2 Postgres 호스팅 + RLS — Supabase 채택
 
 > ⚠️ **2026-05-27 superseded by ADR-0017**: 본 ADR은 ADR-0017(Ports & Adapters)의 어댑터 옵션 명세로 reshape됨. Supabase Postgres + Drizzle은 `AppRepository` Port의 Cloud 어댑터 중 하나로 격하되며, 상세 명세는 **ADR-0025+** (CloudRepo-Supabase, v2 CLD Epic 진입 시점에 작성)에서 별도 작성된다. 본 ADR의 결정 근거(RLS auth.uid()=owner_id 패턴, Drizzle ORM 선택, B-tree 인덱스 의무 등)는 ADR-0025+ 작성 시 참고용으로 보존한다.
+>
+> ★ **2026-09-03 정정: 이 문장이 가리키는 `ADR-0025+`는 작성되지 않는다.** 인덱스가 그 번호대를 **소멸**로 닫았고(Supabase·Cloud 트랙 폐기) *"결번 0024~0029는 회수하지 않는다"* 고 적었다. 위 문장을 따라가면 존재하지 않는 문서를 찾게 된다 — 보존된 결정 근거는 그 자리에서 참고 자료로만 남는다.
 
 ## Context
 

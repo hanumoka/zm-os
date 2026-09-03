@@ -1,11 +1,21 @@
 ---
 number: "0022"
 title: LocalStaticModeration — HTML 정적 분석 어댑터 (ModerationProvider Local)
-status: accepted
+status: deprecated
 date: 2026-05-27
 author: hanumoka
 related: ["0017", "0011"]
 ---
+
+
+> ⚠️ **2026-09-03 deprecated — 대상 상실.**
+>
+> `zm-docs`의 `docs/projects/zm-os/requirements.md`가 **정적 모더레이션을 비목표로 판정했다** — 앱이 전부
+> 소유자 것이라 모더레이션 대상이 없다. 이 ADR이 호출 지점으로 지목한 `UserAppsProvider.install` +
+> zip-loader 경로도 업로드 UI 제거와 함께 사라졌고, 어댑터 구현은 존재한 적이 없다(`packages/adapters-local/src`에 `moderation/` 없음).
+>
+> 인덱스는 같은 사유로 ADR-0029+(CloudModeration)를 이미 「대상 상실」로 닫았다. **같은 판정이 Local 쪽에는
+> 적용되지 않은 채 남아 있었다.** `packages/core/src/ports/moderation.ts`(인터페이스)를 남길지는 별도 판단이다.
 
 # ADR-0022: LocalStaticModeration — HTML 정적 분석 어댑터
 

@@ -11,6 +11,8 @@ superseded_by: ["0017"]
 # ADR-0013: v2 사용자 인증 — Supabase Auth 채택
 
 > ⚠️ **2026-05-27 superseded by ADR-0017**: 본 ADR은 ADR-0017(Ports & Adapters)의 어댑터 옵션 명세로 reshape됨. Supabase Auth는 `AuthProvider` Port의 Cloud 어댑터 중 하나로 격하되며, 상세 명세는 **ADR-0024+** (CloudAuth-Supabase, v2 CLD Epic 진입 시점에 작성)에서 별도 작성된다. 본 ADR의 결정 근거(MAU 비용 분석, RLS 통합, CVE-2026-31813 강제 등)는 ADR-0024+ 작성 시 참고용으로 보존한다.
+>
+> ★ **2026-09-03 정정: 이 문장이 가리키는 `ADR-0024+`는 작성되지 않는다.** 인덱스가 그 번호대를 **소멸**로 닫았고(Supabase·Cloud 트랙 폐기) *"결번 0024~0029는 회수하지 않는다"* 고 적었다. 위 문장을 따라가면 존재하지 않는 문서를 찾게 된다 — 보존된 결정 근거는 그 자리에서 참고 자료로만 남는다.
 
 ## Context
 

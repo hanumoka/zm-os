@@ -2,18 +2,34 @@
 
 > Architecture Decision Records — 순차 번호. 수동 인덱스 (자동 생성 금지).
 
+> ## ⚠ 먼저 읽어라 — ADR 본문과 이 인덱스는 시점이 다르다
+>
+> **ADR 본문 대부분은 2026-08 전략 재정립 이전 상태다.** 그 재정립은 이 인덱스만 다시 썼고
+> 본문은 거의 손대지 않았다(2026-06-08 이후 본문 변경 3건). 그래서 **인덱스는 새 세계를 알고
+> 본문 다수는 옛 세계에 있다.**
+>
+> 1. **요구·정책·상위 설계·계약의 정본은 이 저장소가 아니다.** `zm-docs`의
+>    `docs/projects/zm-os/{requirements,policies,architecture,contracts}.md`이며 충돌하면 그쪽이 이긴다(`DEC-0005`).
+>    이 저장소의 ADR은 **구현 결정**의 정본이다.
+> 2. **ADR이 인용하는 `docs/04-planning/`과 `docs/03-policy/`는 2026-08-15에 동결됐다.**
+>    근거 사슬을 따라가면 동결본에 닿는다. 그 문서들을 현재 사실로 읽지 마라.
+> 3. **`status: accepted`는 "구현됐다"가 아니다.** 결정의 상태일 뿐이며 구현 여부를 적는 칸은
+>    아래 「작성 규칙」의 `implementation` 필드가 생기기 전까지 없었다. **필드가 없는 ADR은
+>    "미상"이며 코드로 확인해야 한다.**
+> 4. **아래 표의 상태 열을 본문보다 먼저 믿어라.** 본문 헤더의 `status`와 어긋나면 표가 최신이다.
+
 | ID | 제목 | 상태 | 날짜 |
 |----|------|------|------|
 | [ADR-0001](adr-0001-initial-stack.md) | 초기 스택 (Next.js 단일 풀스택 + 단일 사용자 + iframe 샌드박싱) | accepted | 2026-05-24 |
 | [ADR-0002](adr-0002-window-manager.md) | 윈도우 매니저 라이브러리 — react-rnd 채택 (POC v1) | accepted | 2026-05-24 |
 | [ADR-0003](adr-0003-ipc-surface.md) | 호스트-앱 IPC 어댑터 표면 — wire-compatible RPC + 화이트리스트 권한 (v1) | accepted | 2026-05-24 |
-| [ADR-0004](adr-0004-csp-permissions-policy.md) | 호스트 origin CSP / Permissions-Policy 정책 — POC 1차 정적 헤더 모델 | accepted | 2026-05-24 |
+| [ADR-0004](adr-0004-csp-permissions-policy.md) | 호스트 origin CSP / Permissions-Policy 정책 — POC 1차 정적 헤더 모델 | **superseded (→0041)** | 2026-05-24 |
 | [ADR-0005](adr-0005-window-state-management.md) | 윈도우 상태 관리 방식 — React Context + useReducer (POC v1) | accepted | 2026-05-24 |
 | [ADR-0006](adr-0006-desktop-app-catalog.md) | 데스크탑 앱 카탈로그 모델 — POC v1 하드코딩 + v2 STR 전환 | accepted | 2026-05-24 |
 | [ADR-0007](adr-0007-client-storage-indexeddb.md) | 클라이언트 스토리지 추상화 — IndexedDB (idb library) + 메모리 폴백 | accepted | 2026-05-24 |
-| [ADR-0008](adr-0008-user-zip-upload.md) | POC v1 사용자 ZIP 앱 업로드 모델 (JSZip + 단일 HTML + 보안 검증) | accepted | 2026-05-24 |
+| [ADR-0008](adr-0008-user-zip-upload.md) | POC v1 사용자 ZIP 앱 업로드 모델 (JSZip + 단일 HTML + 보안 검증) | **deprecated (대상 상실)** | 2026-05-24 |
 | [ADR-0009](adr-0009-storage-abstraction.md) | 스토리지 추상화 계층 — StorageAdapter Strategy 패턴 + OPFS 어댑터 | superseded (→0020) | 2026-05-25 |
-| [ADR-0011](adr-0011-user-app-lifecycle.md) | 사용자 앱 삭제 및 업데이트 UX (APP-04) | accepted | 2026-05-25 |
+| [ADR-0011](adr-0011-user-app-lifecycle.md) | 사용자 앱 삭제 및 업데이트 UX (APP-04) | **deprecated (대상 상실)** | 2026-05-25 |
 | [ADR-0012](adr-0012-dark-mode-strategy.md) | 다크 모드 CSS 전략 — Tailwind v4 class 기반 dark variant | accepted | 2026-05-25 |
 | [ADR-0013](adr-0013-v2-auth-supabase.md) | v2 사용자 인증 — Supabase Auth 채택 | superseded by ADR-0017 | 2026-05-26 |
 | [ADR-0014](adr-0014-v2-db-supabase.md) | v2 Postgres 호스팅 + RLS — Supabase 채택 | superseded by ADR-0017 | 2026-05-26 |
@@ -24,7 +40,7 @@
 | [ADR-0019](adr-0019-localrepo-idb.md) | LocalRepo IDB — AppRepository Local 어댑터 (IndexedDB) | accepted | 2026-05-27 |
 | [ADR-0020](adr-0020-localopfs-blobstorage.md) | LocalOPFS BlobStorage — BlobStorage Local 어댑터 (IDB/OPFS/Memory + AbortSignal) | accepted | 2026-05-27 |
 | [ADR-0021](adr-0021-local-noop-sync.md) | LocalNoOpSync — 동기화 비활성 어댑터 (SyncProvider Local) | accepted | 2026-05-27 |
-| [ADR-0022](adr-0022-local-static-moderation.md) | LocalStaticModeration — HTML 정적 분석 어댑터 (ModerationProvider Local) | accepted | 2026-05-27 |
+| [ADR-0022](adr-0022-local-static-moderation.md) | LocalStaticModeration — HTML 정적 분석 어댑터 (ModerationProvider Local) | **deprecated (대상 상실)** | 2026-05-27 |
 | [ADR-0023](adr-0023-adapter-resolver-composition-root.md) | Adapter Resolver + Composition Root — createPorts() + PortsContext + 동적 import | accepted | 2026-05-27 |
 | [ADR-0030](adr-0030-isolation-first.md) | 멀티 세션 협업 — Isolation-First (worktree 격리) | accepted | 2026-06-07 |
 | [ADR-0031](adr-0031-ssot-and-derived.md) | 멀티 세션 협업 — SSOT + Append-Only Events | accepted | 2026-06-07 |
@@ -32,8 +48,12 @@
 | [ADR-0033](adr-0033-os-extension-architecture.md) | OS 확장 아키텍처 — capability-우선 + microkernel-lite + 점진 | accepted | 2026-06-07 |
 | [ADR-0034](adr-0034-capability-and-ipc-contract.md) | App Capability 모델 + IPC 권한 계약 (load-bearing) | accepted | 2026-06-07 |
 | [ADR-0040](adr-0040-app-record-schema.md) | AppRecord 콘텐츠 표현과 레거시 레코드 승격 | accepted | 2026-08-04 |
+| [ADR-0041](adr-0041-nonce-csp-and-dynamic-rendering.md) | 요청별 nonce CSP + 동적 렌더링 — 정적 헤더 모델 대체 | accepted | 2026-09-03 |
 
-> **0024~0029 결번(예약)**: CloudAdapter 옵션 트랙 — 아래 "보류" 참조. 협업 헌법 ADR 은 예약 회피를 위해 0030~0032 사용.
+> **0010 결번 — 예약이 아니라 유실이다.** 한 번도 커밋된 적이 없다(`git log --all --diff-filter=A -- 'docs/02-decisions/adr-0010*'` = 0건).
+> 그런데 `docs/04-planning/01-prd.md`와 `03-v2-plan.md`가 IPC rate limiter의 근거로 이 번호를 인용한다 — **가리키는 문서가 없는 인용이다.**
+> 기능은 실재한다(`packages/ipc/src/rate-limiter.ts`). **번호는 회수하지 않는다.**
+> **0024~0029 결번**: CloudAdapter 옵션 트랙. 예약이 아니라 **소멸**이다 — 아래 "보류 목록" 참조. 협업 헌법 ADR 은 예약 회피를 위해 0030~0032 사용.
 > **0035~0039 예약**: OS 확장 후속 (ADR-0033 §D6) — 0035 Service Registry / 0036 IPC 프로토콜·EVENT / 0037 VFS / 0038 Lifecycle·Boot / 0039 Event Bus. F1~F3에서 작성.
 
 ## 다음 번호 가이드
@@ -88,6 +108,12 @@ REFAC-02의 Ports & Adapters 골격만 자산으로 살아남았고, 그 위에 
   date: YYYY-MM-DD
   author: <git user>
   related: [<other ADR ids>]
+  implementation: none | partial | done   # 측정 ref와 함께 적는다
+  measured_at: <commit sha> (<YYYY-MM-DD>)
   ---
   ```
+- ★ **`implementation`은 2026-09-03에 추가했다. 그 이전 ADR에는 없고, 없는 것은 "미상"이다.**
+  `status: accepted`가 구현을 뜻한다고 읽혀 온 것이 이 필드를 만든 이유다 — ADR-0018·0021·0022·0023이
+  석 달째 `accepted`인데 구현이 0건이었고, 진행 상태를 아는 유일한 곳이 소스 주석이었다.
+  코드 상태를 단언하는 문장에는 측정한 ref를 함께 적는다(`zm-docs` `AGENTS.md` 6절과 같은 규칙).
 - 본문 권장 섹션: Context / Decision / Consequences / Alternatives

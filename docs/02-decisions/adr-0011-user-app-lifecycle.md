@@ -1,11 +1,18 @@
 ---
 number: "0011"
 title: "사용자 앱 삭제 및 업데이트 UX (APP-04)"
-status: "accepted"
+status: "deprecated"
 date: "2026-05-25"
 author: "architect + hanumoka"
 related: ["ADR-0008", "PROD-05"]
 ---
+
+
+> ⚠️ **2026-09-03 deprecated — 대상 상실.**
+>
+> 이 ADR은 [ADR-0008](adr-0008-user-zip-upload.md)의 사용자 업로드 앱을 전제로 한 삭제·업데이트 UX다.
+> 그 전제가 `DEC-0007`로 사라졌다. 앱은 전부 저장소 안의 모듈이고 **「설치」는 활성화·비활성화**이며,
+> 활성화 상태·조작 분리(`disable`/`hide`/`purge`)의 정본은 `zm-docs`의 `docs/projects/zm-os/contracts.md` 5절이다.
 
 # ADR-0011: 사용자 앱 삭제 및 업데이트 UX
 

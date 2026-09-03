@@ -7,6 +7,25 @@ author: hanumoka
 related: ["0003", "0017", "0033"]
 ---
 
+> ⚠️ **2026-09-03 정정 — D1과 D4는 코드에서 뒤집혔다.**
+>
+> | 이 ADR | 지금 |
+> |---|---|
+> | D1 *"enum으로 값 집합을 **고정하지 않는다**(OCP)"* | **닫힌 유니언이다.** `CapabilityId`가 `host-api/contract.ts`의 `HostApiSurface`에서 파생돼 표면에 없는 토큰은 타입으로 존재하지 않는다 |
+> | D4 *"`manifest.capabilities`는 free-form 그대로 유지"* | 유한 유니언의 배열이다 |
+> | 카탈로그 엔트리 `{id,title,risk,requiresUserGrant,ipcMethods}` | 두 표로 분리되고 `status` 필드가 생겼다 |
+> | D-F0 *"`desktopApps.ts`는 여전히 수기 `allowedMethods` 사용"* | 하드코딩은 제거됐다. `manifest.capabilities → resolveHostApi → capabilitiesToAllowedMethods → createHostEndpoint`가 앱 실행 경로에서 실제로 돈다 |
+>
+> **뒤집은 이유는 근거가 대상을 잃었기 때문이다.** OCP 근거는 *"사용자 앱이 새 토큰을 선언할 수 있어야 한다"* 였는데
+> `DEC-0007`로 ZIP 업로드 경로가 제거되면서 **토큰을 모르는 앱이 존재할 수 없게 됐다.** 열어 두면 오타가 조용히
+> "권한 없음"이 되고 그것을 잡을 수단이 없다.
+>
+> ★ **`packages/core/src/capability/catalog.ts`가 "(ADR-0034 갱신)"이라고 적지만 그 갱신은 없었다.**
+> 이 정정이 그 문장을 참으로 만든다. 계약의 정본은 `zm-docs`의 `docs/projects/zm-os/contracts.md` 3절이다.
+>
+> **`requiresUserGrant`를 전부 `false`로 둔 결정**(전 capability 자동 승인)은 커밋 메시지에만 있었다.
+> 그 결정과 되돌리는 조건의 정본도 위 계약 문서다 — 다중 사용자 게이트나 외부 앱 유통 경로가 열리는 순간 올린다.
+
 # ADR-0034: App Capability 모델 + IPC 권한 계약
 
 ## Context
