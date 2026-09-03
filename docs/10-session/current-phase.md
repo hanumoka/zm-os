@@ -1,6 +1,6 @@
 # Current Phase
 
-> 최종 갱신: 2026-06-07
+> 최종 갱신: 2026-09-03
 
 ## 🚀 v2 진입 — REFAC-02 진행 중
 - **Phase 1~3 (POC)**: ✅ 완료 (M4 마일스톤 달성, POC 공식 종료)
@@ -8,6 +8,7 @@
 - **v2 설계**: SRV-00 모노레포 + ADR-0016~0023 채택 + v2 plan v0.3.0 ✅
 - **REFAC-02**: **P1 ✅ + P2 ✅ + P3 ✅ 완료** (P3: AppRepository Port + LocalRepo IDB 어댑터 `@zm/adapters-local/app-repository`, content-agnostic, cascade remove, contract test 14, vitest 104, build ✅ — 소비처 wrapper 흡수/reshape는 P5로 이관) → **다음: P4** (Auth/Sync/Moderation Local 어댑터)
 - **협업 인프라**: sonix_docs 멀티 세션 협업 이식 ✅ 완료 (2026-06-07, commit c368b5e)
+- **데스크탑 아이콘 (2026-09-03)**: TS-007 수정 — 설치되지 않은 앱이 좌측 열 위 다섯 칸을 예약해 좌상단 드롭이 막히던 문제. 배치를 순수 함수 `placeIcons`(`icon-grid.ts`)로 분리하고 점유 계산을 화면 기준으로 통일. 함께 **스토어 아이콘 기본 자리를 우상단 → 좌상단(격자 첫 칸)으로 이동**(2026-05-24 C-01 결정을 소유자 요청으로 되돌림), built-in 좌측 열 기본 좌표는 y=130부터로 하향. `anchor` prop 제거. 단위 88 ✅ / e2e 66 ✅
 
 > ⚠️ 아래 "## ✅ Phase 1" 이후는 POC 당시 historical 작업 로그. 현재 다음 작업은 본 섹션 하단 "REFAC-02 진입" 참조.
 

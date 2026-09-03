@@ -17,6 +17,18 @@
 
 ## Active Patterns
 
+### [TS-007] 설치되지 않은 앱이 데스크탑 칸을 예약해 좌상단 드롭이 막힘
+
+**증상**: 스토어 아이콘을 좌상단으로 드래그하면 놓는 순간 한 칸 오른쪽(130,30)으로 밀려남. 드래그 자체는 정상 동작(끄는 동안 좌상단까지 따라옴). 좌측 열 위 다섯 칸(30,30 / 30,130 / 30,230 / 30,330 / 30,430)이 모두 같은 증상이고 (30,530)부터는 정상. 아이콘이 스토어 하나뿐인 빈 데스크탑에서도 재현.
+**원인**: `Desktop.tsx`의 `occupiedCellsExcept`가 겹침 회피용 점유 셀을 **카탈로그 전체**(`appsRef.current`)에서 계산. 화면 렌더는 설치된 앱만 거르는데(`visibleApps`) 점유 계산만 카탈로그를 봐서, **설치되지 않아 화면에 없는 built-in 앱 5개가 자기 `iconPosition`을 영구히 예약**. `resolveDropPosition`이 그 칸을 피해 `findFreeCell`로 밀어냈고, 고리 탐색 순서(위·왼쪽은 좌표 음수라 탈락 → 오른쪽 채택) 때문에 항상 x=130으로 이동. 같은 파일에서 자동 정렬(`handleAutoArrange`)은 `visibleApps`를 써 두 경로의 기준이 어긋나 있었음.
+**해결**: 배치를 순수 함수 `placeIcons`(`icon-grid.ts`)로 분리하고 **화면에 있는 아이콘만** 입력으로 받게 함. 점유 셀은 그 결과(`effectiveIconPositions`)에서 읽어 렌더와 드롭이 같은 것을 보게 함. 함께 닫은 구멍 — 설치는 id만 저장하고 좌표는 저장하지 않으므로(`installed-apps.ts`), 점유를 화면 기준으로 바꾸면 나중에 설치한 앱이 사용자가 옮겨 둔 아이콘 위에 겹칠 수 있음. `placeIcons`가 저장 좌표를 먼저 배치한 뒤 기본 자리가 차 있으면 빈 칸으로 밀어내 이 경로도 막음.
+**관련 파일**: `src/components/desktop/Desktop.tsx`, `src/components/desktop/icon-grid.ts`, `src/components/desktop/__tests__/icon-grid.test.ts`
+**날짜**: 2026-09-03
+**재발 이력**: —
+**관련 M-NNN**: —
+
+**핵심 교훈**: **무엇을 그릴지와 무엇이 자리를 차지하는지를 서로 다른 목록에서 계산하면 어긋난다.** 두 경로가 같은 한 값을 보게 만드는 것이 규칙을 하나 더 추가하는 것보다 낫다. 그리고 과도한 차단은 다른 결함을 가린다 — 이 경우 카탈로그 예약이 설치 시점 겹침을 우연히 막고 있었으므로, 예약을 걷을 때 그 겹침도 함께 닫아야 했다.
+
 ### [TS-006] PersistenceErrorSource 'window-layout' vs IDB 'desktop-layout' 불일치
 
 **증상**: `WindowManagerProvider`에서 `createPersistenceError('window-layout', ...)` 호출 시 에러 소스 이름이 실제 IDB store name `'desktop-layout'`과 불일치. 에러 로그에서 정확한 store 추적 불가.

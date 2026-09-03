@@ -3,6 +3,8 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { DesktopIcon } from './DesktopIcon';
+import { ICON_GRID } from './icon-grid';
+import type { IconPoint } from './icon-grid';
 import type { DesktopAppEntry } from './desktopApps';
 
 type DesktopIconLayerProps = {
@@ -29,6 +31,18 @@ type DesktopIconLayerProps = {
  * (충돌 회피 셀 계산, 자동 정렬 대상).
  */
 export const STORE_ICON_ID = '__system_store__';
+
+/**
+ * 스토어 아이콘의 기본 자리 — 격자의 첫 칸(좌상단).
+ *
+ * 앱 아이콘보다 **먼저** 자리를 잡는다. 좌측 열 첫 칸을 스토어가 쓰므로
+ * `desktopApps.ts`의 built-in 기본 좌표는 그 아래(y=130)에서 시작한다.
+ * 사용자가 한 번 옮기면 저장된 좌표가 이 값을 덮는다.
+ */
+export const STORE_DEFAULT_POSITION: IconPoint = {
+  x: ICON_GRID.originX,
+  y: ICON_GRID.originY,
+};
 
 export function DesktopIconLayer({
   apps,
@@ -71,18 +85,17 @@ export function DesktopIconLayer({
       ))}
 
       {/*
-       * 좌표 컨벤션 (code-reviewer C-01 fix, 2026-05-24):
-       * - 데스크탑 좌측 column 좌표 = { x: 30, y: 30, 130, 230, ... } (앱 아이콘용)
-       * - 스토어 시스템 아이콘 = 저장된 좌표가 없으면 우상단(anchor)
-       *   → 일반 앱 아이콘과 시각적/공간적 분리
-       *   → 좌측 column 아이콘이 N개여도 충돌 없음
-       * desktopApps.ts 의 iconPosition 은 `x ≤ 30, y < 1000` 좌측 column 만 사용 권장.
+       * 좌표 컨벤션
+       * - 스토어 시스템 아이콘 = 격자 첫 칸(좌상단). `STORE_DEFAULT_POSITION`
+       * - 앱 아이콘 = 그 아래 좌측 column ({ x: 30, y: 130, 230, ... })
+       *
+       * 예전에는 스토어를 우상단에 붙였다(code-reviewer C-01 fix, 2026-05-24).
+       * 좌측 column과 겹치지 않도록 자리를 떼어 놓으려는 것이었는데, 겹침은 이제
+       * `placeIcons`가 좌표로 해결하므로 영역을 나눠 가질 이유가 없어졌다.
        *
        * 스토어도 다른 아이콘과 동일하게 끌 수 있다. 예전에는 <Link>로 감싸 고정
        * 배치했는데, 그러면 두 가지가 막혔다 — position이 없어 드래그가 비활성이었고,
        * 설령 켜도 <Link>가 positioned 조상이 되어 드래그 좌표가 어긋났다.
-       * 지금은 아이콘 자신이 anchor로 배치되고, 한 번 끌면 좌표가 저장돼
-       * 그때부터는 일반 앱 아이콘과 완전히 같은 경로를 탄다.
        *
        * 실행 방식은 기존과 같다 — **단일 클릭으로 스토어가 열린다.**
        * <Link>를 걷어낸 것은 앵커의 네이티브 이동이 드래그 종료와 충돌하기
@@ -94,8 +107,7 @@ export function DesktopIconLayer({
           id={STORE_ICON_ID}
           label="스토어"
           icon={{ kind: 'emoji', char: '🛒' }}
-          position={iconPositions?.[STORE_ICON_ID]}
-          anchor="top-right"
+          position={iconPositions?.[STORE_ICON_ID] ?? STORE_DEFAULT_POSITION}
           openOnSingleClick
           selected={selectedIconId === STORE_ICON_ID}
           dragging={draggingIconId === STORE_ICON_ID}

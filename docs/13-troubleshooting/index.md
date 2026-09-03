@@ -1,6 +1,6 @@
 # 트러블슈팅 인덱스 (Troubleshooting Index)
 > 상세: `docs/13-troubleshooting/entries.md` | 규칙: `.claude/rules/troubleshoot-auto.md`
-> 최종 갱신: 2026-05-25
+> 최종 갱신: 2026-09-03
 
 | ID | 문제 요약 | 모듈 | 원인 분류 | 관련 M-NNN |
 |----|-----------|------|-----------|------------|
@@ -10,3 +10,4 @@
 | TS-004 | Snake 게임 자동 시작 후 즉시 Game Over | sample-game | 게임 UX | — |
 | TS-005 | ZIP built-in manifest.id 중복 검사 우회 | store/AppUpload | 입력 검증 | — |
 | TS-006 | PersistenceErrorSource 'window-layout' vs IDB 'desktop-layout' 불일치 | errors/storage | 네이밍 산재 | — |
+| TS-007 | 설치 안 된 앱이 칸을 예약해 좌상단 드롭 차단 | desktop/icon-grid | 목록 기준 불일치 | — |

@@ -126,6 +126,56 @@ export function findFreeCell(
 }
 
 /**
+ * 화면에 있는 아이콘들의 최종 좌표를 한 번에 정한다.
+ *
+ * 두 단계다.
+ * 1. **사용자가 정한 좌표가 우선이다.** 영역 안으로 가둔 뒤 그대로 쓴다.
+ * 2. 좌표가 없는 아이콘은 기본 자리에 둔다. 그 자리가 이미 차 있으면 가장
+ *    가까운 빈 칸으로 밀어낸다.
+ *
+ * ★ 인자로 받는 `icons`는 **화면에 실제로 그려지는 아이콘만** 담아야 한다.
+ * 설치되지 않아 렌더되지 않는 앱까지 넣으면 그 앱의 기본 자리가 영구히 예약되어
+ * 아무도 그 칸을 쓸 수 없게 된다 — 좌측 열 위쪽이 통째로 막혔던 원인이 그것이다.
+ *
+ * 기본 자리도 저장된 좌표도 없는 아이콘은 결과에 넣지 않는다. 그런 아이콘은
+ * 부모가 흐름 배치로 다룬다.
+ */
+export function placeIcons(
+  icons: ReadonlyArray<{ id: string; defaultPosition?: IconPoint }>,
+  stored: Readonly<Record<string, IconPoint>>,
+  areaWidth: number,
+  areaHeight: number,
+): Record<string, IconPoint> {
+  const clamped = clampPositions(stored, areaWidth, areaHeight);
+  const placed: Record<string, IconPoint> = {};
+  const occupied = new Set<string>();
+
+  const take = (id: string, point: IconPoint): void => {
+    placed[id] = point;
+    occupied.add(cellKey(point));
+  };
+
+  for (const icon of icons) {
+    const point = clamped[icon.id];
+    if (point !== undefined) take(icon.id, point);
+  }
+
+  for (const icon of icons) {
+    if (placed[icon.id] !== undefined) continue;
+    const base = icon.defaultPosition;
+    if (base === undefined) continue;
+    take(
+      icon.id,
+      occupied.has(cellKey(base))
+        ? findFreeCell(base, occupied, areaWidth, areaHeight)
+        : base,
+    );
+  }
+
+  return placed;
+}
+
+/**
  * 아이콘들을 격자에 자동 정렬한다.
  * Windows와 같이 위에서 아래로 채우고, 한 열이 차면 다음 열로 넘어간다.
  *

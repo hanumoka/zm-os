@@ -17,12 +17,6 @@ type DesktopIconProps = {
   icon: AppIcon;
   position?: { x: number; y: number };
   /**
-   * 저장된 좌표가 아직 없을 때의 기본 자리. 지정하면 아이콘 **자신이** absolute로
-   * 데스크탑 영역 모서리에 붙는다. 부모를 positioned로 감싸면 안 된다 —
-   * offsetParent가 바뀌어 드래그 좌표가 어긋난다.
-   */
-  anchor?: 'top-right';
-  /**
    * 단일 클릭으로도 실행한다. 스토어처럼 '앱 실행'이 아니라 '화면 이동'인
    * 아이콘용이다. 드래그와 충돌하지 않는다 — 드래그 직후 클릭은 isDragEcho()가
    * 막는다.
@@ -71,7 +65,6 @@ export function DesktopIcon({
   label,
   icon,
   position,
-  anchor,
   openOnSingleClick = false,
   selected = false,
   onLaunch,
@@ -227,18 +220,15 @@ export function DesktopIcon({
 
   // 배치 규칙
   //
-  // 1. position 있음  → 데스크탑 좌표계에 absolute (사용자가 옮긴 좌표)
-  // 2. position 없고 anchor 있음 → 데스크탑 영역 모서리에 absolute
-  //    스토어처럼 저장된 좌표가 아직 없는 시스템 아이콘의 기본 자리다.
+  // 1. position 있음 → 데스크탑 좌표계에 absolute
+  //    사용자가 옮긴 좌표이거나, 아직 옮기지 않았다면 부모가 정한 기본 자리다.
   //    **부모가 아니라 아이콘 자신이 absolute여야 한다** — 부모를 positioned로
   //    감싸면 offsetParent가 그 부모가 되어 areaOf()가 데스크탑 영역 대신
   //    래퍼를 잡고, 드래그 좌표가 통째로 어긋난다.
-  // 3. 둘 다 없음 → 일반 흐름 (부모가 배치를 결정)
+  // 2. 없음 → 일반 흐름 (부모가 배치를 결정)
   const positionStyle: React.CSSProperties = isPositioned
     ? { left: position.x, top: position.y, zIndex: dragging ? 30 : undefined }
-    : anchor === 'top-right'
-      ? { right: 30, top: 30, zIndex: dragging ? 30 : undefined }
-      : {};
+    : {};
 
   return (
     <div
@@ -249,7 +239,7 @@ export function DesktopIcon({
       aria-pressed={selected}
       style={positionStyle}
       className={[
-        isPositioned || anchor !== undefined ? 'absolute' : 'relative',
+        isPositioned ? 'absolute' : 'relative',
         'flex',
         'flex-col',
         'items-center',

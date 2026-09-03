@@ -94,7 +94,7 @@ export const DESKTOP_APPS: ReadonlyArray<DesktopAppEntry> = [
     icon: { kind: 'emoji', char: '🟢' },
     source: 'built-in' as const,
     contentUrl: '/sample-game/index.html',
-    iconPosition: { x: 30, y: 30 },
+    iconPosition: { x: 30, y: 130 },
     windowDefaults: {
       position: { x: 80, y: 60 },
       size: { width: 520, height: 380 },
@@ -128,7 +128,7 @@ export const DESKTOP_APPS: ReadonlyArray<DesktopAppEntry> = [
     icon: { kind: 'emoji', char: '📡' },
     source: 'built-in' as const,
     contentUrl: '/sample-game-ipc/index.html',
-    iconPosition: { x: 30, y: 130 },
+    iconPosition: { x: 30, y: 230 },
     windowDefaults: {
       position: { x: 640, y: 60 },
       size: { width: 520, height: 380 },
@@ -165,7 +165,7 @@ export const DESKTOP_APPS: ReadonlyArray<DesktopAppEntry> = [
     icon: { kind: 'emoji', char: '🐍' },
     source: 'built-in' as const,
     contentUrl: '/sample-game-phaser/index.html',
-    iconPosition: { x: 30, y: 230 },
+    iconPosition: { x: 30, y: 330 },
     windowDefaults: {
       position: { x: 320, y: 80 },
       size: { width: 660, height: 520 },
@@ -197,7 +197,7 @@ export const DESKTOP_APPS: ReadonlyArray<DesktopAppEntry> = [
     icon: { kind: 'emoji', char: '🌧️' },
     source: 'built-in' as const,
     contentUrl: '/sample-game-pixi/index.html',
-    iconPosition: { x: 30, y: 330 },
+    iconPosition: { x: 30, y: 430 },
     windowDefaults: {
       position: { x: 200, y: 60 },
       size: { width: 640, height: 480 },
@@ -229,7 +229,7 @@ export const DESKTOP_APPS: ReadonlyArray<DesktopAppEntry> = [
     icon: { kind: 'emoji', char: '🧊' },
     source: 'built-in' as const,
     contentUrl: '/sample-game-three/index.html',
-    iconPosition: { x: 30, y: 430 },
+    iconPosition: { x: 30, y: 530 },
     windowDefaults: {
       position: { x: 350, y: 100 },
       size: { width: 640, height: 480 },

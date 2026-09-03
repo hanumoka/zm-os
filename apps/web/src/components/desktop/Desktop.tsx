@@ -2,7 +2,11 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useWindowManager } from './useWindowManager';
-import { DesktopIconLayer, STORE_ICON_ID } from './DesktopIconLayer';
+import {
+  DesktopIconLayer,
+  STORE_DEFAULT_POSITION,
+  STORE_ICON_ID,
+} from './DesktopIconLayer';
 import { launchApp } from './launch-app';
 import { WindowLayer } from './WindowLayer';
 import { Taskbar } from './Taskbar';
@@ -22,7 +26,7 @@ import { NS_DESKTOP_LAYOUT } from '@zm/core';
 import type { DesktopIconsRecord } from '@/lib/storage/desktop-icons';
 import type { IconPoint } from './icon-grid';
 import { loadDesktopIcons, saveDesktopIcons } from '@/lib/storage/desktop-icons';
-import { arrangeInGrid, cellKey, clampPositions, resolveDropPosition } from './icon-grid';
+import { arrangeInGrid, cellKey, placeIcons, resolveDropPosition } from './icon-grid';
 
 type DesktopProps = {
   apps?: ReadonlyArray<DesktopAppEntry>;
@@ -67,9 +71,14 @@ export function Desktop({
     () => appsProp ?? buildCatalog(userApps),
     [appsProp, userApps],
   );
-  // 이벤트 핸들러에서 최신 카탈로그를 읽기 위한 ref
-  const appsRef = useRef(apps);
-  appsRef.current = apps;
+
+  // 화면에 실제로 그려지는 아이콘. 카탈로그에는 있지만 설치되지 않은 앱은
+  // 아이콘이 없으므로 배치·점유 계산에서 **카탈로그가 아니라 이 목록**을 쓴다.
+  const visibleApps = useMemo(
+    () => (catalogReady ? apps.filter((a) => isInstalled(a.id)) : []),
+    [catalogReady, apps, isInstalled],
+  );
+
   const desktopAreaRef = useRef<HTMLDivElement>(null);
   const [selectedIconId, setSelectedIconId] = useState<string | null>(null);
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
@@ -123,6 +132,10 @@ export function Desktop({
   const iconPositionsRef = useRef(iconPositions);
   iconPositionsRef.current = iconPositions;
 
+  // 화면에 있는 아이콘의 최종 좌표. 아래 memo에서 계산한 뒤 대입한다.
+  // 드롭 시 점유 셀을 이 값에서 읽으므로 렌더가 보는 것과 어긋나지 않는다.
+  const effectiveIconPositionsRef = useRef<Record<string, IconPoint>>({});
+
   const handleIconDragMove = useCallback((id: string, x: number, y: number): void => {
     setDragging({ id, point: { x, y } });
   }, []);
@@ -133,20 +146,20 @@ export function Desktop({
 
   // 자기 자신을 제외한 다른 아이콘이 점유한 셀 — 겹쳐 놓아 아래 아이콘이
   // 완전히 가려지는 것을 막는다.
+  //
+  // ★ 기준은 **화면에 있는 아이콘의 최종 좌표**(effectiveIconPositions)다.
+  // 예전에는 카탈로그 전체를 훑어 `iconPositions[id] ?? entry.iconPosition`으로
+  // 셀을 모았는데, 그러면 **설치하지도 않아 화면에 없는 built-in 앱이 자기 기본
+  // 자리를 영구히 예약**했다. 좌측 열 위 다섯 칸(30,30 / 30,130 / … / 30,430)이
+  // 그래서 통째로 막혔고, 스토어 아이콘을 좌상단에 놓으려 하면 한 칸 오른쪽으로
+  // 밀려났다. 보이지 않는 아이콘은 가릴 것도 없으므로 점유하지 않는다.
+  // 스토어도 같은 맵에 들어 있어 따로 더할 필요가 없다.
   const occupiedCellsExcept = useCallback(
     (excludeId: string): ReadonlySet<string> => {
       const cells = new Set<string>();
-      for (const entry of appsRef.current) {
-        if (entry.id === excludeId) continue;
-        const point = iconPositionsRef.current[entry.id] ?? entry.iconPosition;
-        if (point !== undefined) cells.add(cellKey(point));
-      }
-      // 스토어도 같은 좌표계에 있으므로 그 위에 앱을 떨어뜨리면 안 된다.
-      // 아직 옮긴 적이 없으면(anchor 배치) 좌표가 없고, 그때는 우상단이라
-      // 좌측 column과 겹치지 않는다.
-      if (excludeId !== STORE_ICON_ID) {
-        const storePoint = iconPositionsRef.current[STORE_ICON_ID];
-        if (storePoint !== undefined) cells.add(cellKey(storePoint));
+      for (const [id, point] of Object.entries(effectiveIconPositionsRef.current)) {
+        if (id === excludeId) continue;
+        cells.add(cellKey(point));
       }
       return cells;
     },
@@ -187,12 +200,30 @@ export function Desktop({
     return () => observer.disconnect();
   }, []);
 
-  // 드래그 중인 아이콘만 실시간 좌표로 덮어쓴다.
+  // 화면에 있는 아이콘의 최종 좌표를 한 번에 정한다. 드래그 중인 아이콘만
+  // 실시간 좌표로 덮어쓴다.
+  //
+  // ★ 저장된 좌표가 없는 아이콘의 기본 자리가 이미 차 있으면 빈 칸으로 밀어낸다.
+  // 설치는 id만 저장하고 좌표는 저장하지 않으므로(`installed-apps.ts`), 나중에
+  // 설치한 앱은 사용자가 그 자리에 옮겨 둔 아이콘 위에 그대로 겹칠 수 있다.
+  // 드롭 경로에만 겹침 회피를 두면 이 경로가 열린 채 남는다.
   const effectiveIconPositions = useMemo<Record<string, IconPoint>>(() => {
-    const clamped = clampPositions(iconPositions, areaSize.width, areaSize.height);
-    if (dragging === null) return clamped;
-    return { ...clamped, [dragging.id]: dragging.point };
-  }, [iconPositions, dragging, areaSize]);
+    const placed = placeIcons(
+      [
+        // 스토어가 먼저다. 기본 자리(좌상단)를 앱보다 먼저 잡아야
+        // 앱 기본 좌표가 그 아래로 흐른다.
+        { id: STORE_ICON_ID, defaultPosition: STORE_DEFAULT_POSITION },
+        ...visibleApps.map((a) => ({ id: a.id, defaultPosition: a.iconPosition })),
+      ],
+      iconPositions,
+      areaSize.width,
+      areaSize.height,
+    );
+    if (dragging === null) return placed;
+    return { ...placed, [dragging.id]: dragging.point };
+  }, [iconPositions, dragging, areaSize, visibleApps]);
+
+  effectiveIconPositionsRef.current = effectiveIconPositions;
 
   const bgClass = wallpaper.kind === 'preset' ? WALLPAPER_CLASSES[wallpaper.preset] : '';
   const bgStyle: React.CSSProperties | undefined = wallpaper.kind === 'url'
@@ -291,8 +322,6 @@ export function Desktop({
       }
     }
   }, [catalogReady, apps, manager, isInstalled]);
-
-  const visibleApps = catalogReady ? apps.filter((a) => isInstalled(a.id)) : [];
 
   // 시작 메뉴와 같은 동작이어야 하므로 로직은 launch-app.ts 한 곳에 둔다.
   const handleLaunch = (entry: DesktopAppEntry): void => {
