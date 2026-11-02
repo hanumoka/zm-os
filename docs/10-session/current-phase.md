@@ -2,7 +2,9 @@
 
 ## 2026-11-02 독립 플랫폼 재구축
 
-소유자의 개발 요청으로 기준 ref `25e4e92ed65cfe535983ac92688aa1b516bbac62`에서 독립 플랫폼 로컬 개발본을 구현했다. 전체 자동 시험 314개와 웹 브라우저 흐름을 검증했으며 [검증 기록](../11-archive/2026-11.md)에 범위와 한계를 적었다. 실제 Google·GitHub OAuth와 Android 네이티브 빌드·설치·기기 실행은 미검증이다. 첫 개발 단계 전체 완료나 공개 운영 준비 완료를 뜻하지 않는다. 소유자가 2026-11-02 커밋·push·필요한 병합을 요청했으며 원격 반영 결과는 Git 기록에서 확인한다. 기존 REFAC-02의 후속을 자동 승계한 작업이 아니다. [ADR-0042](../02-decisions/0042-platform-rebuild-local-trial.md)와 [로컬 시험 안내](../01-architecture/platform-trial.md)를 따른다. 아래 과거 진행률은 새 플랫폼의 완료율이 아니다.
+소유자가 **웹을 먼저 완성하고 Android 구현·시험은 이후로 미루도록 변경했다.** 현재 완료 대상은 웹·BE·worker·SDK·CLI와 두 유형 인앱이다. Android 미검증은 웹 완료를 막지 않는다. 실제 웹 OAuth와 남은 웹 인수 조건은 [웹 완료 검증 목록](../01-architecture/web-completion-checklist.md)에 연결한다. Android 코드는 보존하며 전용 구현·시험을 지금 재개하지 않는다. 웹 완료나 공개 운영 준비 완료를 선언한 것은 아니다.
+
+기준 ref `25e4e92ed65cfe535983ac92688aa1b516bbac62`에서 구현한 로컬 개발본은 commit `81c4979c71967aa387be18839d51219b9447b590`으로 main에 반영했다. 전체 자동 시험 314개와 웹 브라우저 흐름의 범위·한계는 [검증 기록](../11-archive/2026-11.md)에 있다. 기존 REFAC-02의 후속을 자동 승계한 작업이 아니다. [ADR-0042](../02-decisions/0042-platform-rebuild-local-trial.md)와 [로컬 시험 안내](../01-architecture/platform-trial.md)를 따른다. 아래 과거 진행률은 새 플랫폼의 완료율이 아니다.
 
 > 최종 갱신: 2026-09-03
 

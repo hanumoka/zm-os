@@ -1,6 +1,6 @@
 # zm-os
 
-**2026-11-01: 독립 앱 플랫폼의 로컬 시험 구현을 진행하고 있습니다.** 신규 구현은 `apps/platform-web`·`apps/api`·`apps/worker`·`apps/android`와 SDK·CLI입니다. 기존 POC와 실행 명령을 구분합니다. 실제 OAuth·Android 기기 검증을 마쳤다는 뜻은 아닙니다.
+**2026-11-02: 웹을 먼저 완성하고 Android 구현·검증은 이후에 진행합니다.** 현재 대상은 `apps/platform-web`·`apps/api`·`apps/worker`와 SDK·CLI입니다. 기존 `apps/android` 코드와 시험 기록은 보존합니다. 웹의 실제 OAuth 및 남은 인수 조건은 [웹 완료 검증 목록](docs/01-architecture/web-completion-checklist.md)에서 확인합니다. 기존 POC와 실행 명령을 구분하며 웹 완료나 공개 운영 준비가 끝났다는 뜻은 아닙니다.
 
 ```bash
 pnpm install
