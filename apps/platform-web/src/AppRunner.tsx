@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import type { AppSessionView, UserView } from "@zm/platform-contracts";
 import { attachHostBridge } from "@zm/host-bridge";
 import { api } from "./api";
@@ -16,7 +16,7 @@ export function AppRunner({
   closeRef.current = onClose;
   const [closing, setClosing] = useState(false);
   const [offline, setOffline] = useState(false);
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!frame.current) return;
     const iframe = frame.current;
     let active = true;
@@ -46,8 +46,6 @@ export function AppRunner({
         }
       },
     });
-    const url = new URL(session.documentUrl, window.location.origin);
-    iframe.src = url.toString();
     const check = async (): Promise<void> => {
       if (checkRunning) return;
       checkRunning = true;
@@ -95,7 +93,8 @@ export function AppRunner({
       window.removeEventListener("online", onVisibility);
       window.removeEventListener("zm-host-back", onHostBack);
       host.dispose();
-      iframe.removeAttribute("src");
+      // React removes the frame on unmount. Effect cleanup must not navigate a
+      // still-mounted frame to about:blank during StrictMode's setup replay.
     };
   }, [session, user.id]);
   const close = async (): Promise<void> => {
@@ -140,6 +139,7 @@ export function AppRunner({
       )}
       <iframe
         ref={frame}
+        src={session.documentUrl}
         title={session.manifest.name}
         sandbox="allow-scripts"
         referrerPolicy="no-referrer"
