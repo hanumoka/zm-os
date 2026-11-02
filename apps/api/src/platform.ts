@@ -513,7 +513,13 @@ export class Platform {
       }
       const external = (
         await db.query(
-          "SELECT app_id,status FROM deletion_requests WHERE withdrawal_id=$1",
+          `SELECT d.app_id,d.status,used.app_name FROM deletion_requests d
+           LEFT JOIN LATERAL (
+             SELECT v.manifest->>'name' AS app_name FROM app_sessions s
+             JOIN versions v ON v.id=s.version_id
+             WHERE s.app_user_id=d.app_user_id AND s.app_id=d.app_id
+             ORDER BY v.created_at DESC,v.id DESC LIMIT 1
+           ) used ON true WHERE d.withdrawal_id=$1 ORDER BY d.app_id,d.id`,
           [row.id],
         )
       ).rows.map(camel);

@@ -5,10 +5,10 @@
 # lint와 테스트는 사람이 명령을 칠 때만 돌았다. 켜 두었는데 도달하지 않는 가드는
 # 없는 가드와 같으므로 여기에 올린다.
 #
-# e2e는 일부러 빼 두었다. 프로덕션 빌드·서버 기동·Playwright 브라우저 캐시가 필요해
+# 기존 POC e2e는 빼 두었다. 프로덕션 빌드·서버 기동·Playwright 브라우저 캐시가 필요해
 # 실패 원인이 코드가 아닌 경우가 섞이고(로컬에서도 번들 브라우저가 깨져 있던 적이 있다),
 # 그런 실패가 반복되면 "CI는 원래 빨갛다"는 습관이 생겨 나머지 검사까지 무력해진다.
-# 붙일 때는 별도 job으로 분리해 이 job의 신뢰도를 떨어뜨리지 않는다.
+# 새 플랫폼의 독립 DB 웹 흐름은 아래 web-flows job에서 따로 검증한다.
 
 name: CI
 
@@ -70,3 +70,35 @@ jobs:
       # 라우트가 정적으로 바뀌면 셸이 조용히 hydration을 멈추는데, 그것을 막으려고 만든
       # 검사가 로컬 빌드에서만 도는 상태였다.
       - run: pnpm build
+
+  web-flows:
+    name: isolated web consent · deletion · moderation
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Install browser and Linux dependencies
+        run: pnpm --filter @zm/platform-web exec playwright install --with-deps chromium
+      - name: Prepare owned PostgreSQL trial
+        run: node scripts/platform-trial.mjs setup
+      - name: Verify isolated browser flows
+        run: pnpm test:web-flows
+        env:
+          PLAYWRIGHT_CHANNEL: chromium
+      - name: Save synthetic check summaries
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: isolated-web-checks
+          path: apps/platform-web/e2e-out/**/result.json
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Stop owned trial database
+        if: always()
+        run: node scripts/platform-trial.mjs stop

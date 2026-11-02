@@ -266,6 +266,7 @@ export function Developer({
                     </dl>
                     {request.note && <p>{request.note}</p>}
                     <form
+                      key={`${request.id}:${request.status}:${request.note ?? ""}`}
                       onSubmit={(e) => {
                         e.preventDefault();
                         const form = new FormData(e.currentTarget);
@@ -284,7 +285,14 @@ export function Developer({
                       }}
                     >
                       <Field label="처리 결과">
-                        <select name="status" defaultValue="processing">
+                        <select
+                          name="status"
+                          defaultValue={
+                            request.status === "pending"
+                              ? "processing"
+                              : request.status
+                          }
+                        >
                           <option value="processing">처리 중</option>
                           <option value="developer_reported_completed">
                             개발자 완료 보고

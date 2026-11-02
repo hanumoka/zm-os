@@ -119,7 +119,9 @@ const decision = async (kind, title, state, reason) => {
     operator,
     kind === "개발자 신청"
       ? "개발자 신청 심사 결과를 기록했습니다."
-      : "앱 버전 검수 결과를 기록했습니다. 개발자가 직접 공개할 수 있습니다.",
+      : state === "approved"
+        ? "앱 버전 검수 결과를 기록했습니다. 개발자가 직접 공개할 수 있습니다."
+        : "앱 버전 검수 결과를 기록했습니다. 개발자가 사유를 확인하고 수정한 버전을 다시 제출해야 합니다.",
   );
 };
 const apply = async (suffix) => {
@@ -345,11 +347,9 @@ try {
 
   await reload(operator, "운영 관리");
   await nav(operator, "앱 운영");
-  const foreign = operator
-    .locator(".record-list > li")
-    .filter({
-      has: operator.getByRole("heading", { name: memo.name, exact: true }),
-    });
+  const foreign = operator.locator(".record-list > li").filter({
+    has: operator.getByRole("heading", { name: memo.name, exact: true }),
+  });
   assert.equal(
     await foreign.getByRole("button", { name: /공개|수정/ }).count(),
     0,
@@ -736,11 +736,9 @@ try {
     await success(page, "앱 종료 확인을 요청했습니다.");
     await reload(operator, "운영 관리");
     await nav(operator, "앱 운영");
-    const row = operator
-      .locator(".record-list > li")
-      .filter({
-        has: operator.getByRole("heading", { name: app.name, exact: true }),
-      });
+    const row = operator.locator(".record-list > li").filter({
+      has: operator.getByRole("heading", { name: app.name, exact: true }),
+    });
     await row
       .getByRole("textbox", { name: "앱 종료 확인 사유", exact: true })
       .fill("시험 소유자의 종료 요청 확인");

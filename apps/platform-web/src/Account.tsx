@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { UserView } from "@zm/platform-contracts";
 import { api, errorMessage } from "./api";
 import { Field, FormSection, SectionTitle, Status } from "./components";
@@ -475,6 +475,7 @@ function explain(value: unknown): React.ReactNode {
   const names: Record<string, string> = {
     status: "상태",
     appId: "앱",
+    appName: "앱",
     appUserId: "앱별 식별자",
     platform: "플랫폼",
     external: "외부 앱",
@@ -489,14 +490,23 @@ function explain(value: unknown): React.ReactNode {
     otherDevices: "다른 기기",
     backups: "운영 백업",
   };
+  const fields = value as Record<string, unknown>;
+  const hasAppName =
+    typeof fields.appName === "string" && fields.appName.trim().length > 0;
   return (
     <dl>
-      {Object.entries(value as Record<string, unknown>).map(([key, item]) => (
-        <div key={key}>
-          <dt>{names[key] ?? key}</dt>
-          <dd>{explain(item)}</dd>
-        </div>
-      ))}
+      {Object.entries(fields)
+        .filter(([key]) => key !== "appId" || !hasAppName)
+        .map(([key, item]) => (
+          <div key={key}>
+            <dt>{names[key] ?? key}</dt>
+            <dd>
+              {key === "appName" && typeof item === "string"
+                ? item
+                : explain(item)}
+            </dd>
+          </div>
+        ))}
     </dl>
   );
 }
@@ -510,24 +520,34 @@ export function WithdrawalStatus({
   const [data, setData] = useState<WithdrawalView | null>(null);
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const requestId = useRef(0);
+  const cancelPending = useCallback((): void => {
+    requestId.current++;
+  }, []);
   const refresh = useCallback(async (): Promise<void> => {
+    const currentRequest = ++requestId.current;
+    setLoading(true);
+    setData(null);
+    setError("");
     try {
-      setError("");
-      setData(
-        await api<WithdrawalView>(
-          "/withdrawal-status",
-          "GET",
-          undefined,
-          secret,
-        ),
+      const next = await api<WithdrawalView>(
+        "/withdrawal-status",
+        "GET",
+        undefined,
+        secret,
       );
+      if (requestId.current === currentRequest) setData(next);
     } catch (e) {
-      setError(errorMessage(e));
+      if (requestId.current === currentRequest) setError(errorMessage(e));
+    } finally {
+      if (requestId.current === currentRequest) setLoading(false);
     }
   }, [secret]);
   useEffect(() => {
     void refresh();
-  }, [refresh]);
+    return cancelPending;
+  }, [refresh, cancelPending]);
   const copyLink = async (): Promise<void> => {
     try {
       await navigator.clipboard.writeText(
@@ -558,6 +578,7 @@ export function WithdrawalStatus({
           {copied ? "조회 링크 복사됨" : "조회 링크 복사"}
         </button>
         <button
+          disabled={loading}
           onClick={() => {
             void refresh();
           }}

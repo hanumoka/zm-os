@@ -8,6 +8,7 @@
     "platform:stop": "node scripts/platform-trial.mjs stop",
     "platform:recovery": "node scripts/platform-recovery.mjs",
     "test:recovery": "node --test scripts/platform-recovery.test.mjs",
+    "test:web-flows": "node scripts/platform-web-check.mjs all",
     "dev": "turbo dev",
     "build": "turbo build",
     "start": "turbo start",

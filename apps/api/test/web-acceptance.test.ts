@@ -52,13 +52,13 @@ test('웹 인수 조건의 권한·동의 이력·공개·재승인 경계 (모�
       const second=await bob.ok<{id:string}>('/developer/applications','POST',{displayName:'다른 개발자',email:'other@example.test',description:'다른 소유자 권한 시험'});
       await owner.ok(`/operator/developer-applications/${second.id}/decisions`,'POST',{decision:'approved',reason:'범위 확인'});
     });
-    const app=await alice.ok<{id:string}>('/developer/apps','POST',{name:'웹 인수 메모'});
+    const app=await alice.ok<{id:string}>('/developer/apps','POST',{name:'비공개 작업용 등록명'});
     const other=await alice.ok<{id:string}>('/developer/apps','POST',{name:'별도 외부 앱'});
-    async function bundle(id:string,version:string,notice='개인 메모 저장'):Promise<Buffer>{
-      const manifest:AppManifest={schemaVersion:1,appId:id,version,name:id===app.id?'웹 인수 메모':'별도 외부 앱',description:'인수 시험',category:'tools',entry:'index.html',permissions:['local-storage','app-identity','external-api'],apiOrigins:['http://localhost:4320'],privacyNotice:notice};
+    async function bundle(id:string,version:string,notice='개인 메모 저장',displayName?:string):Promise<Buffer>{
+      const manifest:AppManifest={schemaVersion:1,appId:id,version,name:displayName??(id===app.id?'웹 인수 메모':'별도 외부 앱'),description:'인수 시험',category:'tools',entry:'index.html',permissions:['local-storage','app-identity','external-api'],apiOrigins:['http://localhost:4320'],privacyNotice:notice};
       return createZip([{path:'manifest.json',data:Buffer.from(JSON.stringify(manifest))},{path:'index.html',data:Buffer.from('<!doctype html><title>인수 시험</title><p>'+version+'</p>')}]);
     }
-    async function upload(id:string,version:string,notice?:string){const v=await alice.ok<{id:string}>(`/developer/apps/${id}/versions`,'POST',await bundle(id,version,notice));assert.equal(await workOnce(db,cfg),true);return v.id;}
+    async function upload(id:string,version:string,notice?:string,displayName?:string){const v=await alice.ok<{id:string}>(`/developer/apps/${id}/versions`,'POST',await bundle(id,version,notice,displayName));assert.equal(await workOnce(db,cfg),true);return v.id;}
     async function approve(version:string){await alice.ok(`/developer/versions/${version}/submit`,'POST',{});await owner.ok(`/operator/versions/${version}/decisions`,'POST',{decision:'approved',reason:'인수 시험'});}
     async function state(id=app.id){return (await db.pool.query<{revision:number;published:boolean;current_version_id:string|null;availability:string}>('SELECT revision,published,current_version_id,availability FROM apps WHERE id=$1',[id])).rows[0]!;}
     async function release(id:string,version:string){await alice.ok(`/developer/apps/${id}/releases`,'POST',{versionId:version,revision:(await state(id)).revision});}
@@ -135,7 +135,7 @@ test('웹 인수 조건의 권한·동의 이력·공개·재승인 경계 (모�
     });
     await t.test('승인 취소 사유·기존 앱 유지·재신청 중 제한·재승인과 앱 중지는 독립',async()=>{
       running=await bob.ok<AppSessionView>('/app-sessions','POST',{appId:app.id});
-      const draft=await upload(app.id,'4.0.0');
+      const draft=await upload(app.id,'4.0.0',undefined,'미이용 새 버전 이름');
       await owner.ok(`/operator/developers/${aliceUser.id}/revoke`,'POST',{reason:'연락 정보 보완'});
       assert.deepEqual(await alice.ok<DeveloperProfileView>('/developer/profile'),{status:'revoked',reason:'연락 정보 보완'});
       assert.equal((await alice.ok<UserView>('/me')).developer,false);assert.equal((await state()).published,true);
@@ -208,8 +208,14 @@ test('웹 인수 조건의 권한·동의 이력·공개·재승인 경계 (모�
       const request=requests.find(item=>item.appId===app.id)!;assert.equal(request.appUserId,oldRun.appUserId);assert.equal(request.status,'pending');
       for(const client of [bob,owner])assert.equal((await client.call(`/developer/deletion-requests/${request.id}/results`,'POST',{status:'developer_reported_completed',note:'대리 처리 시도'})).status,403);
       await alice.ok(`/developer/deletion-requests/${request.id}/results`,'POST',{status:'developer_reported_completed',note:'외부 삭제 결과 보고'});
-      const status=await guest.ok<{platformStatus:string;external:Array<{status:string}>}>('/withdrawal-status','GET',undefined,statusHeaders);
+      const status=await guest.ok<{platformStatus:string;external:Array<{appId:string;appName:string;status:string}>}>('/withdrawal-status','GET',undefined,statusHeaders);
       assert.equal(status.platformStatus,'completed');assert.ok(status.external.some(item=>item.status==='developer_reported_completed'));
+      const named=status.external.find(item=>item.appId===app.id)!;
+      assert.equal(named.appName,'웹 인수 메모');
+      assert.deepEqual(Object.keys(named).sort(),['appId','appName','status']);
+      assert.ok(!JSON.stringify(status).includes('비공개 작업용 등록명'));
+      assert.ok(!JSON.stringify(status).includes('미이용 새 버전 이름'));
+      assert.ok(!JSON.stringify(status).includes('외부 삭제 결과 보고'));
       assert.equal((await guest.call('/me','GET',undefined,statusHeaders)).status,401);
       assert.equal((await guest.call('/withdrawal-status','GET',undefined,{Authorization:'Bearer '+secret()})).status,404);
     });

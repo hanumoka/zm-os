@@ -33,10 +33,19 @@ export function VersionPreview({
         검수용 실행
       </button>
       {open && (
-        <Modal titleId="preview-title" onClose={() => setOpen(false)}>
+        <Modal
+          titleId="preview-title"
+          onClose={() => {
+            if (!busy) setOpen(false);
+          }}
+        >
           <div className="dialog-heading">
             <span className="app-category">비공개 검수</span>
-            <button aria-label="검수 안내 닫기" onClick={() => setOpen(false)}>
+            <button
+              disabled={busy}
+              aria-label="검수 안내 닫기"
+              onClick={() => setOpen(false)}
+            >
               닫기
             </button>
           </div>
@@ -65,6 +74,7 @@ export function VersionPreview({
           <label className="check">
             <input
               type="checkbox"
+              disabled={busy}
               checked={confirmed}
               onChange={(e) => setConfirmed(e.target.checked)}
             />
@@ -87,6 +97,12 @@ export function VersionPreview({
           >
             동의하고 검수 시작
           </button>
+          {busy && (
+            <p role="status">
+              검수 실행 요청을 처리하고 있습니다. 결과가 표시될 때까지 기다려
+              주세요.
+            </p>
+          )}
         </Modal>
       )}
     </>

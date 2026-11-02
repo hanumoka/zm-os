@@ -195,6 +195,7 @@ export function Store({
       {selected && (
         <Modal
           onClose={() => {
+            if (busy) return;
             setSelected(null);
             setConsent(null);
           }}
@@ -204,6 +205,7 @@ export function Store({
               {categories[selected.category]}
             </span>
             <button
+              disabled={busy}
               onClick={() => {
                 setSelected(null);
                 setConsent(null);
@@ -264,8 +266,16 @@ export function Store({
                 >
                   동의하고 실행
                 </button>
-                <button onClick={() => setConsent(null)}>취소</button>
+                <button disabled={busy} onClick={() => setConsent(null)}>
+                  취소
+                </button>
               </div>
+              {busy && (
+                <p role="status">
+                  동의와 실행 요청을 처리하고 있습니다. 결과가 표시될 때까지
+                  기다려 주세요.
+                </p>
+              )}
             </section>
           ) : (
             <div className="actions">

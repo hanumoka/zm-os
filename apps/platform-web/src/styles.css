@@ -751,7 +751,8 @@ dd {
   margin: 1.8rem 0;
 }
 .deletion-status dl dl > div {
-  grid-template-columns: 100px minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.25rem;
 }
 .preserve-lines {
   white-space: pre-line;

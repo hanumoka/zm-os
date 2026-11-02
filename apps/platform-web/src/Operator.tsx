@@ -89,6 +89,22 @@ export function Operator({
           </button>
         ))}
       </nav>
+      {tab === "reviews" && (
+        <section className="form-section" aria-labelledby="review-guide-title">
+          <h2 id="review-guide-title">앱 버전 검수 기준</h2>
+          <p>파일 검사 통과 후에도 제출된 앱의 기능과 이용 안내를 확인해야 합니다.</p>
+          <details>
+            <summary>검수 순서와 첫 버전 제외 기능 확인</summary>
+            <ol>
+              <li>제출 버전의 매니페스트·원본 ZIP·미리보기를 대조합니다. 외부 서버 사용과 저장 범위가 이용 안내와 일치하는지 확인합니다.</li>
+              <li>광고 SDK·광고 수익화·유료 결제, 공개 게시물·댓글·채팅, 기기 기능이나 실시간 지속 연결에 의존하는 앱은 첫 버전 승인 대상에서 제외합니다.</li>
+              <li>본인만 보는 개인 메모는 공개 콘텐츠와 구분합니다. 외부 서버를 사용한다는 이유만으로 제외하지 않습니다.</li>
+              <li>확인한 기능과 보완·반려 사유를 아래 심사 사유에 기록합니다. 본인 소유 앱에도 같은 기준을 적용합니다.</li>
+            </ol>
+            <p className="muted">승인 후 공개는 소유 개발자가 진행합니다. 파일 자동 검사는 기능 검수를 대신하지 않습니다.</p>
+          </details>
+        </section>
+      )}
       {error && (
         <p role="alert" className="error-text">
           {error}
@@ -183,7 +199,9 @@ export function Operator({
                                 "POST",
                                 { decision, reason },
                               ),
-                            "앱 버전 검수 결과를 기록했습니다. 개발자가 직접 공개할 수 있습니다.",
+                            decision === "approved"
+                              ? "앱 버전 검수 결과를 기록했습니다. 개발자가 직접 공개할 수 있습니다."
+                              : "앱 버전 검수 결과를 기록했습니다. 개발자가 사유를 확인하고 수정한 버전을 다시 제출해야 합니다.",
                           )
                         }
                       />
