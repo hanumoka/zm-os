@@ -6,7 +6,7 @@ import type {
   UserView,
 } from "@zm/platform-contracts";
 import { clearAppStorage } from "@zm/host-bridge";
-import { api, errorMessage } from "./api";
+import { api, assertCurrentUser, errorMessage } from "./api";
 import { Empty, Field, Modal, SectionTitle } from "./components";
 import { categories, type RunAction } from "./types";
 interface Consent {
@@ -102,7 +102,7 @@ export function Store({
         title={mine ? "내 앱" : "오늘, 어떤 앱이 필요한가요?"}
         description={
           mine
-            ? "웹과 Android에서 같은 앱 목록을 사용합니다. 앱 안의 로컬 데이터는 기기별로 저장됩니다."
+            ? "같은 계정으로 로그인한 웹에서 내 앱 목록을 함께 사용합니다. 앱 내부의 기기 데이터는 동기화하지 않습니다."
             : "설치 부담 없이 시작하는 작은 도구들. 앱의 기능과 이용 범위를 확인하고 열어 보세요."
         }
       />
@@ -335,10 +335,10 @@ export function Store({
                         "현재 기기에 저장된 이 앱의 데이터를 삭제할까요? 삭제한 데이터는 복구할 수 없습니다. 외부 서버 데이터는 삭제되지 않습니다.",
                       )
                     )
-                      void run(
-                        () => clearAppStorage(user.id, selected.id),
-                        "현재 기기의 이 앱 데이터를 삭제했습니다.",
-                      );
+                      void run(async () => {
+                        await assertCurrentUser(user.id);
+                        await clearAppStorage(user.id, selected.id);
+                      }, "현재 기기의 이 앱 데이터를 삭제했습니다.");
                   }}
                 >
                   이 기기의 앱 데이터 삭제

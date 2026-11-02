@@ -636,6 +636,26 @@ export class Platform {
       await audit(db, a.id, "identity.unlinked", a.id, { provider });
       return { ok: true };
     }
+    if (method === "GET" && path === "/me/app-consents") {
+      const rows = await db.query<{
+        app_id: string; name: string; revoked_at: Date | null; available: boolean;
+      }>(
+        `SELECT c.app_id,COALESCE(v.manifest->>'name',app.name) AS name,c.revoked_at,
+          COALESCE(app.published AND app.availability='allowed' AND app.closure<>'closed'
+            AND v.validation_status='passed' AND v.review_status='approved',false) AS available
+          FROM consents c JOIN apps app ON app.id=c.app_id
+          LEFT JOIN versions v ON v.id=app.current_version_id
+          WHERE c.user_id=$1 ORDER BY name,c.app_id`,
+        [a.id],
+      );
+      return rows.rows.map((row) => ({
+        appId: row.app_id,
+        name: row.name,
+        revokedAt: row.revoked_at?.toISOString() ?? null,
+        available: row.available,
+        ...(!row.available ? { unavailableReason: "현재 새 실행을 할 수 없는 앱입니다." } : {}),
+      }));
+    }
     if (method === "GET" && path === "/me/apps") return store(db, "", "", a.id);
     if (
       segments[0] === "me" &&
@@ -787,6 +807,11 @@ export class Platform {
         return { code, expiresAt: expiresAt.toISOString() };
       }
     }
+    if (method === "GET" && path === "/developer/profile") {
+      return (await one<{status: string; reason: string}>(db,
+        "SELECT status,reason FROM developers WHERE user_id=$1", [a.id]))
+        ?? { status: "none", reason: "" };
+    }
     if (method === "GET" && path === "/developer/application") {
       const row = await one(
         db,
@@ -839,7 +864,7 @@ export class Platform {
       );
       if (data.decision === "approved")
         await db.query(
-          "INSERT INTO developers(user_id,status) VALUES($1,'approved') ON CONFLICT(user_id) DO UPDATE SET status='approved'",
+          "INSERT INTO developers(user_id,status,reason) VALUES($1,'approved','') ON CONFLICT(user_id) DO UPDATE SET status='approved',reason=''",
           [application.user_id],
         );
       await audit(db, a.id, "developer.reviewed", id, data);
@@ -852,10 +877,11 @@ export class Platform {
       segments[3] === "revoke"
     ) {
       const data = z.object({ reason: reasonSchema }).strict().parse(body);
-      await db.query(
-        "UPDATE developers SET status='revoked' WHERE user_id=$1",
-        [at(2)],
+      const revoked = await db.query(
+        "UPDATE developers SET status='revoked',reason=$2 WHERE user_id=$1 RETURNING user_id",
+        [at(2), data.reason],
       );
+      ensure(revoked.rowCount === 1, 404, "DEVELOPER_NOT_FOUND");
       await audit(db, a.id, "developer.revoked", at(2), data);
       return { ok: true };
     }

@@ -3,8 +3,10 @@ import type { UserView } from "@zm/platform-contracts";
 import { api, errorMessage } from "./api";
 import { Field, FormSection, SectionTitle, Status } from "./components";
 import { label, type Report, type RunAction } from "./types";
+import { UsedApps } from "./UsedApps";
 interface Props {
   user: UserView | null;
+  revision: number;
   testMode: boolean;
   busy: boolean;
   run: RunAction;
@@ -98,6 +100,7 @@ export function Enrollment({
 }
 export function Account({
   user,
+  revision,
   testMode,
   busy,
   run,
@@ -300,6 +303,7 @@ export function Account({
                 </div>
               ))}
           </FormSection>
+          <UsedApps user={user} revision={revision} busy={busy} run={run} />
           <FormSection title="내 신고">
             <p>신고 내용은 공개되지 않습니다.</p>
             {reports.length ? (
@@ -406,7 +410,11 @@ export function Account({
                     onWithdraw(withdrawReceipt.lookupSecret);
                   else
                     setNotice(
-                      ["pending", "closure_required"].includes(result.status)
+                      [
+                        "pending",
+                        "closure_required",
+                        "owner_closure_required",
+                      ].includes(result.status)
                         ? "소유 앱의 종료 확인이 필요합니다. 개발자 공간에서 앱 종료를 요청해 주세요."
                         : `탈퇴 처리: ${label(result.status)}`,
                     );

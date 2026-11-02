@@ -1,6 +1,6 @@
 # 로컬 시험 API 계약
 
-대상: 웹·SDK·BE 구현 담당자. 소유자: 프로젝트 소유자. 검토일: 2026-11-01. ADR-0042의 구현 계약이며 운영 공개 판이 아니다.
+대상: 웹·SDK·BE 구현 담당자. 소유자: 프로젝트 소유자. 검토일: 2026-11-02. ADR-0042의 구현 계약이며 운영 공개 판이 아니다.
 
 API는 `/v1`, JSON을 반환한다. 오류는 `{code,message}`와 HTTP 400/401/403/404/409/413. 웹 same-origin 프록시를 통해 HttpOnly 쿠키를 사용하고 변경 요청은 `X-CSRF-Token`을 보낸다. GET `/me` 응답의 csrf를 사용한다. 직접 API 요청도 같은 권한 검사를 받는다. 배열 조회는 배열 자체를 반환한다.
 
@@ -16,6 +16,7 @@ API는 `/v1`, JSON을 반환한다. 오류는 `{code,message}`와 HTTP 400/401/4
 | GET /me/apps | AppView[] |
 | PUT 또는 DELETE /me/apps/:id | `{}` → `{ok:true}` |
 | GET /apps/:id/consent | `{fingerprint,manifest,accepted:boolean}` |
+| GET /me/app-consents | 본인의 `AppConsentView[]`. 내 앱 추가 여부와 무관하며 공개 중단·종료·철회한 앱도 포함 |
 | PUT /me/app-consents/:id | `{fingerprint}` → `{ok:true}` |
 | DELETE /me/app-consents/:id | 철회·실행 취소 → `{ok:true}` |
 | POST /app-sessions | `{appId}` → AppSessionView |
@@ -23,6 +24,7 @@ API는 `/v1`, JSON을 반환한다. 오류는 `{code,message}`와 HTTP 400/401/4
 | DELETE /app-sessions/:id | 종료 → `{ok:true}` |
 | POST /app-sessions/:id/authorization-codes | `{challenge}` → `{code,expiresAt}` |
 | GET /developer/application | 신청 객체 또는 null |
+| GET /developer/profile | 현재 `{status:'none'|'approved'|'revoked',reason}`. 과거 신청의 심사 결과와 구분 |
 | POST /developer/applications | `{displayName,email,description}` → 신청 객체 |
 | GET /operator/developer-applications | 신청 객체[] |
 | POST /operator/developer-applications/:id/decisions | `{decision:'approved'|'changes_requested'|'rejected',reason}` |
@@ -61,3 +63,5 @@ API는 `/v1`, JSON을 반환한다. 오류는 `{code,message}`와 HTTP 400/401/4
 | POST /auth/native/bootstrap | 단회 ticket POST → HttpOnly 세션 설정·기존 기기 실행 취소·303 웹 복귀 |
 
 단순 중지 후 기존 실행은 유효하며 새 실행만 막는다. 긴급·동의철회·계정정지는 관련 실행을 취소한다. 현재 사용자의 정지와 앱 소유자의 정지를 혼동하지 않는다. 개발자 승인 취소는 기존 앱의 공개 상태를 바꾸지 않는다. 모든 입력은 서버에서 검증한다. 임의 개발자 서버로의 서버 측 프록시는 제공하지 않는다.
+
+이용 앱 이력에는 앱 ID·이름·철회 시각·실행 가능 여부와 일반적인 불가 사유만 반환한다. 미공개 버전 내용·신청 연락처·다른 사용자의 이력을 반환하지 않는다. 계정 화면에서 목록에 없는 앱의 동의 철회와 현재 기기 로컬 삭제를 계속 제공한다. 개발자 재승인 시 현재 취소 사유를 비우지만 감사 이력과 앱 중지 상태는 유지한다.

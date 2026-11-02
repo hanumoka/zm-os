@@ -72,3 +72,10 @@ CREATE INDEX IF NOT EXISTS app_sessions_app ON app_sessions(app_id,status);
 CREATE INDEX IF NOT EXISTS versions_app ON versions(app_id);
 ALTER TABLE versions ADD COLUMN IF NOT EXISTS asset_revision integer;
 ALTER TABLE web_sessions ADD COLUMN IF NOT EXISTS restricted boolean NOT NULL DEFAULT false;
+ALTER TABLE developers ADD COLUMN IF NOT EXISTS reason text;
+UPDATE developers d SET reason=COALESCE((SELECT e.detail->>'reason' FROM audit_events e
+ WHERE e.action='developer.revoked' AND e.target_id=d.user_id::text
+ ORDER BY e.created_at DESC,e.id DESC LIMIT 1),'') WHERE d.status='revoked' AND d.reason IS NULL;
+UPDATE developers SET reason='' WHERE reason IS NULL;
+ALTER TABLE developers ALTER COLUMN reason SET DEFAULT '';
+ALTER TABLE developers ALTER COLUMN reason SET NOT NULL;

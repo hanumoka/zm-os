@@ -1,3 +1,5 @@
+import type { UserView } from "@zm/platform-contracts";
+
 let csrf = "";
 const userMessages: Record<string, string> = {
   LOGIN_REQUIRED: "로그인이 필요합니다.",
@@ -25,6 +27,24 @@ const userMessages: Record<string, string> = {
 };
 export function setCsrf(value: string): void {
   csrf = value;
+}
+/** Recheck cookie identity immediately before touching this device's data. */
+export async function assertCurrentUser(expectedUserId: string): Promise<void> {
+  const current = await api<UserView>("/me");
+  if (current.id !== expectedUserId)
+    throw new ApiError(
+      409,
+      "CURRENT_ACCOUNT_CHANGED",
+      "로그인 계정이 바뀌어 삭제하지 않았습니다. 현재 계정의 화면을 확인해 주세요.",
+    );
+  if (current.status !== "active")
+    throw new ApiError(403, "ACCOUNT_SUSPENDED", "이용이 정지된 계정입니다.");
+  if (current.requiresReauth)
+    throw new ApiError(
+      403,
+      "REAUTH_REQUIRED",
+      "내 계정에서 로그인 수단으로 본인 확인을 다시 진행해 주세요.",
+    );
 }
 export class ApiError extends Error {
   constructor(

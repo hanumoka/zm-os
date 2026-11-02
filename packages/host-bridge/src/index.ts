@@ -1,5 +1,5 @@
 import { rpcRequestSchema, TEST_LIMITS, type AppSessionView, type JsonValue, type RpcRequest, type RpcResponse } from '@zm/platform-contracts';
-import { clearAppStorage, clearPreviewStorage, getAppStorage, removeAppStorage, setAppStorage, validateJson } from './storage';
+import { captureStorageLease, clearAppStorage, clearPreviewStorage, getAppStorage, removeAppStorage, setAppStorage, StorageLeaseExpiredError, validateJson } from './storage';
 export { clearAppStorage, clearPreviewStorage };
 
 export interface HostOptions {
@@ -40,13 +40,20 @@ export function attachHostBridge(options: HostOptions): { dispose(): void } {
   let requests = 0;
   let pending = 0;
   const ids = new Set<string>();
+  const storageAbort = new AbortController();
   const dispose = (): void => {
     if (disposed) return;
-    disposed = true; window.removeEventListener('message', hello); iframe.removeEventListener('load', loaded);
+    disposed = true; storageAbort.abort(); window.removeEventListener('message', hello); iframe.removeEventListener('load', loaded);
     if (port) { port.onmessage = null; port.close(); }
     ids.clear();
   };
   const terminate = (reason: string): void => { dispose(); options.onClose(reason); };
+  // Never acquire a new generation from an SDK request after authorize().
+  // While this initial acquisition is pending, no request is executed.
+  const storageLease = captureStorageLease(userId, storageAppId, storageAbort.signal).catch(() => {
+    if (!disposed) terminate('로컬 저장소를 준비하지 못했습니다. 앱을 다시 실행해 주세요.');
+    return null;
+  });
   const loaded = (): void => { if (++loadCount > 1) terminate('앱이 다른 문서로 이동하여 실행을 종료했습니다.'); };
   const send = (response: RpcResponse): void => { if (!disposed) port?.postMessage(response); };
   const handle = async (data: unknown): Promise<void> => {
@@ -60,6 +67,8 @@ export function attachHostBridge(options: HostOptions): { dispose(): void } {
     ids.add(request.id); pending++;
     if (ids.size > 10000) { terminate('앱 실행의 SDK 요청 한도를 초과했습니다.'); return; }
     try {
+      const lease = await storageLease;
+      if (!lease || disposed) return;
       await options.authorize();
       if (disposed) return;
       let result: JsonValue = null;
@@ -68,14 +77,15 @@ export function attachHostBridge(options: HostOptions): { dispose(): void } {
         case 'runtime.close': send({ id: request.id, result: null }); terminate('앱을 종료했습니다.'); return;
         case 'identity.getAppUser': result = { appUserId: session.appUserId }; break;
         case 'auth.createCode': result = await options.createCode(request.params.challenge as string); break;
-        case 'storage.get': result = await getAppStorage(userId, storageAppId, request.params.key as string); break;
-        case 'storage.set': await setAppStorage(userId, storageAppId, request.params.key as string, request.params.value); break;
-        case 'storage.remove': await removeAppStorage(userId, storageAppId, request.params.key as string); break;
+        case 'storage.get': result = await getAppStorage(userId, storageAppId, request.params.key as string, lease); break;
+        case 'storage.set': await setAppStorage(userId, storageAppId, request.params.key as string, request.params.value, lease); break;
+        case 'storage.remove': await removeAppStorage(userId, storageAppId, request.params.key as string, lease); break;
       }
       if (disposed) return;
       await options.authorize();
       send({ id: request.id, result });
     } catch (error) {
+      if (error instanceof StorageLeaseExpiredError) { terminate(error.message); return; }
       const status = error && typeof error === 'object' && 'status' in error ? error.status : undefined;
       if (status === 401 || status === 403 || status === 404) { terminate('앱 실행 권한이 종료되었습니다.'); return; }
       send({ id: request.id, error: { code: 'REQUEST_FAILED', message: error instanceof Error ? error.message : '요청을 처리하지 못했습니다.' } });

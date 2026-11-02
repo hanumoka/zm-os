@@ -6,6 +6,8 @@
     "platform:setup": "node scripts/platform-trial.mjs setup",
     "platform:dev": "node scripts/platform-trial.mjs start",
     "platform:stop": "node scripts/platform-trial.mjs stop",
+    "platform:recovery": "node scripts/platform-recovery.mjs",
+    "test:recovery": "node --test scripts/platform-recovery.test.mjs",
     "dev": "turbo dev",
     "build": "turbo build",
     "start": "turbo start",

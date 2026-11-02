@@ -1,7 +1,7 @@
 import 'fake-indexeddb/auto';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { TEST_LIMITS, type AppSessionView } from '@zm/platform-contracts';
-import { clearAppStorage, getAppStorage, setAppStorage, validateJson } from './storage';
+import { captureStorageLease, clearAppStorage, getAppStorage, removeAppStorage, setAppStorage, StorageLeaseExpiredError, validateJson } from './storage';
 import { checkRequest } from './index';
 
 describe('current user and app local storage', () => {
@@ -20,6 +20,46 @@ describe('current user and app local storage', () => {
     expect(outcomes.filter(outcome => outcome.status === 'fulfilled')).toHaveLength(1);
     expect(outcomes.filter(outcome => outcome.status === 'rejected')).toHaveLength(1);
     await clearAppStorage('quota', 'app');
+  });
+  it('serializes a pre-delete write and rejects stale writes and removals from another connection', async () => {
+    const lease = await captureStorageLease('epoch', 'notes');
+    await setAppStorage('epoch', 'notes', 'key', 'before', lease);
+    vi.resetModules();
+    const secondConnection = await import('./storage');
+    const concurrent = await Promise.allSettled([
+      setAppStorage('epoch', 'notes', 'key', 'racing', lease),
+      secondConnection.clearAppStorage('epoch', 'notes'),
+    ]);
+    expect(concurrent[1]?.status).toBe('fulfilled');
+    expect(await getAppStorage('epoch', 'notes', 'key')).toBeNull();
+    await expect(setAppStorage('epoch', 'notes', 'key', 'late', lease)).rejects.toBeInstanceOf(StorageLeaseExpiredError);
+    const fresh = await captureStorageLease('epoch', 'notes');
+    await setAppStorage('epoch', 'notes', 'key', 'new execution', fresh);
+    await expect(removeAppStorage('epoch', 'notes', 'key', lease)).rejects.toBeInstanceOf(StorageLeaseExpiredError);
+    await expect(getAppStorage('epoch', 'notes', 'key', lease)).rejects.toBeInstanceOf(StorageLeaseExpiredError);
+    expect(await getAppStorage('epoch', 'notes', 'key', fresh)).toBe('new execution');
+  });
+  it('keeps other user, app and preview generations valid after a published partition is cleared', async () => {
+    const scopes = [['scope-user', 'scope-app'], ['other-user', 'scope-app'], ['scope-user', 'other-app'], ['scope-user', 'preview:scope-app']] as const;
+    const leases = await Promise.all(scopes.map(([user, app]) => captureStorageLease(user, app)));
+    await clearAppStorage('scope-user', 'scope-app');
+    await expect(setAppStorage('scope-user', 'scope-app', 'key', 'stale', leases[0])).rejects.toBeInstanceOf(StorageLeaseExpiredError);
+    for (const lease of leases.slice(1)) {
+      await setAppStorage(lease.userId, lease.appId, 'key', 'valid', lease);
+      expect(await getAppStorage(lease.userId, lease.appId, 'key', lease)).toBe('valid');
+    }
+  });
+  it('aborts a queued put when disposed and prevents later writes from the same execution', async () => {
+    const abort = new AbortController();
+    const lease = await captureStorageLease('dispose', 'app', abort.signal);
+    const put = IDBObjectStore.prototype.put;
+    const intercepted = vi.spyOn(IDBObjectStore.prototype, 'put').mockImplementation(function (this: IDBObjectStore, ...args: Parameters<IDBObjectStore['put']>) {
+      const request = put.apply(this, args); abort.abort(); return request;
+    });
+    try { await expect(setAppStorage('dispose', 'app', 'key', 'uncommitted', lease)).rejects.toThrow('종료된 앱'); }
+    finally { intercepted.mockRestore(); }
+    expect(await getAppStorage('dispose', 'app', 'key')).toBeNull();
+    await expect(setAppStorage('dispose', 'app', 'key', 'late', lease)).rejects.toThrow('종료된 앱');
   });
   it('rejects values that cannot round trip as JSON', () => {
     expect(() => validateJson(Number.NaN)).toThrow();

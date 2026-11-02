@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import 'fake-indexeddb/auto';
 import type { AppSessionView } from '@zm/platform-contracts';
-import { attachHostBridge, clearPreviewStorage } from './index';
+import { attachHostBridge, clearAppStorage, clearPreviewStorage } from './index';
+import { getAppStorage } from './storage';
 
 const session: AppSessionView = { id: 'session-1', appId: 'app-1', appUserId: 'app-user-1', versionId: 'version-1', expiresAt: '2026-12-01T00:00:00Z', documentUrl: 'http://127.0.0.1:4311/app?instance=session-1', manifest: { schemaVersion: 1, appId: '00000000-0000-4000-8000-000000000001', version: '1.0.0', name: 'notes', description: 'notes', category: 'tools', entry: 'index.html', permissions: ['app-identity'], apiOrigins: [], privacyNotice: 'test' } };
 const sleep = async (): Promise<void> => new Promise(resolve => setTimeout(resolve, 20));
@@ -66,6 +67,23 @@ describe('MessagePort source and execution binding', () => {
       const port = f.ports[0]!; port.onmessage = (): void => { responses++; }; port.start();
       port.postMessage({ id: 'request', method: 'identity.getAppUser', params: {} });
       await sleep(); expect(authorize).toHaveBeenCalledOnce(); f.dispose(); release?.(); await sleep(); expect(responses).toBe(0);
+    } finally { f.dispose(); }
+  });
+  it('closes an old execution whose first authorized write resumes after deletion', async () => {
+    let release: (() => void) | undefined;
+    const authorize = vi.fn(() => new Promise<void>(resolve => { release = resolve; }));
+    const execution = { ...session, appId: 'delete-race', manifest: { ...session.manifest, permissions: ['local-storage' as const] } };
+    const f = fixture(authorize, execution);
+    try {
+      f.sendHello(f.frameWindow);
+      f.ports[0]!.postMessage({ id: 'late-write', method: 'storage.set', params: { key: 'memo', value: 'must not return' } });
+      await vi.waitFor(() => expect(authorize).toHaveBeenCalledOnce());
+      await clearAppStorage('platform-user-private', execution.appId);
+      release?.();
+      await vi.waitFor(() => expect(f.close).toHaveBeenCalledWith('로컬 데이터가 삭제되었습니다. 앱을 다시 실행해 주세요.'));
+      expect(await getAppStorage('platform-user-private', execution.appId, 'memo')).toBeNull();
+      await storage(execution, 'storage.set', { key: 'memo', value: 'fresh execution' });
+      expect(await storage(execution, 'storage.get', { key: 'memo' })).toBe('fresh execution');
     } finally { f.dispose(); }
   });
   it('terminates on navigation and on revoked authorization', async () => {

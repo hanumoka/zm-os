@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
-import type { AppSessionView, UserView } from "@zm/platform-contracts";
+import type {
+  AppSessionView,
+  DeveloperProfileView,
+  UserView,
+} from "@zm/platform-contracts";
 import { api, errorMessage } from "./api";
 import { Empty, Field, FormSection, SectionTitle, Status } from "./components";
 import type {
@@ -30,6 +34,7 @@ export function Developer({
     null,
   );
   const [apps, setApps] = useState<ManagedApp[]>([]);
+  const [profile, setProfile] = useState<DeveloperProfileView | null>(null);
   const [deletions, setDeletions] = useState<DeletionRequest[]>([]);
   const [selectedId, setSelectedId] = useState("");
   const [loadError, setLoadError] = useState("");
@@ -43,13 +48,17 @@ export function Developer({
       api<DeveloperApplication | null>("/developer/application"),
       api<ManagedApp[]>("/developer/apps"),
       api<DeletionRequest[]>("/developer/deletion-requests"),
+      api<DeveloperProfileView>("/developer/profile"),
     ])
-      .then(([applicationResult, appResults, deletionResults]) => {
-        if (!active) return;
-        setApplication(applicationResult);
-        setApps(appResults);
-        setDeletions(deletionResults);
-      })
+      .then(
+        ([applicationResult, appResults, deletionResults, profileResult]) => {
+          if (!active) return;
+          setApplication(applicationResult);
+          setApps(appResults);
+          setDeletions(deletionResults);
+          setProfile(profileResult);
+        },
+      )
       .catch((e) => {
         if (active) setLoadError(errorMessage(e));
       });
@@ -77,10 +86,30 @@ export function Developer({
               {loadError}
             </p>
           )}
+          {profile && (
+            <FormSection title="현재 개발자 자격">
+              <p>
+                {profile.status === "approved"
+                  ? "개발자 자격이 승인되어 있습니다."
+                  : profile.status === "revoked"
+                    ? "개발자 자격이 취소되었습니다."
+                    : "아직 개발자 자격이 없습니다."}
+              </p>
+              {profile.reason && <p>자격 안내: {profile.reason}</p>}
+              {profile.status === "revoked" && (
+                <p>
+                  신규 앱 등록·버전 제출·공개가 제한됩니다. 아래에서 다시 신청할
+                  수 있으며 재승인되어도 앱별 중지 상태는 자동 해제되지
+                  않습니다.
+                </p>
+              )}
+            </FormSection>
+          )}
           {!user.developer && (
             <FormSection title="개발자 승인 신청">
               {application && (
                 <div className="notice">
+                  <p>최근 신청의 심사 결과</p>
                   <Status value={application.status} />
                   <p>
                     {application.reason ??
@@ -361,7 +390,7 @@ function ManagedAppEditor({
         <button
           disabled={
             busy ||
-            !canDevelop ||
+            (!canDevelop && !app.published) ||
             app.closed ||
             (!app.published && app.availability !== "allowed")
           }

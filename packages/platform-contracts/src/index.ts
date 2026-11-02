@@ -79,6 +79,17 @@ export interface AppSessionView {
   manifest: AppManifest;
   isPreview?: boolean;
 }
+export interface AppConsentView {
+  appId: string;
+  name: string;
+  revokedAt: string | null;
+  available: boolean;
+  unavailableReason?: string;
+}
+export interface DeveloperProfileView {
+  status: "none" | "approved" | "revoked";
+  reason: string;
+}
 export const sdkMethods = [
   "runtime.ready",
   "runtime.close",

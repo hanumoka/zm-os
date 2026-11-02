@@ -55,6 +55,11 @@ jobs:
 
       - run: pnpm test
 
+      - name: Verify isolated database and file recovery
+        run: pnpm test:recovery
+        env:
+          ZM_RECOVERY_INTEGRATION: '1'
+
       - name: Stop owned trial database
         if: always()
         run: node scripts/platform-trial.mjs stop

@@ -74,6 +74,14 @@ export function App(): React.JSX.Element {
       if (success) setMessage(success);
     } catch (e) {
       setError(errorMessage(e));
+      // A sibling tab may have changed the cookie identity. Keep the original
+      // action error, but discard stale account-bound forms and data.
+      try {
+        await refreshUser();
+        setRevision((v) => v + 1);
+      } catch {
+        // A failed refresh must not turn an uncertain mutation into success.
+      }
     } finally {
       setBusy(false);
     }
@@ -237,6 +245,7 @@ export function App(): React.JSX.Element {
             )}
             {(page === "store" || page === "mine") && (
               <Store
+                key={`${user?.id ?? "guest"}:${page}`}
                 mine={page === "mine"}
                 user={user}
                 revision={revision}
@@ -248,6 +257,7 @@ export function App(): React.JSX.Element {
             )}
             {page === "developer" && (
               <Developer
+                key={user?.id ?? "guest"}
                 user={user}
                 revision={revision}
                 busy={busy}
@@ -267,7 +277,9 @@ export function App(): React.JSX.Element {
             )}
             {page === "account" && (
               <Account
+                key={user?.id ?? "guest"}
                 user={user}
+                revision={revision}
                 testMode={testMode}
                 busy={busy}
                 run={run}

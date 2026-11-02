@@ -61,6 +61,8 @@
 
 ## 실제 인증 설정
 
+등록 값·로컬 파일 적용·실제 시험 시나리오는 [실제 웹 로그인 설정](web-oauth-local.md)을 따른다. 2026-11-02 로컬 점검에서 키를 찾지 못했고 제공자 콘솔의 기존 등록 여부는 확인하지 않았다.
+
 API 환경에 `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`을 비공개로 설정한다. 실제 값은 문서·코드·로그에 넣지 않는다. 콜백은 각각 `http://localhost:4300/v1/auth/google/callback`, `http://localhost:4300/v1/auth/github/callback`이다. 제공자에 등록한 URL과 정확히 같아야 한다. 설정이 없으면 실제 로그인은 503을 반환한다.
 
 초기 운영자는 실제 인증을 마친 기존 계정을 로컬 배포 담당자가 지정한다. `pnpm --filter @zm/api admin list`로 계정 ID·상태·연결 제공자를 확인하고 `admin grant <계정 UUID>`로 부여하거나 `admin revoke <계정 UUID>`로 회수한다. 마지막 활성 운영자 회수와 비활성 계정 부여는 거부한다. 이 명령은 로컬 DB 관리 자격이 있는 실행자만 쓸 수 있고 작업을 감사 이력에 남긴다. 공개 가입 API에 운영자 역할 입력을 열지 않으며 모의 owner를 실제 제공자 계정으로 바꾸지 않는다.
@@ -68,3 +70,15 @@ API 환경에 `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GITHUB_CLIENT_ID`, `G
 Android 시험 환경은 [Android 안내](../../apps/android/README.md)를 따른다. WebView 라이브러리의 프레임 정보 전달 및 탐색 검사 무응답 차단을 최소 패치로 고정했다. 패치의 Java 컴파일·실제 탐색은 Android SDK와 기기가 있어야 검증할 수 있다. 기기에서 localhost를 사용할 때 웹·자산·외부 API 포트를 각각 연결해야 한다.
 
 참고한 공식 문서: [NestJS 시작](https://docs.nestjs.com/first-steps), [Google 웹 서버 OAuth](https://developers.google.com/identity/protocols/oauth2/web-server), [GitHub OAuth](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps), [Expo WebView](https://docs.expo.dev/versions/latest/sdk/webview/).
+
+## 별도 시험 데이터의 복구 확인
+
+전제: `platform:setup`의 소유 label을 가진 PostgreSQL 컨테이너가 실행 중이고 로컬 설정·의존성이 준비되어 있어야 한다.
+
+1. `pnpm platform:recovery`를 실행한다. 도구는 무작위 전용 DB와 임시 파일 영역에 두 앱 버전 fixture를 만들고 쓰는 프로세스를 멈춘다. 기존 화면용 `zmtrial`과 `.trial/files`는 백업·삭제 대상으로 사용하지 않는다.
+2. DB dump와 파일 SHA256 목록을 함께 만들고 새 DB·폴더에 복원한다. 손상·누락, 기존 대상 덮어쓰기, 복원 실패의 정리와 새 대상 재시도를 시험한다.
+3. 복원 DB에서 HTTP 실행·원본 ZIP·준비 HTML을 확인한다. 승인된 이전 버전 공개 시 신규 실행과 기존 실행의 버전이 각각 올바른지 확인한다.
+
+완료 확인: 명령 exit 0과 `.trial/recovery-report.json`의 `ok:true`. 보고서는 성공 및 자기 시험 자원 정리 후 기록한다. 기본 단위 시험은 `pnpm test:recovery`, 실제 통합은 `ZM_RECOVERY_INTEGRATION=1` 환경변수로 같은 명령을 실행한다. CI에도 실제 통합을 연결했다.
+
+실패 대응: 도구가 만든 DB·폴더만 정리한다. 실행 시작 시 과거 성공 보고서를 제거하므로 실패를 이전 성공으로 해석하지 않는다. 실패 원인을 확인한 뒤 새 무작위 대상으로 재실행하며, 일반 사용 DB를 수동 초기화하지 않는다. 이는 정지한 시험 fixture의 복원 검증이며 운영 중 백업의 일관성·RPO/RTO·키 복구·스키마 downgrade·외부 앱 DB 복구를 보장하지 않는다.
