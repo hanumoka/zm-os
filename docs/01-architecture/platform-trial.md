@@ -48,9 +48,9 @@
 
 ## 웹 단계에서 남은 확인
 
-- 실제 OAuth 앱 설정·콜백·계정 연결·재인증의 제공자별 실행 검증. 제공자 화면의 계정 선택이 강한 재인증을 보장하는지도 확인해야 한다.
+- 실제 OAuth 작업은 소유자 요청으로 일시 보류했다. 재개 후 앱 설정·콜백·계정 연결·재인증을 확인한다. 제공자 화면의 계정 선택이 강한 재인증을 보장하는지도 확인해야 한다.
 - 웹의 전체 수락 시나리오에 대한 최종 완료 판정과 재현 근거. 로컬 모의 제공자 시험과 실제 계정 로그인 시험을 합치지 않는다.
-- 시험 DB 복원 등 웹 단계의 시험 환경 운영 확인. 검증 목록에서 기존 실행 근거와 새로 확인할 조건을 구분한다.
+- 시험 DB 복원은 아래 독립 fixture 근거를 확인한다. 운영 백업·복원은 별도 단계다.
 
 다음 항목은 웹 완료 이후다.
 
@@ -70,6 +70,18 @@ API 환경에 `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GITHUB_CLIENT_ID`, `G
 Android 시험 환경은 [Android 안내](../../apps/android/README.md)를 따른다. WebView 라이브러리의 프레임 정보 전달 및 탐색 검사 무응답 차단을 최소 패치로 고정했다. 패치의 Java 컴파일·실제 탐색은 Android SDK와 기기가 있어야 검증할 수 있다. 기기에서 localhost를 사용할 때 웹·자산·외부 API 포트를 각각 연결해야 한다.
 
 참고한 공식 문서: [NestJS 시작](https://docs.nestjs.com/first-steps), [Google 웹 서버 OAuth](https://developers.google.com/identity/protocols/oauth2/web-server), [GitHub OAuth](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps), [Expo WebView](https://docs.expo.dev/versions/latest/sdk/webview/).
+
+## 독립 웹 흐름 시험
+
+전제: `pnpm install`과 `pnpm platform:setup`, 웹 14600·API 14610·자산 14611 포트가 비어 있어야 한다. 기본 브라우저는 Windows의 Edge이며 Linux에서는 `pnpm --filter @zm/platform-web exec playwright install --with-deps chromium` 후 `PLAYWRIGHT_CHANNEL=chromium`을 환경변수로 지정한다.
+
+1. `pnpm test:web-flows`를 실행한다. 부분 확인은 `node scripts/platform-web-check.mjs external-deletion` 또는 `moderation`이다.
+2. 도구는 trial 컨테이너의 소유 label을 확인하고 무작위 `zmwebui_` DB·임시 파일·자기 서버를 만든다. 기존 `zmtrial`·`.trial/files`를 초기화하지 않는다. 외부 삭제 8개 흐름 뒤 검수 표본 5개 흐름을 같은 전용 환경에서 실행한다.
+3. `apps/platform-web/e2e-out/`의 실행별 `result.json`과 스크린샷을 확인한다. 조회 자격은 스크린샷에서 가리고 원문 오류 로그를 출력하지 않는다. CI는 결과 JSON만 보관한다.
+
+완료 확인: 명령 exit 0, 두 결과의 `completed:true`, 브라우저 오류 0, 자기 자원 정리 안내를 확인한다. 브라우저 표본은 모의 로그인만 사용하며 실제 OAuth·운영 앱 검수·실제 외부 삭제를 대신하지 않는다.
+
+실패 대응: 실패 코드와 마지막 통과 단계·가려진 로컬 스크린샷으로 확인한다. 비밀이 포함될 수 있는 Playwright 원문 오류·trace는 공개 로그에 추가하지 않는다. 실행기는 성공·실패 시 자기가 만든 DB·파일·서버만 정리하며 정리 실패도 비정상 종료한다. 브라우저 시작 실패의 정리도 시험했다. 프로세스 강제 종료나 OS 장애 뒤 정리 완료까지 보장하는 것은 아니다.
 
 ## 별도 시험 데이터의 복구 확인
 

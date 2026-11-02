@@ -49,7 +49,7 @@ API는 `/v1`, JSON을 반환한다. 오류는 `{code,message}`와 HTTP 400/401/4
 | POST /me/withdrawal | `{confirmed:true,receiptId}` + 최근 재인증 → `{status}`. 응답 유실 뒤에도 미리 보관한 링크로 조회 |
 | GET /developer/deletion-requests | 본인 앱의 외부 삭제 요청[] |
 | POST /developer/deletion-requests/:id/results | `{status:'processing'|'developer_reported_completed'|'needs_attention',note}` |
-| GET /withdrawal-status | `Authorization: Bearer <조회비밀>` → 최소 삭제 상태 |
+| GET /withdrawal-status | `Authorization: Bearer <조회비밀>` → 최소 삭제 상태. external 항목은 `{appId,appName,status}` |
 | POST /developer/apps/:id/closure-requests | 소유자 종료 신청 |
 | POST /operator/apps/:id/closure-confirmations | `{reason}` → 종료확인 |
 | POST /developer/apps/:id/credentials | 서버 자격 발급·회전. 응답을 한 번만 표시 |
@@ -65,3 +65,5 @@ API는 `/v1`, JSON을 반환한다. 오류는 `{code,message}`와 HTTP 400/401/4
 단순 중지 후 기존 실행은 유효하며 새 실행만 막는다. 긴급·동의철회·계정정지는 관련 실행을 취소한다. 현재 사용자의 정지와 앱 소유자의 정지를 혼동하지 않는다. 개발자 승인 취소는 기존 앱의 공개 상태를 바꾸지 않는다. 모든 입력은 서버에서 검증한다. 임의 개발자 서버로의 서버 측 프록시는 제공하지 않는다.
 
 이용 앱 이력에는 앱 ID·이름·철회 시각·실행 가능 여부와 일반적인 불가 사유만 반환한다. 미공개 버전 내용·신청 연락처·다른 사용자의 이력을 반환하지 않는다. 계정 화면에서 목록에 없는 앱의 동의 철회와 현재 기기 로컬 삭제를 계속 제공한다. 개발자 재승인 시 현재 취소 사유를 비우지만 감사 이력과 앱 중지 상태는 유지한다.
+
+탈퇴 조회의 `appName`은 해당 요청의 앱별 사용자 식별자로 실제 실행한 버전 중 생성 시각이 최신인 판의 매니페스트 이름이다. 마지막 실행 시각 기준은 아니며 앱 등록 작업명이나 이용하지 않은 새 초안 이름을 반환하지 않는다. 이름이 없으면 null이고 화면은 appId를 표시한다. 개발자 처리 메모·연락처·appUserId는 이 조회 자격에 제공하지 않는다. 외부 완료 상태는 개발자의 보고이며 플랫폼의 실제 삭제 확인과 구분한다.
