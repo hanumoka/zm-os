@@ -21,6 +21,8 @@ import jsxA11y from 'eslint-plugin-jsx-a11y';
 export default tseslint.config(
   {
     ignores: [
+      '.trial/**',
+      '**/.expo/**',
       '**/node_modules/**',
       '**/.next/**',
       '**/dist/**',
@@ -119,6 +121,13 @@ export default tseslint.config(
   },
 
   // @zm/storage shell 자신과, 아직 그것을 쓰는 저장 래퍼들.
+  // ADR-0042: 신규 SDK의 전송 경계 두 곳만 MessagePort를 직접 사용한다.
+  // 다른 기능 파일에는 기존 raw postMessage 금지를 유지한다.
+  {
+    files: ['packages/sdk/src/index.ts', 'packages/host-bridge/src/index.ts', 'packages/sdk/src/index.test.ts', 'packages/host-bridge/src/bridge.test.ts'],
+    rules: { 'no-restricted-syntax': 'off' },
+  },
+
   // G5(Composition Root)에서 정리되면 이 예외를 지우고 error가 실제로 걸리게 한다.
   {
     files: ['packages/storage/**/*.ts', 'apps/web/src/lib/storage/**/*.ts'],

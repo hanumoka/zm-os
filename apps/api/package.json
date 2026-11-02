@@ -1,0 +1,32 @@
+{
+  "name": "@zm/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "start": "tsx src/main.ts",
+    "admin": "tsx src/admin.ts",
+    "type-check": "tsc --noEmit",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "dependencies": {
+    "@nestjs/common": "^11.1.0",
+    "@nestjs/core": "^11.1.0",
+    "@nestjs/platform-express": "^11.1.0",
+    "@zm/platform-contracts": "workspace:*",
+    "@zm/cli": "workspace:*",
+    "express": "^5.1.0",
+    "pg": "^8.16.0",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^24.0.0",
+    "@types/pg": "^8.15.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.3"
+  }
+}

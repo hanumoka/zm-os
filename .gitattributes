@@ -22,3 +22,6 @@ docs/13-troubleshooting/entries.md merge=union
 *.ico  binary
 *.pdf  binary
 *.zip  binary
+
+# Unified diff의 빈 문맥 행은 공백 한 칸이 문법이다.
+patches/*.patch whitespace=-blank-at-eol

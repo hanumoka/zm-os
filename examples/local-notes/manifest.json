@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "appId": "00000000-0000-4000-8000-000000000001",
+  "version": "1.0.0",
+  "name": "나의 메모",
+  "description": "현재 기기에 개인 메모를 저장합니다.",
+  "category": "productivity",
+  "entry": "index.html",
+  "permissions": [
+    "local-storage",
+    "app-identity"
+  ],
+  "apiOrigins": [],
+  "privacyNotice": "메모는 현재 기기의 사용자·앱별 저장 영역에 보관됩니다. 클라우드 동기화는 하지 않습니다."
+}

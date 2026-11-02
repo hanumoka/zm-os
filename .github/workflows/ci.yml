@@ -25,7 +25,7 @@ jobs:
   check:
     name: type-check · lint · test · build
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     steps:
       - uses: actions/checkout@v4
@@ -50,7 +50,14 @@ jobs:
       # 새 error 규칙은 즉시 빨간불이 된다.
       - run: pnpm lint
 
+      - name: Prepare isolated local PostgreSQL trial
+        run: node scripts/platform-trial.mjs setup
+
       - run: pnpm test
+
+      - name: Stop owned trial database
+        if: always()
+        run: node scripts/platform-trial.mjs stop
 
       # build를 여기서 돌리는 이유는 산출물이 아니라 **검사** 때문이다.
       # `verify-dynamic-rendering.mjs`가 `apps/web`의 build 스크립트에만 붙어 있어서,

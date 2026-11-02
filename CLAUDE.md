@@ -5,6 +5,8 @@
 > **Claude Code를 위한 zm-os 프로젝트 가이드**
 > **최종 업데이트**: 2026-06-07
 
+> **2026-11-02 신규 플랫폼 안내:** 현재 개발 대상은 웹·Android의 독립 앱 플랫폼이다. 제품 요구·정책은 zm-docs를 따르며 구현 구성은 [ADR-0042](docs/02-decisions/0042-platform-rebuild-local-trial.md), 실행 방법은 [로컬 시험 안내](docs/01-architecture/platform-trial.md), 검증 결과는 [2026-11 기록](docs/11-archive/2026-11.md)에 있다. 아래 POC의 개요·구조·스택·진행률은 기존 `apps/web`의 기록이다. 신규 `apps/platform-web`, `apps/api`, `apps/worker`, `apps/android`, SDK·CLI에 그대로 적용하지 않는다. Git 작업·보안·협업 규칙은 유지한다. 실제 OAuth와 Android 기기 검증은 남아 있다.
+
 ---
 
 ## 📋 1. 프로젝트 개요

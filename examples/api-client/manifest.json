@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "appId": "00000000-0000-4000-8000-000000000002",
+  "version": "1.0.0",
+  "name": "서버 메모",
+  "description": "개발자가 운영하는 별도 서버에 나의 메모를 저장하는 예제입니다.",
+  "category": "productivity",
+  "entry": "index.html",
+  "permissions": ["app-identity", "external-api"],
+  "apiOrigins": ["http://127.0.0.1:4320"],
+  "privacyNotice": "앱별 사용자 식별자와 작성한 메모가 개발자의 시험 서버에 저장됩니다. 삭제는 개발자에게 별도로 요청합니다."
+}

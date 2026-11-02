@@ -1,5 +1,7 @@
 # ADR Index
 
+2026-11-01 신규 구현: [ADR-0042 — NestJS 독립 앱 플랫폼 로컬 시험](0042-platform-rebuild-local-trial.md). 새 정책은 zm-docs의 DEC-0121·0126·0127·0135~0141을 따른다. 아래 과거 POC·로컬 우선 기록을 신규 제품 요구사항으로 적용하지 않는다. 구현 상태와 미검증 경계는 [로컬 시험 안내](../01-architecture/platform-trial.md)에서 구분한다.
+
 > Architecture Decision Records — 순차 번호. 수동 인덱스 (자동 생성 금지).
 
 > ## ⚠ 먼저 읽어라 — ADR 본문과 이 인덱스는 시점이 다르다

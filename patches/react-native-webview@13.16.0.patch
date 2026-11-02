@@ -1,0 +1,69 @@
+diff --git a/android/src/main/java/com/reactnativecommunity/webview/RNCWebViewClient.java b/android/src/main/java/com/reactnativecommunity/webview/RNCWebViewClient.java
+index 0287e1c56b07b6c23b4049f3992d88b86fdc5c79..c13b9a1cb0f2a243fd5da4a44a634506732e4105 100644
+--- a/android/src/main/java/com/reactnativecommunity/webview/RNCWebViewClient.java
++++ b/android/src/main/java/com/reactnativecommunity/webview/RNCWebViewClient.java
+@@ -92,6 +92,11 @@ public class RNCWebViewClient extends WebViewClient {
+ 
+     @Override
+     public boolean shouldOverrideUrlLoading(WebView view, String url) {
++        // Legacy callbacks cannot establish frame identity; leave it absent so the host can reject them.
++        return shouldOverrideUrlLoadingWithFrame(view, url, null);
++    }
++
++    private boolean shouldOverrideUrlLoadingWithFrame(WebView view, String url, Boolean isTopFrame) {
+         final RNCWebView rncWebView = (RNCWebView) view;
+         final boolean isJsDebugging = rncWebView.getReactApplicationContext().getJavaScriptContextHolder().get() == 0;
+ 
+@@ -101,6 +106,7 @@ public class RNCWebViewClient extends WebViewClient {
+             final AtomicReference<RNCWebViewModuleImpl.ShouldOverrideUrlLoadingLock.ShouldOverrideCallbackState> lockObject = lock.second;
+ 
+             final WritableMap event = createWebViewEvent(view, url);
++            if (isTopFrame != null) event.putBoolean("isTopFrame", isTopFrame);
+             event.putDouble("lockIdentifier", lockIdentifier);
+             rncWebView.dispatchDirectShouldStartLoadWithRequest(event);
+ 
+@@ -110,9 +116,10 @@ public class RNCWebViewClient extends WebViewClient {
+                     final long startTime = SystemClock.elapsedRealtime();
+                     while (lockObject.get() == RNCWebViewModuleImpl.ShouldOverrideUrlLoadingLock.ShouldOverrideCallbackState.UNDECIDED) {
+                         if (SystemClock.elapsedRealtime() - startTime > SHOULD_OVERRIDE_URL_LOADING_TIMEOUT) {
+-                            FLog.w(TAG, "Did not receive response to shouldOverrideUrlLoading in time, defaulting to allow loading.");
++                            FLog.w(TAG, "Did not receive response to shouldOverrideUrlLoading in time, blocking navigation.");
+                             RNCWebViewModuleImpl.shouldOverrideUrlLoadingLock.removeLock(lockIdentifier);
+-                            return false;
++                            // zm-os requires a positive navigation decision; silence cannot grant access.
++                            return true;
+                         }
+                         lockObject.wait(SHOULD_OVERRIDE_URL_LOADING_TIMEOUT);
+                     }
+@@ -120,7 +127,8 @@ public class RNCWebViewClient extends WebViewClient {
+             } catch (InterruptedException e) {
+                 FLog.e(TAG, "shouldOverrideUrlLoading was interrupted while waiting for result.", e);
+                 RNCWebViewModuleImpl.shouldOverrideUrlLoadingLock.removeLock(lockIdentifier);
+-                return false;
++                // An interrupted permission check must not authorize the pending navigation.
++                return true;
+             }
+ 
+             final boolean shouldOverride = lockObject.get() == RNCWebViewModuleImpl.ShouldOverrideUrlLoadingLock.ShouldOverrideCallbackState.SHOULD_OVERRIDE;
+@@ -132,9 +140,11 @@ public class RNCWebViewClient extends WebViewClient {
+             progressChangedFilter.setWaitingForCommandLoadUrl(true);
+ 
+             int reactTag = RNCWebViewWrapper.getReactTagFromWebView(view);
++            final WritableMap event = createWebViewEvent(view, url);
++            if (isTopFrame != null) event.putBoolean("isTopFrame", isTopFrame);
+             UIManagerHelper.getEventDispatcherForReactTag((ReactContext) view.getContext(), reactTag).dispatchEvent(new TopShouldStartLoadWithRequestEvent(
+                     reactTag,
+-                    createWebViewEvent(view, url)));
++                    event));
+             return true;
+         }
+     }
+@@ -143,7 +153,7 @@ public class RNCWebViewClient extends WebViewClient {
+     @Override
+     public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+         final String url = request.getUrl().toString();
+-        return this.shouldOverrideUrlLoading(view, url);
++        return shouldOverrideUrlLoadingWithFrame(view, url, request.isForMainFrame());
+     }
+ 
+     @Override

@@ -1,0 +1,36 @@
+{
+  "expo": {
+    "name": "zm-os 로컬 시험",
+    "slug": "zm-os-local-trial",
+    "version": "0.1.0",
+    "scheme": "zmos",
+    "orientation": "default",
+    "platforms": [
+      "android"
+    ],
+    "android": {
+      "package": "dev.hanumoka.zmos.trial",
+      "permissions": [],
+      "blockedPermissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.CAMERA",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_MEDIA_VIDEO",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.VIBRATE"
+      ],
+      "allowBackup": false
+    },
+    "plugins": [
+      "expo-web-browser",
+      "./plugins/withLocalNetwork.cjs"
+    ],
+    "extra": {
+      "environment": "local-test"
+    }
+  }
+}

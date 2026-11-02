@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "platform:setup": "node scripts/platform-trial.mjs setup",
+    "platform:dev": "node scripts/platform-trial.mjs start",
+    "platform:stop": "node scripts/platform-trial.mjs stop",
     "dev": "turbo dev",
     "build": "turbo build",
     "start": "turbo start",

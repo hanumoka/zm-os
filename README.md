@@ -1,5 +1,17 @@
 # zm-os
 
+**2026-11-01: 독립 앱 플랫폼의 로컬 시험 구현을 진행하고 있습니다.** 신규 구현은 `apps/platform-web`·`apps/api`·`apps/worker`·`apps/android`와 SDK·CLI입니다. 기존 POC와 실행 명령을 구분합니다. 실제 OAuth·Android 기기 검증을 마쳤다는 뜻은 아닙니다.
+
+```bash
+pnpm install
+pnpm platform:setup
+pnpm platform:dev
+```
+
+Docker가 실행되어 있어야 합니다. 웹 주소는 `http://localhost:4300`입니다. `127.0.0.1`로 바꾸면 origin 검사에서 거부됩니다. 생성된 `.trial/config.json`은 시험 자격증명을 포함하는 로컬 비추적 파일입니다. 자세한 시작·종료·실패 대응과 미완료 범위는 [로컬 시험 안내](docs/01-architecture/platform-trial.md)를 확인하세요.
+
+## 기존 POC 기록
+
 브라우저 안에서 동작하는 **가상 데스크탑 + 공유 앱 스토어** POC.
 사용자가 만든 JavaScript 앱(특히 게임)을 스토어에 올려 공유 · 설치 · 실행한다.
 

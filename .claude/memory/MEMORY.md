@@ -1,4 +1,6 @@
 # zm-os Project Memory
+
+> 2026-11-02 신규 개발 맥락: NestJS·React/Vite·Android·SDK/CLI 로컬 개발본은 [로컬 시험 안내](../../docs/01-architecture/platform-trial.md)와 [2026-11 기록](../../docs/11-archive/2026-11.md)을 따른다. 아래 수치는 과거 POC 기록이다. 실제 OAuth·Android 기기 검증이 남아 있어 첫 개발 단계 전체 완료는 아니다. 소유자는 문서 갱신·커밋·push·병합을 요청했다. 원격 반영 상태는 현재 Git ref와 PR에서 확인한다.
 > 시스템 프롬프트 자동 로드 (200줄 한도). 최종 갱신: 2026-06-07 (REFAC-02-P2 완료)
 
 ## 프로젝트 수치 (항상 최신 유지)
