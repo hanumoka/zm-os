@@ -2,7 +2,7 @@
 
 대상: 소유자와 웹·BE·SDK 구현 담당자. 마지막 검토: 2026-11-02.
 
-현재 단계는 웹·NestJS BE·worker·SDK·CLI와 두 유형 인앱의 로컬·시험 환경 구현·검증이다. [요구사항의 완료 기준](https://github.com/hanumoka/zm-docs/blob/main/docs/projects/zm-os/requirements.md#첫-개발-단계의-완료-조건)과 [웹 우선 결정](https://github.com/hanumoka/zm-docs/blob/main/docs/governance/decisions/DEC-0147-zm-os-complete-web-before-android.md)이 정본이다. Android 추가 구현·전용 검증은 웹 완료 후다. 이 목록은 정책을 새로 정하거나 기존 시험만으로 웹 완료를 선언하지 않는다.
+현재 단계는 웹·NestJS BE·worker·SDK·CLI와 두 유형 인앱의 로컬·시험 환경 구현·검증이다. [요구사항의 완료 기준](https://github.com/hanumoka/zm-docs/blob/main/docs/projects/zm-os/requirements.md#첫-개발-단계의-완료-조건)과 [웹 우선 결정](https://github.com/hanumoka/zm-docs/blob/main/docs/governance/decisions/DEC-0148-zm-os-complete-web-before-android.md)이 정본이다. Android 추가 구현·전용 검증은 웹 완료 후다. 이 목록은 정책을 새로 정하거나 기존 시험만으로 웹 완료를 선언하지 않는다.
 
 ## 기존 근거와 남은 확인
 

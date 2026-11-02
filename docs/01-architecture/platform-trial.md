@@ -2,7 +2,7 @@
 
 대상: 소유자와 구현 담당자. 마지막 검토: 2026-11-02. 제품 정책은 zm-docs가 정본이며 구현 선택은 [ADR-0042](../02-decisions/0042-platform-rebuild-local-trial.md), API는 [시험 계약](platform-api-trial.md)을 따른다.
 
-현재는 [웹 우선 결정](https://github.com/hanumoka/zm-docs/blob/main/docs/governance/decisions/DEC-0147-zm-os-complete-web-before-android.md)에 따라 웹·BE·worker·SDK·CLI를 먼저 완성한다. Android 추가 구현·네이티브 빌드·설치·기기 시험은 웹 완료 후 진행한다. 기존 Android 코드는 보존한다. [웹 완료 검증 목록](web-completion-checklist.md)에서 웹에 필요한 실제 OAuth와 남은 조건을 확인한다.
+현재는 [웹 우선 결정](https://github.com/hanumoka/zm-docs/blob/main/docs/governance/decisions/DEC-0148-zm-os-complete-web-before-android.md)에 따라 웹·BE·worker·SDK·CLI를 먼저 완성한다. Android 추가 구현·네이티브 빌드·설치·기기 시험은 웹 완료 후 진행한다. 기존 Android 코드는 보존한다. [웹 완료 검증 목록](web-completion-checklist.md)에서 웹에 필요한 실제 OAuth와 남은 조건을 확인한다.
 
 ## 실행
 
