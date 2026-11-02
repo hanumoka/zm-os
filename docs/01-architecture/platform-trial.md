@@ -75,11 +75,11 @@ Android 시험 환경은 [Android 안내](../../apps/android/README.md)를 따�
 
 전제: `pnpm install`과 `pnpm platform:setup`, 웹 14600·API 14610·자산 14611 포트가 비어 있어야 한다. 기본 브라우저는 Windows의 Edge이며 Linux에서는 `pnpm --filter @zm/platform-web exec playwright install --with-deps chromium` 후 `PLAYWRIGHT_CHANNEL=chromium`을 환경변수로 지정한다.
 
-1. `pnpm test:web-flows`를 실행한다. 부분 확인은 `node scripts/platform-web-check.mjs external-deletion` 또는 `moderation`이다.
-2. 도구는 trial 컨테이너의 소유 label을 확인하고 무작위 `zmwebui_` DB·임시 파일·자기 서버를 만든다. 기존 `zmtrial`·`.trial/files`를 초기화하지 않는다. 외부 삭제 8개 흐름 뒤 검수 표본 5개 흐름을 같은 전용 환경에서 실행한다.
+1. `pnpm test:web-flows`를 실행한다. 부분 확인은 `node scripts/platform-web-check.mjs` 뒤에 `external-deletion`, `moderation`, `runner-lifecycle` 중 하나를 지정한다.
+2. 도구는 trial 컨테이너의 소유 label을 확인하고 무작위 `zmwebui_` DB·임시 파일·자기 서버를 만든다. 기존 `zmtrial`·`.trial/files`를 초기화하지 않는다. 외부 삭제 8개·검수 표본 5개·실행 화면 2개 확인을 같은 전용 환경에서 실행한다. 마지막 시험은 실제 FE와 합성 HTTP 응답으로 초기 실행 40회와 후속 문서 이동을 확인한다.
 3. `apps/platform-web/e2e-out/`의 실행별 `result.json`과 스크린샷을 확인한다. 조회 자격은 스크린샷에서 가리고 원문 오류 로그를 출력하지 않는다. CI는 결과 JSON만 보관한다.
 
-완료 확인: 명령 exit 0, 두 결과의 `completed:true`, 브라우저 오류 0, 자기 자원 정리 안내를 확인한다. 브라우저 표본은 모의 로그인만 사용하며 실제 OAuth·운영 앱 검수·실제 외부 삭제를 대신하지 않는다.
+완료 확인: 명령 exit 0, 세 결과의 `completed:true`, 브라우저 오류 0, 자기 자원 정리 안내를 확인한다. 브라우저 표본은 모의 로그인 또는 합성 응답만 사용하며 실제 OAuth·운영 앱 검수·실제 외부 삭제를 대신하지 않는다.
 
 실패 대응: 실패 코드와 마지막 통과 단계·가려진 로컬 스크린샷으로 확인한다. 비밀이 포함될 수 있는 Playwright 원문 오류·trace는 공개 로그에 추가하지 않는다. 실행기는 성공·실패 시 자기가 만든 DB·파일·서버만 정리하며 정리 실패도 비정상 종료한다. 브라우저 시작 실패의 정리도 시험했다. 프로세스 강제 종료나 OS 장애 뒤 정리 완료까지 보장하는 것은 아니다.
 

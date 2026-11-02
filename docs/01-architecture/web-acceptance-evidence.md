@@ -12,6 +12,7 @@
 - 웹 추가: [web-acceptance.mjs](../../apps/platform-web/e2e/web-acceptance.mjs). 독립 브라우저 프로필·여러 탭·관리 화면을 검사한다.
 - 외부 삭제 웹: [external-deletion.mjs](../../apps/platform-web/e2e/external-deletion.mjs). 첫 동의 취소의 내부 행, 요청 경합, 외부 삭제 접수·결과 등록·조회 실패/재시도와 공개 필드를 검사한다.
 - 검수 표본 웹: [moderation.mjs](../../apps/platform-web/e2e/moderation.mjs). 운영자 안내와 기능 표시 표본 4개의 미리보기·사유 있는 판정·공개 분리를 검사한다. 실제 광고·결제·공개 댓글·기기·실시간 기능을 실행하지 않는 연습용 표본이다.
+- 실행 화면 회귀: [runner-lifecycle.mjs](../../apps/platform-web/e2e/runner-lifecycle.mjs). 실제 AppRunner·bridge를 StrictMode에서 40회 열고 닫으며 초기 빈 문서 이동이 없고 실제 두 번째 문서 이동은 종료되는지 확인한다. HTTP 인증 응답과 앱 HTML은 합성 fixture이므로 BE 권한 검증과 구분한다.
 - 외부 API: [platform-external.mjs](../../packages/cli/e2e/platform-external.mjs), 탈퇴: [withdrawal.mjs](../../apps/platform-web/e2e/withdrawal.mjs).
 - 저장: [storage.test.ts](../../packages/host-bridge/src/storage.test.ts), [migration](../../packages/host-bridge/src/storage-migration.test.ts), [bridge](../../packages/host-bridge/src/bridge.test.ts).
 - 복구: [platform-recovery.test.mjs](../../scripts/platform-recovery.test.mjs). 별도 DB와 파일 fixture의 복원을 검사한다.
