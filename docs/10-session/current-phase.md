@@ -6,6 +6,8 @@
 
 기준 ref `25e4e92ed65cfe535983ac92688aa1b516bbac62`에서 구현한 로컬 개발본은 commit `81c4979c71967aa387be18839d51219b9447b590`으로 main에 반영했다. 전체 자동 시험 314개와 웹 브라우저 흐름의 범위·한계는 [검증 기록](../11-archive/2026-11.md)에 있다. 기존 REFAC-02의 후속을 자동 승계한 작업이 아니다. [ADR-0042](../02-decisions/0042-platform-rebuild-local-trial.md)와 [로컬 시험 안내](../01-architecture/platform-trial.md)를 따른다. 아래 과거 진행률은 새 플랫폼의 완료율이 아니다.
 
+후속 구현 `402d592522fde774682e8d9d0a4aab9edd784c22`는 이용 앱 관리·로컬 저장 세대·현재 개발자 자격 표시와 복구 도구를 추가했다. 전체 자동 시험 331개·추가 브라우저 14개 흐름·별도 DB 복구 3개 시험을 통과했다. 실제 OAuth 설정은 로컬에 없었으며 [설정 안내](../01-architecture/web-oauth-local.md)와 [인수 대응표](../01-architecture/web-acceptance-evidence.md)에 남은 범위를 기록한다. 코드의 원격 반영 여부는 Git ref를 함께 확인한다.
+
 > 최종 갱신: 2026-09-03
 
 ## 🚀 v2 진입 — REFAC-02 진행 중
