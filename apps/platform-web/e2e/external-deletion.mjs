@@ -46,6 +46,7 @@ let appId = "";
 let userId = "";
 let externalServer;
 let completed = false;
+let step = "prepare", failure = null;
 const newPage = async () => {
   const context = await browser.newContext({
     baseURL: origin,
@@ -347,6 +348,7 @@ try {
     await route.continue();
   });
   await nav(user, "동의하고 실행");
+  step = "consent-request";
   await consentEntered;
   for (const text of ["취소", "앱 상세 닫기", "동의하고 실행"])
     assert.equal(
@@ -370,6 +372,7 @@ try {
   await user.keyboard.press("Escape");
   assert.equal(await user.getByRole("dialog").isVisible(), true);
   releaseSession();
+  step = "session-frame";
   await user.locator("iframe").waitFor();
   await user.unrouteAll({ behavior: "wait" });
   counts.afterConsent = await readCounts();
@@ -390,12 +393,15 @@ try {
     1,
   );
   const frame = user.frameLocator("iframe");
+  step = "external-login-button";
   await frame.getByRole("button", { name: "서버 연결", exact: true }).click();
+  step = "external-user";
   await frame.getByText(/앱 사용자:/).waitFor();
   await frame
     .getByRole("textbox", { name: "개인 메모", exact: true })
     .fill("삭제 흐름 검증용 외부 메모");
   await frame.getByRole("button", { name: "서버에 저장", exact: true }).click();
+  step = "external-save";
   await frame.getByText(/서버에 저장했습니다/).waitFor();
   counts.afterExternalLogin = await readCounts();
   assert.equal(counts.afterExternalLogin.app_tokens, 1);
@@ -404,6 +410,7 @@ try {
     "동의·실행 요청 지연 중 취소·닫기·Escape 차단, 정상 동의 후 외부 인증·저장 생성 확인",
   );
   await nav(user, "앱 종료");
+  step = "withdrawal-and-results";
   await success(user, "앱을 종료했습니다.");
 
   await nav(user, "내 계정");
@@ -626,6 +633,8 @@ try {
   assert.deepEqual(errors, []);
   completed = true;
 } catch (error) {
+  failure = { step, navigationClosed: await user.getByText("앱이 다른 문서로 이동하여 실행을 종료했습니다.", { exact: true }).isVisible().catch(() => false), frameCount: await user.locator("iframe").count().catch(() => -1) };
+  console.info("FAIL " + JSON.stringify(failure));
   for (const [page, file] of [
     [user, "user-failure.png"],
     [developer, "developer-failure.png"],
@@ -649,6 +658,7 @@ try {
         counts,
         checks,
         errors,
+        failure,
       },
       null,
       2,

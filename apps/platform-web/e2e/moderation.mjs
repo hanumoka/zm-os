@@ -26,7 +26,7 @@ const context = await browser.newContext({ baseURL: origin, viewport: { width: 1
 const page = await context.newPage();page.setDefaultTimeout(15000);
 page.on('pageerror', () => errors.push('브라우저 스크립트 오류'));
 const pass = message => { checks.push(message);console.info('PASS '+message); };
-let completed = false;
+let completed = false, step = 'login', failure = null;
 async function request(path, method='GET', data, expected=200, zip=false) {
   const me = method==='GET' ? null : await (await page.request.get('/v1/me')).json();
   const response = await page.request.fetch('/v1'+path, {
@@ -67,6 +67,7 @@ try {
     {name:'본인용 개인 메모 표본',content:'본인만 보는 개인 메모이며 다른 사용자에게 내용을 공개하지 않습니다.',decision:'approved',reason:'개인 메모로 확인했습니다. 공개 콘텐츠와 구분해 승인합니다.'},
   ];
   for (const [index, fixture] of fixtures.entries()) {
+    step = `fixture-${index+1}:upload`;
     const app = await request('/developer/apps','POST',{name:fixture.name});
     const manifest = {schemaVersion:1,appId:app.id,version:'1.0.0',name:fixture.name,description:fixture.content,category:'tools',entry:'index.html',permissions:[],apiOrigins:[],privacyNotice:'실제 광고·결제·기기 접근·외부 통신을 실행하지 않는 검수 연습용 표본입니다.'};
     const zip = await createZip([
@@ -83,6 +84,7 @@ try {
       throw new Error('worker 검사 대기 시간 초과');
     });
     await request(`/developer/versions/${version.id}/submit`,'POST',{});
+    step = `fixture-${index+1}:open-preview`;
     await reviews();
     const row = page.locator('.record-list > li').filter({has:page.getByRole('heading',{name:fixture.name,exact:true})});
     await row.getByText('제출된 매니페스트와 검증 결과',{exact:true}).click();
@@ -90,9 +92,11 @@ try {
     await row.getByRole('button',{name:'검수용 실행',exact:true}).click();
     await page.getByRole('dialog').getByRole('checkbox').check();
     await page.getByRole('button',{name:'동의하고 검수 시작',exact:true}).click();
+    step = `fixture-${index+1}:frame-heading`;
     await page.frameLocator('iframe').getByRole('heading',{name:fixture.name,exact:true}).waitFor();
     await page.screenshot({path:join(output,`fixture-${index+1}.png`),fullPage:true});
     await page.getByRole('button',{name:'앱 종료',exact:true}).click();
+    step = `fixture-${index+1}:decision`;
     await reviews();
     const current = page.locator('.record-list > li').filter({has:page.getByRole('heading',{name:fixture.name,exact:true})});
     await current.getByRole('combobox',{name:'심사 결과',exact:true}).selectOption(fixture.decision);
@@ -102,6 +106,7 @@ try {
       ? '앱 버전 검수 결과를 기록했습니다. 개발자가 직접 공개할 수 있습니다.'
       : '앱 버전 검수 결과를 기록했습니다. 개발자가 사유를 확인하고 수정한 버전을 다시 제출해야 합니다.',{exact:true}).waitFor();
     const stored = await db.query('SELECT review_status,reason FROM versions WHERE id=$1',[version.id]);
+    step = `fixture-${index+1}:verify-decision`;
     assert.equal(stored.rows[0].review_status,fixture.decision);assert.equal(stored.rows[0].reason,fixture.reason);
     const audit = await db.query("SELECT detail->>'selfReview' AS self FROM audit_events WHERE action='version.reviewed' AND target_id=$1",[version.id]);
     assert.equal(audit.rows[0].self,'true');
@@ -113,11 +118,13 @@ try {
   }
   assert.deepEqual(errors,[]);completed=true;
 } catch(error) {
+  failure = { step, navigationClosed: await page.getByText('앱이 다른 문서로 이동하여 실행을 종료했습니다.',{exact:true}).isVisible().catch(()=>false), frameCount: await page.locator('iframe').count().catch(()=>-1) };
+  console.info('FAIL '+JSON.stringify(failure));
   await page.screenshot({path:join(output,'failure.png'),fullPage:true}).catch(()=>{});
   throw error;
 } finally {
   await db.end();await browser.close();
-  await writeFile(join(output,'result.json'),JSON.stringify({completed,mockOAuthOnly:true,syntheticReviewFixtures:true,checks,errors,limitations:['실제 광고·결제·기기·외부 통신은 실행하지 않는 기능 표시 표본','자동 악성 행위 탐지나 운영 앱의 검수 완료를 증명하지 않음']},null,2));
+  await writeFile(join(output,'result.json'),JSON.stringify({completed,mockOAuthOnly:true,syntheticReviewFixtures:true,checks,errors,failure,limitations:['실제 광고·결제·기기·외부 통신은 실행하지 않는 기능 표시 표본','자동 악성 행위 탐지나 운영 앱의 검수 완료를 증명하지 않음']},null,2));
   console.info('검수 표본 보고서: '+join(dirname(output),output.split(/[\\/]/).at(-1),'result.json'));
 }
 }
