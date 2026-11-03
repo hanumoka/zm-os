@@ -4,8 +4,8 @@ title: 데스크톱에서 시스템 앱과 일반 인앱을 독립 창으로 실
 status: accepted
 date: 2026-11-03
 author: Codex
-implementation: partial
-measured_at: work/os-desktop-shell-20261103 미커밋 작업본 (2026-11-03)
+implementation: done
+measured_at: 5c9c4740f201e2c9f4073bbbe521435711437e01 (2026-11-03)
 ---
 
 # 데스크톱과 앱 창
@@ -14,7 +14,7 @@ measured_at: work/os-desktop-shell-20261103 미커밋 작업본 (2026-11-03)
 
 ## 근거
 
-소유자가 첫 화면을 기존 브라우저 OS로 유지하고 시스템 앱과 일반 인앱 모두 창으로 실행하도록 정정했다. 정책 정본은 zm-docs의 [DEC-0164](https://github.com/hanumoka/zm-docs/blob/main/docs/governance/decisions/DEC-0164-zm-os-desktop-and-windowed-system-apps.md)다. ADR-0042의 다중 창 제외만 변경하며 인증·검수·동의·격리 경계와 웹 우선 범위는 유지한다.
+소유자가 첫 화면을 기존 브라우저 OS로 유지하고 시스템 앱과 일반 인앱 모두 창으로 실행하도록 정정했다. 정책 정본은 zm-docs의 [DEC-0165](https://github.com/hanumoka/zm-docs/blob/main/docs/governance/decisions/DEC-0165-zm-os-desktop-and-windowed-system-apps.md)다. ADR-0042의 다중 창 제외만 변경하며 인증·검수·동의·격리 경계와 웹 우선 범위는 유지한다.
 
 ## 구현 결정
 

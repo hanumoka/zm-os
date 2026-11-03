@@ -1,10 +1,12 @@
 # 웹 인수 조건과 시험 근거
 
-대상: 소유자와 웹 인수 담당자. 마지막 검토: 2026-11-02.
+대상: 소유자와 웹 인수 담당자. 마지막 검토: 2026-11-03.
 
 제품 요구·정책·상위 설계는 웹 개발을 진행할 수 있는 상태다. 아래 표는 [요구사항 인수 시나리오](https://github.com/hanumoka/zm-docs/blob/main/docs/projects/zm-os/requirements.md#인수-시나리오)에 시험을 대응한다. 새 정책 정본이 아니며 실제 OAuth·수동 콘텐츠 검수·Android 검증을 자동 시험으로 대체하지 않는다. 측정 ref와 최종 실행 수치는 [작업 기록](../11-archive/2026-11.md)에 둔다.
 
 ## 근거 파일
+
+- 데스크톱: [desktop.mjs](../../apps/platform-web/e2e/desktop.mjs). 첫 화면·시스템 창 조작·일반 앱 다중 창·SDK 저장/식별자 격리·개별 종료·최소화 상태 철회·계정 변경·로그아웃·좁은 웹 화면을 검사한다. 창 실행의 기준은 [ADR-0044](../02-decisions/0044-desktop-system-and-app-windows.md)다.
 
 - API 기존: [platform.test.ts](../../apps/api/test/platform.test.ts). 모의 로그인으로 실제 HTTP·PostgreSQL 정책·실패 경계를 검사한다.
 - API 추가: [web-acceptance.test.ts](../../apps/api/test/web-acceptance.test.ts). 별도 DB에서 본인 이력·소유권·공개·동의 변경·자격 취소·재가입을 검사한다.
