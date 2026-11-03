@@ -1,7 +1,7 @@
 /** 로컬 웹 인수 전용. 기존 trial DB/파일과 독립된 DB·포트를 사용한다.
  * 소유자: zm-os. 검토일: 2026-11-03.
  * 전제: platform:setup의 PostgreSQL 컨테이너와 pnpm 의존성.
- * 실행: node scripts/platform-web-check.mjs external-deletion|moderation|runner-lifecycle|desktop|all
+ * 실행: node scripts/platform-web-check.mjs external-deletion|moderation|runner-lifecycle|desktop|desktop-icons|email-auth|all
  * 완료: 브라우저 시험 성공, 자기 서버·DB·임시 파일 정리 후 exit 0.
  * 실패: 자기 자원만 정리하고 실패 코드를 반환한다. 실제 OAuth는 사용하지 않는다.
  */
@@ -25,6 +25,8 @@ const tests = {
   moderation: 'moderation.mjs',
   'runner-lifecycle': 'runner-lifecycle.mjs',
   desktop: 'desktop.mjs',
+  'desktop-icons': 'desktop-icons.mjs',
+  'email-auth': 'email-auth.mjs',
 };
 const mode = process.argv[2] ?? 'all';
 assert.ok(mode === 'all' || Object.hasOwn(tests, mode), '알려진 웹 인수 시험 이름만 지정하세요.');
@@ -37,7 +39,7 @@ assert.equal(label.stdout.trim(), 'platform-rebuild', '소유 label이 다른 DB
 const local = JSON.parse(await readFile(join(root, '.trial/config.json'), 'utf8'));
 const source = new URL(local.DATABASE_URL);
 assert.ok(source.hostname === '127.0.0.1' && source.port === '15438' && source.pathname === '/zmtrial', '정해진 로컬 trial DB 접속만 허용합니다.');
-for (const port of [14600, 14610, 14611]) {
+for (const port of [14600, 14610, 14611, 14612]) {
   await new Promise((done, reject) => {
     const probe = createNetServer();
     probe.once('error', () => reject(new Error(`시험 포트 ${port}가 이미 사용 중입니다.`)));

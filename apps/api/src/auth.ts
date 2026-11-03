@@ -18,6 +18,7 @@ export interface Actor {
   restricted: boolean;
 }
 export async function revokePendingIdentityProofs(db:PoolClient,userId:string):Promise<void>{
+  await db.query('DELETE FROM email_challenges WHERE user_id=$1',[userId]);
   await db.query('DELETE FROM native_starts WHERE user_id=$1',[userId]);
   await db.query('DELETE FROM native_codes WHERE user_id=$1',[userId]);
   await db.query('DELETE FROM native_bootstraps WHERE user_id=$1',[userId]);
@@ -96,6 +97,7 @@ export async function userView(db: PoolClient, a: Actor): Promise<object> {
   ).rows.map((r) => r.provider);
   return {
     id: a.id,
+    emailAddress: (await one<{subject:string}>(db, "SELECT subject FROM identities WHERE user_id=$1 AND provider='email'", [a.id]))?.subject,
     status: a.status,
     operator: a.operator,
     developer: a.developer,

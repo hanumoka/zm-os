@@ -56,6 +56,7 @@ export interface UserView {
   operator: boolean;
   developer: boolean;
   providers: string[];
+  emailAddress?: string;
   csrf: string;
   requiresReauth?: boolean;
 }

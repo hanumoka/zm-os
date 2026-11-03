@@ -79,3 +79,19 @@ UPDATE developers d SET reason=COALESCE((SELECT e.detail->>'reason' FROM audit_e
 UPDATE developers SET reason='' WHERE reason IS NULL;
 ALTER TABLE developers ALTER COLUMN reason SET DEFAULT '';
 ALTER TABLE developers ALTER COLUMN reason SET NOT NULL;
+-- Verified email credentials share the existing identity/session model.
+ALTER TABLE identities DROP CONSTRAINT IF EXISTS identities_provider_check;
+ALTER TABLE identities ADD CONSTRAINT identities_provider_check CHECK(provider IN ('google','github','email'));
+CREATE TABLE IF NOT EXISTS email_credentials (
+ user_id uuid PRIMARY KEY REFERENCES users(id), password_hash text NOT NULL,
+ verified_at timestamptz NOT NULL DEFAULT now(), changed_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS email_challenges (
+ hash text PRIMARY KEY, purpose text NOT NULL CHECK(purpose IN ('signup','link','reset')),
+ email text NOT NULL, user_id uuid REFERENCES users(id), source_session text,
+ expires_at timestamptz NOT NULL
+);
+CREATE INDEX IF NOT EXISTS email_challenges_user ON email_challenges(user_id);
+CREATE TABLE IF NOT EXISTS auth_rate_limits (
+ key text PRIMARY KEY, attempts integer NOT NULL, expires_at timestamptz NOT NULL
+);

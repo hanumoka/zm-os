@@ -11,6 +11,7 @@ import { Database } from "./db.js";
 import { Platform } from "./platform.js";
 import { ApiError } from "./common.js";
 import { serveAssets } from "./assets.js";
+import { serveTrialMailbox } from "./mail.js";
 
 const envPath = new URL("../../../.trial/config.json", import.meta.url);
 if (existsSync(envPath)) {
@@ -107,11 +108,13 @@ app.use(express.json({ limit: "96kb" }));
 app.use(express.urlencoded({ extended: false, limit: "4kb" }));
 await app.listen(cfg.port, "127.0.0.1");
 const assets = await serveAssets(db, cfg);
+const mailbox = await serveTrialMailbox(cfg);
 console.info(
   `zm-os local API ready on ${cfg.port}; assets ${cfg.assetPort}; ${fileURLToPath(new URL(".", import.meta.url))}`,
 );
 async function close(): Promise<void> {
   assets.close();
+  mailbox?.close();
   await app.close();
   await db.close();
   process.exit(0);

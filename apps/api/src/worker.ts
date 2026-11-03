@@ -100,6 +100,8 @@ export async function workOnce(db: Database, cfg: Config): Promise<boolean> {
     );
     if (!withdrawal) return false;
     // The old IDs remain as tombstones for audit / external deletion. Completion explicitly means this live profile only.
+    await tx.query("DELETE FROM email_credentials WHERE user_id=$1", [withdrawal.user_id]);
+    await tx.query("DELETE FROM email_challenges WHERE user_id=$1", [withdrawal.user_id]);
     await tx.query("DELETE FROM identities WHERE user_id=$1", [
       withdrawal.user_id,
     ]);

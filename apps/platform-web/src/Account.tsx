@@ -4,10 +4,12 @@ import { api, errorMessage } from "./api";
 import { Field, FormSection, SectionTitle, Status } from "./components";
 import { label, type Report, type RunAction } from "./types";
 import { UsedApps } from "./UsedApps";
+import { EmailSignIn, EmailCredentials } from "./EmailAccount";
 interface Props {
   user: UserView | null;
   revision: number;
   testMode: boolean;
+  mailboxUrl?: string;
   busy: boolean;
   run: RunAction;
   onWithdraw: (secret?: string) => void;
@@ -105,6 +107,7 @@ export function Account({
   busy,
   run,
   onWithdraw,
+  mailboxUrl,
 }: Props): React.JSX.Element {
   const [subject, setSubject] = useState("alice");
   const [provider, setProvider] = useState("google");
@@ -140,6 +143,7 @@ export function Account({
       )}
       {!user ? (
         <div className="account-layout">
+          <EmailSignIn busy={busy} run={run} mailboxUrl={mailboxUrl}/>
           <FormSection title="Google 또는 GitHub로 시작">
             <p>
               처음 가입할 때 만 19세 이상 이용 조건을 확인합니다. 이름과
@@ -215,6 +219,7 @@ export function Account({
         </div>
       ) : (
         <>
+          <EmailCredentials user={user} busy={busy} run={run} mailboxUrl={mailboxUrl}/>
           <FormSection title="로그인 연결">
             <p>
               재인증 후 연결을 변경할 수 있습니다. 마지막 로그인 수단은 해제할
@@ -223,10 +228,10 @@ export function Account({
             <ul className="identity-list">
               {user.providers.map((item) => (
                 <li key={item}>
-                  <strong>{item === "google" ? "Google" : "GitHub"}</strong>
+                  <strong>{item === "email" ? "이메일" : item === "google" ? "Google" : "GitHub"}</strong>
                   <span>연결됨</span>
-                  <a href={`/v1/auth/${item}/start?intent=reauth`}>재인증</a>
-                  {testMode && (
+                  {item !== "email" && <a href={`/v1/auth/${item}/start?intent=reauth`}>재인증</a>}
+                  {testMode && item !== "email" && (
                     <button
                       disabled={busy}
                       onClick={() => {

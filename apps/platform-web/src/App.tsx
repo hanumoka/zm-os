@@ -6,6 +6,7 @@ import { Developer } from "./Developer";
 import { Operator } from "./Operator";
 import { Account, Enrollment, WithdrawalStatus } from "./Account";
 import { AppRunner } from "./AppRunner";
+import { EmailComplete } from "./EmailAccount";
 import { Desktop, systemTitles } from "./Desktop";
 import { desktopReducer, emptyDesktop, type DesktopWindow, type SystemApp } from "./desktop-state";
 import type { RunAction } from "./types";
@@ -17,6 +18,8 @@ export function App(): React.JSX.Element {
   const busyRef = useRef(false);
   const [ready, setReady] = useState(false);
   const [testMode, setTestMode] = useState(false);
+  const [mailboxUrl,setMailboxUrl] = useState<string>();
+  const [emailAction,setEmailAction] = useState<{purpose:string;token:string}|null>(null);
   const [desktop, dispatch] = useReducer(desktopReducer, emptyDesktop);
   const [revision, setRevision] = useState(0);
   const [busy, setBusy] = useState(false);
@@ -50,6 +53,15 @@ export function App(): React.JSX.Element {
   }, [acceptUser]);
   useEffect(() => {
     let active = true;
+    const readHash = ():void => {
+      const hash = new URLSearchParams(window.location.hash.slice(1));
+      if(hash.has("email") && hash.has("token")) {
+        setEmailAction({purpose:hash.get("email") ?? "",token:hash.get("token") ?? ""});
+        history.replaceState(null,"",location.pathname);
+      }
+    };
+    readHash();
+    window.addEventListener("hashchange",readHash);
     const hash = new URLSearchParams(window.location.hash.slice(1));
     if (new URLSearchParams(window.location.search).get("enrollment") === "required") setEnrollment(true);
     if (hash.has("withdrawal")) {
@@ -58,8 +70,9 @@ export function App(): React.JSX.Element {
     }
     void Promise.all([
       refreshUser(),
-      api<{ mode: string; testAuth?: boolean }>("/health").then(result => {
+      api<{ mode: string; testAuth?: boolean; mailboxUrl?: string }>("/health").then(result => {
         if (active) setTestMode(result.mode === "local-test" && result.testAuth === true);
+        if (active && result.mode==="local-test") setMailboxUrl(result.mailboxUrl);
       }),
     ]).catch(e => { if (active) setError(errorMessage(e)); })
       .finally(() => { if (active) setReady(true); });
@@ -68,6 +81,7 @@ export function App(): React.JSX.Element {
     document.addEventListener("visibilitychange", checkIdentity);
     return (): void => {
       active = false;
+      window.removeEventListener("hashchange",readHash);
       window.removeEventListener("focus", checkIdentity);
       document.removeEventListener("visibilitychange", checkIdentity);
     };
@@ -129,6 +143,10 @@ export function App(): React.JSX.Element {
     return () => window.removeEventListener("zm-host-back", back);
   }, [desktop.active, desktop.windows]);
   if (lookupSecret) return <main className="standalone"><WithdrawalStatus secret={lookupSecret} onExit={() => setLookupSecret("")} /></main>;
+  if (emailAction) return <main className="standalone">
+    {error && <p className="notice error" role="alert">{error}</p>}
+    <EmailComplete {...emailAction} busy={busy} run={run} onComplete={()=>{setEmailAction(null);setError("");}}/>
+  </main>;
   if (enrollment) return <main className="standalone"><Enrollment onComplete={() => {
     setEnrollment(false); history.replaceState(null, "", location.pathname); void refreshUser();
   }} /></main>;
@@ -141,7 +159,7 @@ export function App(): React.JSX.Element {
       case "store": case "mine": return <Store {...common} mine={win.system === "mine"} onLaunch={launch} onLogin={() => openSystem("account")} />;
       case "developer": return <Developer {...common} onLogin={() => openSystem("account")} onLaunch={launch} />;
       case "operator": return user?.operator ? <Operator {...common} user={user} onLaunch={launch} /> : null;
-      case "account": return <Account {...common} testMode={testMode} onWithdraw={secret => {
+      case "account": return <Account {...common} testMode={testMode} mailboxUrl={mailboxUrl} onWithdraw={secret => {
         acceptUser(null); if (secret) setLookupSecret(secret);
       }} />;
       default: return null;

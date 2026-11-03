@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type Dispatch, type ReactNode } from "reac
 import type { UserView } from "@zm/platform-contracts";
 import { fitRect, type DesktopAction, type DesktopState, type DesktopWindow, type Rect, type SystemApp } from "./desktop-state";
 import "./desktop.css";
+import { DesktopIcons } from "./DesktopIcons";
 
 export const systemTitles: Record<SystemApp, string> = {
   store: "Store", mine: "내 앱", account: "내 계정", developer: "개발자 공간", operator: "운영 관리",
@@ -39,6 +40,7 @@ export function Desktop({ state, dispatch, user, ready, busy, testMode, onOpen, 
   const [bounds, setBounds] = useState({ width: window.innerWidth, height: window.innerHeight - 52 });
   const [interacting, setInteracting] = useState(false);
   const [menu, setMenu] = useState(false);
+  const [wallpaper,setWallpaper] = useState<"sky"|"sand"|"night">("sky");
   const [now, setNow] = useState(() => new Date());
   const apps: SystemApp[] = ["store", "mine", "account", "developer", ...(user?.operator ? ["operator" as const] : [])];
   const compact = bounds.width < 720;
@@ -113,15 +115,12 @@ export function Desktop({ state, dispatch, user, ready, busy, testMode, onOpen, 
     dispatch({ type: "rect", id: win.id, rect: fitRect(rect, bounds.width, bounds.height) });
   };
 
-  return <main className={`os-desktop${interacting ? " os-interacting" : ""}`} aria-label="zm-os 데스크톱">
+  return <main className={`os-desktop${interacting ? " os-interacting" : ""}`} data-wallpaper={wallpaper} aria-label="zm-os 데스크톱">
     <h1 className="sr-only">zm-os 데스크톱</h1>
     <div className="os-workspace" ref={workspace}>
       <div className="os-wallpaper" onClick={() => setMenu(false)} aria-hidden="true" />
-      <nav className="os-desktop-icons" aria-label="시스템 앱">
-        {apps.map(app => <button key={app} className="os-desktop-icon" disabled={!ready} onClick={() => open(app)} aria-label={`${title(app)} 열기`}>
-          <AppIcon app={app} /><span>{title(app)}</span>
-        </button>)}
-      </nav>
+      <DesktopIcons key={user?.id ?? "guest"} apps={apps} userKey={user?.id ?? "guest"} width={bounds.width} height={bounds.height} ready={ready}
+        title={title} icon={id=><AppIcon app={id}/>} onOpen={open} onWallpaper={setWallpaper} onShowDesktop={()=>dispatch({type:"desktop"})}/>
       {testMode && <p className="os-environment">zm-os <span>로컬 시험 환경</span></p>}
       {!ready && <p className="os-connecting" role="status">서비스에 연결하고 있습니다…</p>}
       <div className="os-window-layer">

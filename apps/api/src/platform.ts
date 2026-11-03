@@ -7,6 +7,8 @@ import { z } from "zod";
 import { validateZip } from "@zm/cli";
 import { TEST_LIMITS } from "@zm/platform-contracts";
 import { Database, one, audit } from "./db.js";
+import { EmailAuth, isEmailRoute } from "./email-auth.js";
+import { mailboxUrl } from "./mail.js";
 import type { Config } from "./config.js";
 import {
   ApiError,
@@ -72,6 +74,7 @@ export class Platform {
   async handle(req: Request, res: Response): Promise<unknown> {
     const path = req.path.replace(/^\/v1/, "").replace(/\/$/, "") || "/";
     const files: string[] = [];
+    if (isEmailRoute(path)) return new EmailAuth(this.db,this.cfg).handle(req,res,path);
     try {
       return await this.db.transaction(async (db) =>
         this.route(db, req, res, path, files),
@@ -106,7 +109,7 @@ export class Platform {
       );
     const at = (n: number): string => idSchema.parse(segments[n]);
     if (method === "GET" && path === "/health")
-      return { ok: true, mode: "local-test", testAuth: this.cfg.testAuth };
+      return { ok: true, mode: "local-test", testAuth: this.cfg.testAuth, mailMode: "capture", mailboxUrl: this.cfg.testAuth ? mailboxUrl(this.cfg) : undefined };
     if (method === "POST" && path === "/auth/native/exchange") {
       const data = z
         .object({
@@ -617,7 +620,7 @@ export class Platform {
       segments[0] === "me" &&
       segments[1] === "login-identities"
     ) {
-      const provider = z.enum(["google", "github"]).parse(segments[2]);
+      const provider = z.enum(["google", "github", "email"]).parse(segments[2]);
       recentAuth(a);
       ensure(a.reauthProvider !== provider, 403, "REAUTH_RETAINED_PROVIDER");
       const providers = (
@@ -626,6 +629,7 @@ export class Platform {
         ])
       ).rows;
       ensure(providers.length > 1, 409, "LAST_LOGIN_METHOD");
+      if (provider === "email") await db.query("DELETE FROM email_credentials WHERE user_id=$1", [a.id]);
       await db.query(
         "DELETE FROM identities WHERE user_id=$1 AND provider=$2",
         [a.id, provider],
@@ -1350,6 +1354,8 @@ export class Platform {
         [id, a.id],
       );
       await db.query("UPDATE users SET status='withdrawn' WHERE id=$1", [a.id]);
+      await db.query("DELETE FROM email_credentials WHERE user_id=$1", [a.id]);
+      await revokePendingIdentityProofs(db,a.id);
       await db.query(
         "UPDATE app_sessions SET status='revoked' WHERE user_id=$1",
         [a.id],
