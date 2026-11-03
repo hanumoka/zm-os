@@ -2,7 +2,7 @@
 
 대상: 웹·SDK·BE 구현 담당자. 소유자: 프로젝트 소유자. 검토일: 2026-11-02. ADR-0042의 구현 계약이며 운영 공개 판이 아니다.
 
-API는 `/v1`, JSON을 반환한다. 오류는 `{code,message}`와 HTTP 400/401/403/404/409/413. 웹 same-origin 프록시를 통해 HttpOnly 쿠키를 사용하고 변경 요청은 `X-CSRF-Token`을 보낸다. GET `/me` 응답의 csrf를 사용한다. 직접 API 요청도 같은 권한 검사를 받는다. 배열 조회는 배열 자체를 반환한다.
+API는 `/v1`, JSON을 반환한다. 오류는 `{code,message}`와 HTTP 400/401/403/404/409/413/429. 웹 same-origin 프록시를 통해 HttpOnly 쿠키를 사용하고 인증된 변경 요청은 `X-CSRF-Token`을 보낸다. GET `/me` 응답의 csrf를 사용한다. 이메일 인증의 모든 POST는 설정한 웹 Origin도 요구한다. 비밀번호·증명 규칙은 [ADR-0045](../02-decisions/0045-email-password-and-desktop-preferences.md)를 따른다. 직접 API 요청도 같은 권한 검사를 받는다. 배열 조회는 배열 자체를 반환한다.
 
 | API | 입력 → 출력 |
 |---|---|
@@ -11,6 +11,13 @@ API는 `/v1`, JSON을 반환한다. 오류는 `{code,message}`와 HTTP 400/401/4
 | GET /auth/:provider/start | OAuth로 이동. 실제 설정이 없으면 503 |
 | GET /me | UserView |
 | POST /logout | `{}` → `{ok:true}` |
+| POST /auth/email/signup | `{email,ageConfirmed:true}` → `{message}`. 인증 전 계정 생성 없음 |
+| POST /auth/email/login | `{email,password}` → `{ok:true}`와 세션 쿠키 |
+| POST /auth/email/reset/request | `{email}` → `{message}`. 주소 존재 여부와 같은 응답 |
+| POST /auth/email/complete | `{purpose:'signup'|'link'|'reset',token,password}` → `{ok:true,purpose}`. 자동 로그인 없음 |
+| POST /me/email/link | `{email}` → `{message}`. 최근 재인증·동일 세션에서 연결 완료 |
+| POST /me/email/reauth | `{password}` → `{ok:true}` |
+| POST /me/email/password | `{password,newPassword}` → `{ok:true}`. 모든 기존 세션 철회 |
 | GET /store/apps?q=&category= | AppView[] |
 | GET /store/apps/:id | AppView |
 | GET /me/apps | AppView[] |

@@ -2,6 +2,8 @@
 
 2026-11-03 후속: [ADR-0044 — 데스크톱과 앱 창](0044-desktop-system-and-app-windows.md). 소유자가 첫 화면과 앱 실행 방식을 정정했으며 단일 전체 화면 선택을 대체한다.
 
+2026-11-03 추가: [ADR-0045 — 이메일 인증과 바탕화면 설정](0045-email-password-and-desktop-preferences.md). 이메일 인증 후 가입, 비밀번호 관리와 아이콘 배치·배경 저장을 추가한다.
+
 2026-11-01 신규 구현: [ADR-0042 — NestJS 독립 앱 플랫폼 로컬 시험](0042-platform-rebuild-local-trial.md). 2026-11-02 후속은 [ADR-0043 — 이용 앱 관리와 로컬 저장 세대](0043-web-consent-management-storage-generation.md)다. 새 정책은 zm-docs의 DEC-0121·0126·0127·0135~0141과 웹 우선 DEC-0148을 따른다. 아래 과거 POC·로컬 우선 기록을 신규 제품 요구사항으로 적용하지 않는다. 구현 상태와 미검증 경계는 [로컬 시험 안내](../01-architecture/platform-trial.md)에서 구분한다.
 
 > Architecture Decision Records — 순차 번호. 수동 인덱스 (자동 생성 금지).
