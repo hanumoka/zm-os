@@ -40,7 +40,7 @@ export function Store({
   busy,
   run,
   onLaunch,
-  onLogin,
+  onLogin: requestLogin,
 }: Props): React.JSX.Element {
   const [apps, setApps] = useState<AvailableApp[]>([]);
   const [q, setQ] = useState("");
@@ -90,11 +90,21 @@ export function Store({
       const requirement = await api<Consent>(`/apps/${app.id}/consent`);
       setSelected(app);
       if (requirement.accepted)
-        onLaunch(
+        finishLaunch(
           await api<AppSessionView>("/app-sessions", "POST", { appId: app.id }),
         );
       else setConsent(requirement);
     });
+  };
+  const finishLaunch = (session: AppSessionView): void => {
+    setSelected(null);
+    setConsent(null);
+    onLaunch(session);
+  };
+  const onLogin = (): void => {
+    setSelected(null);
+    setConsent(null);
+    requestLogin();
   };
   return (
     <>
@@ -256,7 +266,7 @@ export function Store({
                       await api(`/me/app-consents/${selected.id}`, "PUT", {
                         fingerprint: consent.fingerprint,
                       });
-                      onLaunch(
+                      finishLaunch(
                         await api<AppSessionView>("/app-sessions", "POST", {
                           appId: selected.id,
                         }),

@@ -93,7 +93,7 @@ const request = async (page, route, method = "GET", data, expected = 200) => {
 const login = async (page, subject, provider) => {
   await page.goto(origin);
   await page
-    .getByRole("heading", { name: "오늘, 어떤 앱이 필요한가요?", exact: true })
+    .getByRole("heading", { name: "zm-os 데스크톱", exact: true })
     .waitFor();
   await nav(page, "로그인");
   await page

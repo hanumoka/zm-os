@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { AppSessionView, UserView } from "@zm/platform-contracts";
 import { attachHostBridge } from "@zm/host-bridge";
 import { api } from "./api";
@@ -6,14 +6,23 @@ export function AppRunner({
   session,
   user,
   onClose,
+  windowed = false,
+  active: focused = true,
+  authorizationRevision = 0,
 }: {
   session: AppSessionView;
   user: UserView;
   onClose: (reason: string) => void;
+  windowed?: boolean;
+  active?: boolean;
+  authorizationRevision?: number;
 }): React.JSX.Element {
   const frame = useRef<HTMLIFrameElement>(null);
   const closeRef = useRef(onClose);
   closeRef.current = onClose;
+  const focusedRef = useRef(focused);
+  focusedRef.current = focused;
+  const checkRef = useRef<(() => Promise<void>) | null>(null);
   const [closing, setClosing] = useState(false);
   const [offline, setOffline] = useState(false);
   useLayoutEffect(() => {
@@ -65,6 +74,7 @@ export function AppRunner({
         checkRunning = false;
       }
     };
+    checkRef.current = check;
     const timer = setInterval(() => {
       void check();
     }, 5000);
@@ -74,6 +84,7 @@ export function AppRunner({
     document.addEventListener("visibilitychange", onVisibility);
     window.addEventListener("online", onVisibility);
     const onHostBack = (): void => {
+      if (!focusedRef.current) return;
       void api(`/app-sessions/${session.id}`, "DELETE")
         .then(() => {
           if (active) closeRef.current("앱을 종료했습니다.");
@@ -88,6 +99,7 @@ export function AppRunner({
     window.addEventListener("zm-host-back", onHostBack);
     return (): void => {
       active = false;
+      checkRef.current = null;
       clearInterval(timer);
       document.removeEventListener("visibilitychange", onVisibility);
       window.removeEventListener("online", onVisibility);
@@ -97,6 +109,7 @@ export function AppRunner({
       // still-mounted frame to about:blank during StrictMode's setup replay.
     };
   }, [session, user.id]);
+  useEffect(() => { void checkRef.current?.(); }, [authorizationRevision]);
   const close = async (): Promise<void> => {
     setClosing(true);
     try {
@@ -109,21 +122,21 @@ export function AppRunner({
     }
   };
   return (
-    <main className="runner">
+    <div className={windowed ? "runner runner-windowed" : "runner"}>
       <header className="runner-header">
-        <strong>{session.manifest.name}</strong>
+        {!windowed && <strong>{session.manifest.name}</strong>}
         <span>
           버전 {session.manifest.version}
           {session.isPreview ? " · 비공개 검수" : ""}
         </span>
-        <button
+        {!windowed && <button
           onClick={() => {
             void close();
           }}
           disabled={closing}
         >
           앱 종료
-        </button>
+        </button>}
       </header>
       {session.isPreview && (
         <p className="preview-notice">
@@ -145,6 +158,6 @@ export function AppRunner({
         referrerPolicy="no-referrer"
         allow="camera 'none'; microphone 'none'; geolocation 'none'; payment 'none'; clipboard-read 'none'; clipboard-write 'none'"
       />
-    </main>
+    </div>
   );
 }

@@ -78,11 +78,12 @@ const request = async (
 const login = async (target, subject = "alice", provider = "github") => {
   await target.goto(origin);
   await target
-    .getByRole("heading", { name: "오늘, 어떤 앱이 필요한가요?", exact: true })
+    .getByRole("heading", { name: "zm-os 데스크톱", exact: true })
     .waitFor();
   if (
-    await target.getByRole("button", { name: "로그아웃", exact: true }).count()
+    await target.getByRole("button", { name: "내 계정", exact: true }).count()
   ) {
+    await nav(target, "시작 메뉴");
     await nav(target, "로그아웃");
     await success(target, "로그아웃했습니다.");
   }

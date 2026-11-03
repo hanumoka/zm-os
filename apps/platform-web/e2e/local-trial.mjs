@@ -63,7 +63,7 @@ let appId = "";
 try {
   await page.goto(process.env.ZM_WEB_URL ?? "http://localhost:4300");
   await page
-    .getByRole("heading", { name: "오늘, 어떤 앱이 필요한가요?" })
+    .getByRole("heading", { name: "zm-os 데스크톱" })
     .waitFor();
   await navigate("로그인");
   await page
