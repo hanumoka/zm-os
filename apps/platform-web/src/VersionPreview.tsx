@@ -5,6 +5,7 @@ import { Modal } from "./components";
 import type { AppVersion, RunAction } from "./types";
 const permissionNames = {
   "local-storage": "검수용 로컬 데이터 저장",
+  "cloud-storage": "검수용 개인 데이터 서버 저장 · 일반 이용 데이터와 분리",
   "app-identity": "검수용 앱 사용자 식별자",
   "external-api": "개발자의 외부 서버 이용",
 };

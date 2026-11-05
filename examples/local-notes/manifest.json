@@ -1,15 +1,16 @@
 {
   "schemaVersion": 1,
   "appId": "00000000-0000-4000-8000-000000000001",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "name": "나의 메모",
-  "description": "현재 기기에 개인 메모를 저장합니다.",
+  "description": "로그인 계정의 개인 메모를 서버에 저장하고 다른 기기에서 이어 씁니다.",
   "category": "productivity",
   "entry": "index.html",
   "permissions": [
     "local-storage",
-    "app-identity"
+    "app-identity",
+    "cloud-storage"
   ],
   "apiOrigins": [],
-  "privacyNotice": "메모는 현재 기기의 사용자·앱별 저장 영역에 보관됩니다. 클라우드 동기화는 하지 않습니다."
+  "privacyNotice": "메모는 zm-os 서버의 사용자·앱별 저장 영역에 보관되며 같은 계정의 다른 기기에서 조회할 수 있습니다. 미저장 초안과 기존 메모는 현재 기기에 별도로 남을 수 있습니다. 기존 로컬 메모는 선택한 경우에만 서버로 복사합니다. 동의 철회는 접근을 차단하고 데이터 삭제는 계정의 이용 앱 관리에서 별도로 요청합니다."
 }

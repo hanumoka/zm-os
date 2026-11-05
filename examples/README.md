@@ -6,7 +6,7 @@
 
 개발자 콘솔에서 앱을 등록한 뒤, CLI로 플랫폼 저장소 밖의 새 폴더에 만들 수 있다.
 
-동일 소스의 저장소 예제는 `local-notes/`에 있다. 고정된 예제 앱 ID는 실제 등록한 앱 ID로 바꾼 뒤 제출한다.
+`local-notes/`는 1.1.0부터 서버 저장 메모 예제다. CLI init은 로컬 전용 템플릿을 유지한다. 고정된 예제 앱 ID는 실제 등록한 앱 ID로 바꾼 뒤 제출한다. [서버 저장 체험·계약](../docs/01-architecture/personal-storage.md)을 따른다.
 
 ```sh
 pnpm --filter @zm/cli cli init ../../my-zm-notes --app-id 콘솔에서받은앱UUID

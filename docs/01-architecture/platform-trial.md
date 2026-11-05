@@ -1,5 +1,7 @@
 # 독립 앱 플랫폼 로컬 시험
 
+2026-11-05 추가: 메모 앱 1.1.0의 서버 저장·기존 로컬 메모 이전·여러 브라우저 확인은 [개인 저장 사용법](personal-storage.md)을 따른다. 플랫폼 PostgreSQL에 개인 데이터를 저장하며 별도 Google Drive 계정은 필요하지 않다.
+
 대상: 소유자와 구현 담당자. 마지막 검토: 2026-11-03. 제품 정책은 zm-docs가 정본이며 구현 선택은 [ADR-0042](../02-decisions/0042-platform-rebuild-local-trial.md)와 [이메일·바탕화면 ADR-0045](../02-decisions/0045-email-password-and-desktop-preferences.md), API는 [시험 계약](platform-api-trial.md)을 따른다.
 
 현재는 [웹 우선 결정](https://github.com/hanumoka/zm-docs/blob/main/docs/governance/decisions/DEC-0148-zm-os-complete-web-before-android.md)에 따라 웹·BE·worker·SDK·CLI를 먼저 완성한다. Android 추가 구현·네이티브 빌드·설치·기기 시험은 웹 완료 후 진행한다. 기존 Android 코드는 보존한다. [웹 완료 검증 목록](web-completion-checklist.md)에서 웹에 필요한 실제 OAuth와 남은 조건을 확인한다.
@@ -40,8 +42,8 @@
 | 웹 FE | React + Vite, `apps/platform-web` | Store·계정·개발자·운영자·격리된 앱 실행 |
 | Android FE | Expo + React Native WebView, `apps/android` | 신뢰 웹 호스트, 외부 브라우저 인증·단회 복귀 연결 |
 | BE | TypeScript + NestJS, `apps/api` | 권한·동의·버전·검수·공개·사용자별 실행·탈퇴 |
-| 작업 프로세스 | `apps/worker` | ZIP 검사·불변 파일 준비·프로필 삭제 작업 |
-| 플랫폼 DB | 로컬 PostgreSQL 17 | 관계·유일 제약·감사·작업 상태·세션 |
+| 작업 프로세스 | `apps/worker` | ZIP 검사·불변 파일 준비·프로필 및 개인 저장 삭제 작업 |
+| 플랫폼 DB | 로컬 PostgreSQL 17 | 관계·유일 제약·감사·작업 상태·세션·앱별 개인 저장 |
 | 파일 저장 | `.trial/files` | 비공개 업로드·revision별 준비 자원. HTTP 서버는 승인된 포인터와 실행 자격으로 접근 |
 | 개발 도구 | 계약·SDK·호스트 브리지·CLI | 앱 생성·검사·패킹·독립 시험 호스트 |
 | 인앱 BE·DB | 개발자 외부 서버 | 앱 업무 데이터. 플랫폼 DB와 공유하지 않음 |
@@ -69,7 +71,7 @@
 - Android SDK·기기 설치, 로그인 복귀·WebView 쿠키·격리·연결 단절 실측. 현재 계정에 결합한 단회 인증 시작·교환과 WebView 탐색 패치는 보존하며 전용 추가 구현·시험은 재개하지 않는다.
 - 운영 공급자·보관 기간·백업/복원·성능 목표·기기별 삭제 확인. 현재 시험 수치는 운영 기본값이 아니다.
 
-탈퇴 상태의 `platformStatus=completed`는 시험 DB의 로그인 식별자·내 앱·동의·프로필 내용을 정리한 상태다. 감사·탈퇴·외부 삭제 연결용 내부 식별자는 남는다. 다른 기기, 브라우저의 물리 저장, 외부 DB, 운영 백업까지 삭제 완료했다는 뜻이 아니다. 외부 삭제는 `developer_reported_completed`로 개발자의 보고임을 구분한다.
+탈퇴 상태의 `platformStatus=completed`는 시험 DB의 로그인 식별자·내 앱·동의·프로필·공통 개인 서버 저장 내용을 정리한 상태다. 감사·탈퇴·외부 삭제 연결용 내부 식별자는 남는다. 다른 기기, 브라우저의 물리 저장, 외부 DB, 운영 백업까지 삭제 완료했다는 뜻이 아니다. 외부 삭제는 `developer_reported_completed`로 개발자의 보고임을 구분한다.
 
 ## 실제 인증 설정
 

@@ -1,5 +1,7 @@
 # 실행 호스트 브리지
 
+2026-11-05: 플랫폼 웹은 선택 인자 `cloud(method,params)`로 현재 실행의 서버 저장 API를 호출한다. 권한·스키마를 브리지에서 확인하고 BE가 최종 인증한다. 콜백이 없는 단독 호스트는 CLOUD_UNAVAILABLE을 반환한다. IndexedDB 준비 실패는 로컬 저장만 거부하며 서버 저장·runtime 호출을 막지 않는다. [ADR-0046](../../docs/02-decisions/0046-personal-server-storage.md).
+
 대상: zm-os 호스트 구현자. 검토일: 2026-11-02. ADR-0042의 메시지·저장 경계를 구현한다.
 
 `attachHostBridge({iframe,userId,session,authorize,createCode,onClose})`를 iframe 문서 로드 전에 호출한다. 반환값의 `dispose()`는 종료·사용자 변경·동의 철회 때 호출한다. `authorize()`는 현재 실행을 서버에서 확인하며 401·403·404 오류에는 숫자 `status`를 포함한다. 일시 연결 실패는 SDK 요청을 거부하지만 기존 화면을 자동으로 새 실행하지 않는다.

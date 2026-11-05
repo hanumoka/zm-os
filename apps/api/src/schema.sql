@@ -95,3 +95,22 @@ CREATE INDEX IF NOT EXISTS email_challenges_user ON email_challenges(user_id);
 CREATE TABLE IF NOT EXISTS auth_rate_limits (
  key text PRIMARY KEY, attempts integer NOT NULL, expires_at timestamptz NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS cloud_spaces (
+ app_user_id uuid PRIMARY KEY REFERENCES app_users(id), generation uuid NOT NULL,
+ used_bytes integer NOT NULL DEFAULT 0 CHECK(used_bytes>=0),
+ window_started_at timestamptz NOT NULL DEFAULT now(), requests integer NOT NULL DEFAULT 0
+);
+CREATE TABLE IF NOT EXISTS cloud_records (
+ app_user_id uuid NOT NULL REFERENCES cloud_spaces(app_user_id) ON DELETE CASCADE,
+ key text NOT NULL, value jsonb, revision integer NOT NULL CHECK(revision>0),
+ schema_version integer NOT NULL DEFAULT 1, bytes integer NOT NULL DEFAULT 0 CHECK(bytes>=0),
+ deleted boolean NOT NULL DEFAULT false, updated_at timestamptz NOT NULL DEFAULT now(),
+ PRIMARY KEY(app_user_id,key)
+);
+CREATE TABLE IF NOT EXISTS cloud_receipts (
+ app_user_id uuid NOT NULL REFERENCES cloud_spaces(app_user_id) ON DELETE CASCADE,
+ request_id uuid NOT NULL, signature text NOT NULL, result jsonb NOT NULL,
+ expires_at timestamptz NOT NULL DEFAULT now()+interval '24 hours',
+ PRIMARY KEY(app_user_id,request_id)
+);

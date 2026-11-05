@@ -13,7 +13,7 @@
  * 구현한 도구가 아니며 임의 원본·복원 DB/경로를 CLI로 받지 않는다.
  */
 import assert from 'node:assert/strict';
-import { randomBytes, createHash } from 'node:crypto';
+import { randomBytes, randomUUID, createHash } from 'node:crypto';
 import { spawn, spawnSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { mkdir, mkdtemp, readFile, writeFile, readdir, lstat, rm, copyFile } from 'node:fs/promises';
@@ -239,7 +239,7 @@ export async function runRecovery() {
     const app = await developer.ok('/developer/apps', 'POST', { name: '격리된 복구 시험 앱' });
     const versions = [];
     for (const version of ['1.0.0', '2.0.0']) {
-      const manifest = { schemaVersion: 1, appId: app.id, version, name: '복구 시험', description: '로컬 복구 검증', category: 'tools', entry: 'index.html', permissions: ['local-storage'], apiOrigins: [], privacyNotice: '시험 기기에만 저장합니다.' };
+      const manifest = { schemaVersion: 1, appId: app.id, version, name: '복구 시험', description: '로컬 복구 검증', category: 'tools', entry: 'index.html', permissions: ['local-storage','cloud-storage'], apiOrigins: [], privacyNotice: '시험 기기와 서버에 개인 데이터를 저장합니다.' };
       const zip = await createZip([{ path: 'manifest.json', data: Buffer.from(JSON.stringify(manifest)) }, { path: 'index.html', data: Buffer.from(`<!doctype html><meta charset="utf-8"><title>복구 ${version}</title><p>fixture ${version}</p>`) }, { path: '한글 폴더/시험.JS', data: Buffer.from(`globalThis.recoveryVersion = '${version}';`) }]);
       const submitted = await developer.ok(`/developer/apps/${app.id}/versions`, 'POST', zip); versions.push(submitted.id);
       assert.equal(await workOnce(db, cfg(names.source, sourceFiles)), true);
@@ -251,6 +251,11 @@ export async function runRecovery() {
     const consent = await developer.ok(`/apps/${app.id}/consent`);
     await developer.ok(`/me/app-consents/${app.id}`, 'PUT', { fingerprint: consent.fingerprint });
     const pinned = await developer.ok('/app-sessions', 'POST', { appId: app.id }); assert.equal(pinned.versionId, versions[1]);
+    const cloudPath='/app-sessions/'+pinned.id+'/cloud';
+    const empty=await developer.ok(cloudPath,'POST',{method:'cloud.get',params:{key:'note'}});
+    const savedRequest={method:'cloud.put',params:{key:'note',generation:empty.generation,expectedRevision:0,requestId:randomUUID(),schemaVersion:1,value:{text:'복원 후에도 같은 개인 메모'}}};
+    const saved=await developer.ok(cloudPath,'POST',savedRequest);
+    await developer.ok(cloudPath,'POST',{method:'cloud.remove',params:{key:'removed',generation:empty.generation,expectedRevision:0,requestId:randomUUID()}});
     await server.stop(); server = undefined; // Quiescence is an explicit fixture property, not a live-backup claim.
     const before = await databaseState(db); await db.close(); db = undefined;
     const snapshot = join(workspace, 'snapshot'); const manifest = await snapshotFixture(names.source, sourceFiles, snapshot);
@@ -279,6 +284,12 @@ export async function runRecovery() {
     checks.push('별도 DB·파일 복원 후 모든 테이블 행 수·버전 지문·공개 포인터 일치 및 덮어쓰기 거부');
     server = await startServer(cfg(names.restore, restoredFiles));
     assert.equal((await developer.ok(`/app-sessions/${pinned.id}`)).versionId, versions[1]);
+    const restoredNote=await developer.ok(cloudPath,'POST',{method:'cloud.get',params:{key:'note'}});
+    assert.deepEqual(restoredNote,{...saved,value:{text:'복원 후에도 같은 개인 메모'}});
+    assert.deepEqual(await developer.ok(cloudPath,'POST',savedRequest),saved);
+    const tombstone=await developer.ok(cloudPath,'POST',{method:'cloud.get',params:{key:'removed'}});
+    assert.equal(tombstone.exists,false);assert.equal(tombstone.revision,1);assert.equal(tombstone.value,null);
+    checks.push('개인 메모 본문·수정 번호·저장 세대·삭제 표식·동일 요청 재시도 결과 복원');
     assert.match(await (await fetch(pinned.documentUrl)).text(), /fixture 2\.0\.0/);
     const originalZip = await readFile(join(restoredFiles, 'uploads', `${versions[1]}.zip`));
     assert.equal(digest(originalZip), before.versions.find(item => item.id === versions[1]).hash);

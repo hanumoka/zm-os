@@ -1,4 +1,4 @@
-import type { JsonValue, RpcRequest, RpcResponse } from '@zm/platform-contracts';
+import type { CloudRecord, CloudWriteResult, CloudPut, CloudRemove, CloudList, JsonValue, RpcRequest, RpcResponse } from '@zm/platform-contracts';
 
 export class SdkError extends Error {
   constructor(public readonly code: string, message: string) { super(message); this.name = 'SdkError'; }
@@ -6,6 +6,12 @@ export class SdkError extends Error {
 export interface Sdk {
   runtime: { ready(): Promise<JsonValue>; close(): Promise<void> };
   storage: { get(key: string): Promise<JsonValue>; set(key: string, value: JsonValue): Promise<void>; remove(key: string): Promise<void> };
+  cloud: {
+    get(key: string): Promise<CloudRecord>;
+    put(key: string, data: CloudPut): Promise<CloudWriteResult>;
+    remove(key: string, data: CloudRemove): Promise<CloudWriteResult>;
+    list(options?: { cursor?: string; limit?: number }): Promise<CloudList>;
+  };
   identity: { getAppUser(): Promise<{ appUserId: string }> };
   auth: { createCode(challenge: string): Promise<{ code: string; expiresAt: string }> };
   dispose(): void;
@@ -88,6 +94,12 @@ export function createSdk(): Sdk {
       remove: async key => { await call('storage.remove', { key }); },
     },
     identity: { getAppUser: async () => await call('identity.getAppUser') as { appUserId: string } },
+    cloud: {
+      get: async key => await call('cloud.get', { key }) as CloudRecord,
+      put: async (key, data) => await call('cloud.put', { ...data, key }) as CloudWriteResult,
+      remove: async (key, data) => await call('cloud.remove', { ...data, key }) as CloudWriteResult,
+      list: async (options = {}) => await call('cloud.list', options) as CloudList,
+    },
     auth: { createCode: async challenge => await call('auth.createCode', { challenge }) as { code: string; expiresAt: string } },
     dispose,
   };

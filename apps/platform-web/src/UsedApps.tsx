@@ -45,8 +45,8 @@ export function UsedApps({
         수 있습니다.
       </p>
       <p className="muted">
-        동의 철회는 실행 권한을 차단합니다. 기기 데이터와 개발자의 외부 서버
-        데이터는 자동으로 삭제되지 않습니다.
+        동의 철회는 실행 권한을 차단합니다. 기기·zm-os 서버·개발자의 외부 서버
+        데이터는 자동으로 삭제되지 않습니다. 삭제할 저장 위치를 따로 선택하세요.
       </p>
       <button
         disabled={loading || busy}
@@ -76,6 +76,10 @@ export function UsedApps({
                 <p className="muted">{app.unavailableReason}</p>
               )}
               <div className="actions">
+                <button className="danger" disabled={busy} onClick={() => {
+                  if (window.confirm("zm-os 서버에 저장된 이 앱의 개인 데이터를 모두 삭제할까요? 같은 계정의 모든 기기에 적용되고 실행 중인 앱은 종료됩니다. 이 기기의 로컬 메모와 개발자 외부 서버 데이터는 남습니다."))
+                    void run(() => api(`/me/apps/${app.appId}/cloud-clear`, "POST", { confirmed: true, expectedUserId: user.id }), "zm-os 서버의 앱 데이터를 삭제했습니다. 로컬·외부 서버 데이터는 유지됩니다.");
+                }}>서버의 앱 데이터 전체 삭제</button>
                 <button
                   disabled={busy || !!app.revokedAt}
                   onClick={() => {

@@ -9,6 +9,7 @@ import { TEST_LIMITS } from "@zm/platform-contracts";
 import { Database, one, audit } from "./db.js";
 import { EmailAuth, isEmailRoute } from "./email-auth.js";
 import { mailboxUrl } from "./mail.js";
+import { cloudRequest, clearCloud } from "./cloud.js";
 import type { Config } from "./config.js";
 import {
   ApiError,
@@ -667,6 +668,11 @@ export class Platform {
       }));
     }
     if (method === "GET" && path === "/me/apps") return store(db, "", "", a.id);
+    if (method === "POST" && segments[0] === "me" && segments[1] === "apps" && segments[3] === "cloud-clear" && segments.length === 4) {
+      const data = z.object({ confirmed: z.literal(true), isPreview: z.boolean().default(false), expectedUserId: idSchema }).strict().parse(body);
+      ensure(data.expectedUserId === a.id, 409, "CURRENT_ACCOUNT_CHANGED", "로그인 계정이 바뀌어 삭제하지 않았습니다.");
+      return clearCloud(db, a.id, at(2), data.isPreview);
+    }
     if (
       segments[0] === "me" &&
       segments[1] === "apps" &&
@@ -796,6 +802,7 @@ export class Platform {
         return { ok: true };
       }
       const session = await validSession(db, sid, a.id);
+      if (method === "POST" && segments[2] === "cloud" && segments.length === 3) return cloudRequest(db, session, body);
       if (method === "GET" && segments.length === 2)
         return sessionView(session, this.cfg);
       if (method === "POST" && segments[2] === "authorization-codes") {

@@ -1,7 +1,7 @@
 /** 로컬 웹 인수 전용. 기존 trial DB/파일과 독립된 DB·포트를 사용한다.
  * 소유자: zm-os. 검토일: 2026-11-03.
  * 전제: platform:setup의 PostgreSQL 컨테이너와 pnpm 의존성.
- * 실행: node scripts/platform-web-check.mjs external-deletion|moderation|runner-lifecycle|desktop|desktop-icons|email-auth|all
+ * 실행: node scripts/platform-web-check.mjs external-deletion|moderation|runner-lifecycle|desktop|desktop-icons|email-auth|cloud-notes|all
  * 완료: 브라우저 시험 성공, 자기 서버·DB·임시 파일 정리 후 exit 0.
  * 실패: 자기 자원만 정리하고 실패 코드를 반환한다. 실제 OAuth는 사용하지 않는다.
  */
@@ -27,6 +27,7 @@ const tests = {
   desktop: 'desktop.mjs',
   'desktop-icons': 'desktop-icons.mjs',
   'email-auth': 'email-auth.mjs',
+  'cloud-notes': 'cloud-notes.mjs',
 };
 const mode = process.argv[2] ?? 'all';
 assert.ok(mode === 'all' || Object.hasOwn(tests, mode), '알려진 웹 인수 시험 이름만 지정하세요.');

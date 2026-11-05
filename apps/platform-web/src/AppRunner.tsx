@@ -46,6 +46,7 @@ export function AppRunner({
         api(`/app-sessions/${session.id}/authorization-codes`, "POST", {
           challenge,
         }),
+      cloud: (method, params) => api(`/app-sessions/${session.id}/cloud`, "POST", { method, params }),
       onClose: (reason?: string) => {
         if (active) {
           void api(`/app-sessions/${session.id}`, "DELETE").catch(

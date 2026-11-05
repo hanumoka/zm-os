@@ -1,4 +1,4 @@
-import { rpcRequestSchema, TEST_LIMITS, type AppSessionView, type JsonValue, type RpcRequest, type RpcResponse } from '@zm/platform-contracts';
+import { cloudSchemas, rpcRequestSchema, TEST_LIMITS, CLOUD_LIMITS, type CloudMethod, type AppSessionView, type JsonValue, type RpcRequest, type RpcResponse } from '@zm/platform-contracts';
 import { captureStorageLease, clearAppStorage, clearPreviewStorage, getAppStorage, removeAppStorage, setAppStorage, StorageLeaseExpiredError, validateJson } from './storage';
 export { clearAppStorage, clearPreviewStorage };
 
@@ -8,6 +8,7 @@ export interface HostOptions {
   session: AppSessionView;
   authorize(): Promise<void>;
   createCode(challenge: string): Promise<{ code: string; expiresAt: string }>;
+  cloud?(method: CloudMethod, params: Record<string, unknown>): Promise<JsonValue>;
   onClose(reason?: string): void;
 }
 
@@ -19,6 +20,9 @@ export function checkRequest(value: unknown, session: AppSessionView): RpcReques
   if (request.method.startsWith('storage.')) {
     if (!session.manifest.permissions.includes('local-storage')) throw new Error('로컬 저장 권한이 없습니다.');
     if (typeof request.params.key !== 'string' || keys !== (request.method === 'storage.set' ? 'key,value' : 'key')) throw new Error('저장 요청 형식이 올바르지 않습니다.');
+  } else if (request.method.startsWith('cloud.')) {
+    if (!session.manifest.permissions.includes('cloud-storage')) throw new Error('서버 저장 권한이 없습니다.');
+    cloudSchemas[request.method as CloudMethod].parse(request.params);
   } else if (request.method === 'identity.getAppUser') {
     if (!session.manifest.permissions.includes('app-identity') || keys) throw new Error('앱 사용자 식별 권한이 없습니다.');
   } else if (request.method === 'auth.createCode') {
@@ -50,10 +54,7 @@ export function attachHostBridge(options: HostOptions): { dispose(): void } {
   const terminate = (reason: string): void => { dispose(); options.onClose(reason); };
   // Never acquire a new generation from an SDK request after authorize().
   // While this initial acquisition is pending, no request is executed.
-  const storageLease = captureStorageLease(userId, storageAppId, storageAbort.signal).catch(() => {
-    if (!disposed) terminate('로컬 저장소를 준비하지 못했습니다. 앱을 다시 실행해 주세요.');
-    return null;
-  });
+  const storageLease = captureStorageLease(userId, storageAppId, storageAbort.signal).catch(() => null);
   const loaded = (): void => { if (++loadCount > 1) terminate('앱이 다른 문서로 이동하여 실행을 종료했습니다.'); };
   const send = (response: RpcResponse): void => { if (!disposed) port?.postMessage(response); };
   const handle = async (data: unknown): Promise<void> => {
@@ -68,18 +69,22 @@ export function attachHostBridge(options: HostOptions): { dispose(): void } {
     if (ids.size > 10000) { terminate('앱 실행의 SDK 요청 한도를 초과했습니다.'); return; }
     try {
       const lease = await storageLease;
-      if (!lease || disposed) return;
+      if (disposed) return;
+      if (request.method.startsWith('storage.') && !lease) throw Object.assign(new Error('이 브라우저의 로컬 저장소를 사용할 수 없습니다. 서버 저장은 계속 사용할 수 있습니다.'), { code: 'LOCAL_STORAGE_UNAVAILABLE' });
       await options.authorize();
       if (disposed) return;
       let result: JsonValue = null;
       switch (request.method) {
-        case 'runtime.ready': result = { appId: session.appId, version: session.manifest.version, platform: 'web', preview: session.isPreview === true, localStorageLimitBytes: TEST_LIMITS.localBytes }; break;
+        case 'runtime.ready': result = { appId: session.appId, version: session.manifest.version, platform: 'web', preview: session.isPreview === true, localStorageLimitBytes: TEST_LIMITS.localBytes, cloudStorageLimitBytes: CLOUD_LIMITS.spaceBytes, cloudRecordLimitBytes: CLOUD_LIMITS.recordBytes }; break;
         case 'runtime.close': send({ id: request.id, result: null }); terminate('앱을 종료했습니다.'); return;
         case 'identity.getAppUser': result = { appUserId: session.appUserId }; break;
         case 'auth.createCode': result = await options.createCode(request.params.challenge as string); break;
-        case 'storage.get': result = await getAppStorage(userId, storageAppId, request.params.key as string, lease); break;
-        case 'storage.set': await setAppStorage(userId, storageAppId, request.params.key as string, request.params.value, lease); break;
-        case 'storage.remove': await removeAppStorage(userId, storageAppId, request.params.key as string, lease); break;
+        case 'storage.get': result = await getAppStorage(userId, storageAppId, request.params.key as string, lease!); break;
+        case 'storage.set': await setAppStorage(userId, storageAppId, request.params.key as string, request.params.value, lease!); break;
+        case 'storage.remove': await removeAppStorage(userId, storageAppId, request.params.key as string, lease!); break;
+        case 'cloud.get': case 'cloud.put': case 'cloud.remove': case 'cloud.list':
+          if (!options.cloud) throw Object.assign(new Error('이 호스트는 서버 저장을 지원하지 않습니다.'), { code: 'CLOUD_UNAVAILABLE' });
+          result = await options.cloud(request.method, request.params); break;
       }
       if (disposed) return;
       await options.authorize();
@@ -88,7 +93,8 @@ export function attachHostBridge(options: HostOptions): { dispose(): void } {
       if (error instanceof StorageLeaseExpiredError) { terminate(error.message); return; }
       const status = error && typeof error === 'object' && 'status' in error ? error.status : undefined;
       if (status === 401 || status === 403 || status === 404) { terminate('앱 실행 권한이 종료되었습니다.'); return; }
-      send({ id: request.id, error: { code: 'REQUEST_FAILED', message: error instanceof Error ? error.message : '요청을 처리하지 못했습니다.' } });
+      const code = error && typeof error === 'object' && 'code' in error && typeof error.code === 'string' ? error.code : 'REQUEST_FAILED';
+      send({ id: request.id, error: { code, message: error instanceof Error ? error.message : '요청을 처리하지 못했습니다.' } });
     } finally { pending--; }
   };
   const hello = (event: MessageEvent<unknown>): void => {

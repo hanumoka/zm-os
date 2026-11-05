@@ -1,5 +1,7 @@
 # ADR Index
 
+2026-11-05 추가: [ADR-0046 — 앱별 개인 서버 저장과 메모 앱](0046-personal-server-storage.md). cloud SDK·PostgreSQL 저장·기존 메모 이전·충돌·삭제를 추가한다.
+
 2026-11-03 후속: [ADR-0044 — 데스크톱과 앱 창](0044-desktop-system-and-app-windows.md). 소유자가 첫 화면과 앱 실행 방식을 정정했으며 단일 전체 화면 선택을 대체한다.
 
 2026-11-03 추가: [ADR-0045 — 이메일 인증과 바탕화면 설정](0045-email-password-and-desktop-preferences.md). 이메일 인증 후 가입, 비밀번호 관리와 아이콘 배치·배경 저장을 추가한다.

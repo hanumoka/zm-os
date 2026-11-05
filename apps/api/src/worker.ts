@@ -100,6 +100,7 @@ export async function workOnce(db: Database, cfg: Config): Promise<boolean> {
     );
     if (!withdrawal) return false;
     // The old IDs remain as tombstones for audit / external deletion. Completion explicitly means this live profile only.
+    await tx.query("DELETE FROM cloud_spaces WHERE app_user_id IN (SELECT id FROM app_users WHERE user_id=$1)", [withdrawal.user_id]);
     await tx.query("DELETE FROM email_credentials WHERE user_id=$1", [withdrawal.user_id]);
     await tx.query("DELETE FROM email_challenges WHERE user_id=$1", [withdrawal.user_id]);
     await tx.query("DELETE FROM identities WHERE user_id=$1", [
@@ -125,7 +126,7 @@ export async function workOnce(db: Database, cfg: Config): Promise<boolean> {
     );
     await audit(tx, null, "withdrawal.profile_removed", withdrawal.id, {
       jobId: randomUUID(),
-      scope: "live_identity_and_profile_only",
+      scope: "live_identity_profile_and_personal_cloud",
     });
     return true;
   });

@@ -29,6 +29,7 @@ interface Props {
 }
 const permissionLabels = {
   "local-storage": "이 기기에 앱 데이터 저장",
+  "cloud-storage": "zm-os 서버에 개인 데이터 저장 · 같은 계정의 다른 기기에서 조회",
   "app-identity": "이 앱 전용 사용자 식별자",
   "external-api": "개발자의 외부 서버 이용",
 };
