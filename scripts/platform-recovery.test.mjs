@@ -49,6 +49,7 @@ test('DB·파일 지문, 누락·추가 파일, 매니페스트 경로 변경 �
 
 test('독립 PostgreSQL pg_dump/pg_restore와 HTTP 이전판 공개·실패·재시도', { skip: process.env.ZM_RECOVERY_INTEGRATION !== '1', timeout: 180000 }, async () => {
   const result = await runRecovery();
-  assert.equal(result.ok, true); assert.equal(result.checks.length, 8);
+  assert.equal(result.ok, true); assert.equal(result.checks.length, 9);
+  assert.ok(result.checks.some(check => check.includes('개인 메모 본문')));
   assert.equal(result.versions, 2); assert.ok(result.tables >= 20); assert.equal(result.files, 8);
 });
