@@ -46,11 +46,13 @@ try{
   async function open(c,checkConsent=false){
     await c.page.goto(origin);await c.page.getByRole('button',{name:'앱 둘러보기',exact:true}).click();
     await c.page.locator('.app-card').filter({has:c.page.getByRole('heading',{name:'나의 메모',exact:true})}).getByRole('button',{name:'앱 열기',exact:true}).click();
-    if(await c.page.getByRole('heading',{name:'처음 실행하기 전에 확인해 주세요'}).isVisible()){
+    const win=c.page.locator('[data-kind="app"]').filter({has:c.page.locator('iframe[title="나의 메모"]')});
+    const consentHeading=c.page.getByRole('heading',{name:'처음 실행하기 전에 확인해 주세요'});
+    await consentHeading.or(win).first().waitFor();
+    if(await consentHeading.isVisible()){
       if(checkConsent)await c.page.getByText('zm-os 서버에 개인 데이터 저장 · 같은 계정의 다른 기기에서 조회',{exact:true}).waitFor();
       await c.page.getByRole('button',{name:'동의하고 실행',exact:true}).click();
     }
-    const win=c.page.locator('[data-kind="app"]').filter({has:c.page.locator('iframe[title="나의 메모"]')});
     await win.waitFor();const frame=win.frameLocator('iframe');await frame.locator('#note').waitFor();
     await assert.doesNotReject(async()=>{for(let i=0;i<80;i++){if(await frame.locator('#note').isEnabled())return;await new Promise(r=>setTimeout(r,100));}throw Error('메모 연결 시간 초과');});
     c.frame=frame;c.win=win;return frame;
