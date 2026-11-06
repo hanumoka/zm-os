@@ -1,4 +1,5 @@
 import { z } from "zod";
+export * from "./workspace.js";
 
 export const appTypeSchema = z.enum(["default", "developer"]);
 export type AppType = z.infer<typeof appTypeSchema>;

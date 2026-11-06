@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
-import type { AppSessionView, UserView } from "@zm/platform-contracts";
+import type { AppSessionView, UserView, WindowLayout, SavedWindow } from "@zm/platform-contracts";
 import { api, ApiError, errorMessage, setCsrf } from "./api";
 import { Store } from "./Store";
 import { Developer } from "./Developer";
@@ -10,6 +10,8 @@ import { EmailComplete } from "./EmailAccount";
 import { Desktop, systemTitles } from "./Desktop";
 import { desktopReducer, emptyDesktop, type DesktopWindow, type SystemApp } from "./desktop-state";
 import type { RunAction } from "./types";
+import { useWorkspace } from "./use-workspace";
+import { WorkspaceSettings } from "./WorkspaceSettings";
 
 export function App(): React.JSX.Element {
   const [user, setUser] = useState<UserView | null>(null);
@@ -27,6 +29,7 @@ export function App(): React.JSX.Element {
   const [error, setError] = useState("");
   const [lookupSecret, setLookupSecret] = useState("");
   const [enrollment, setEnrollment] = useState(false);
+  const { sync, snapshot } = useWorkspace(user?.id ?? null, ready && (!user || (user.status === "active" && !user.requiresReauth)));
   const acceptUser = useCallback((next: UserView | null): void => {
     const previous = currentUser.current;
     if (previous?.id !== next?.id ||
@@ -105,23 +108,68 @@ export function App(): React.JSX.Element {
     dispatch({ type: "open", window: { id: "system:" + app, kind: "system", system: app,
       title: app === "account" && !user ? "로그인" : systemTitles[app] } });
   };
-  const launch = (session: AppSessionView): void => {
+  const attachSession = async (session: AppSessionView, layout?: WindowLayout, restoreKey?: string): Promise<void> => {
     // Recheck cookie identity before attaching a bridge to account-local storage.
     // A sibling tab may have changed it while session creation was in flight.
-    void (async () => {
       try {
         const identity = await api<UserView>("/me");
         if (!user || identity.id !== user.id || currentUser.current?.id !== user.id) {
           await api("/app-sessions/" + session.id, "DELETE").catch(() => undefined);
-          return;
+          throw new Error("로그인 계정이 바뀌어 앱을 열지 않았습니다.");
         }
-        dispatch({ type: "open", window: { id: "app:" + session.id, kind: "app", session,
-          title: session.manifest.name + (session.isPreview ? " · 검수" : "") } });
+        dispatch({ type: "open", window: { id: "app:" + session.id, kind: "app", session, restoreKey,
+          title: session.manifest.name + (session.isPreview ? " · 검수" : "") }, layout });
       } catch (e) {
         await api("/app-sessions/" + session.id, "DELETE").catch(() => undefined);
-        setError(errorMessage(e));
+        throw e;
       }
-    })();
+  };
+  const launch = (session: AppSessionView): void => { void attachSession(session).catch(e=>setError(errorMessage(e))); };
+  const saveable = desktop.windows.filter(win => win.system !== "workspace" && !win.session?.isPreview);
+  const saveLayout = (): void => {
+    if (!user || !sync.canEdit() || saveable.length>24) return;
+    const windows: SavedWindow[] = saveable.flatMap<SavedWindow>(win => {
+      const key = win.restoreKey ?? crypto.randomUUID();
+      const layout: WindowLayout = { rect: win.rect, minimized: win.minimized, maximized: win.maximized, snap: win.snap };
+      if (win.system) return [{ key, kind: "system" as const, system: win.system, layout }];
+      if (win.session) return [{ key, kind: "app" as const, appId: win.session.appId, name: win.session.manifest.name, layout }];
+      return [];
+    });
+    sync.edit(current=>({ ...current, windows }));
+  };
+  const restoreLayout = (): void => {
+    if (!user || snapshot.phase !== "ready") return;
+    const userId = user.id, saved = snapshot.data.windows;
+    void run(async () => {
+      const reused = new Set<string>(), failures: string[] = [];
+      let restored = 0;
+      for (const [index, entry] of saved.entries()) {
+        if (currentUser.current?.id !== userId) throw new Error("로그인 계정이 바뀌어 복원을 중단했습니다.");
+        try {
+          const identity = await api<UserView>("/me");
+          if (identity.id !== userId || identity.status !== "active" || identity.requiresReauth) throw new Error("현재 계정으로 복원할 수 없습니다.");
+          if (entry.kind === "system") {
+            if (entry.system === "operator" && !identity.operator) throw new Error("운영 권한이 없습니다.");
+            dispatch({ type: "open", window: { id: "system:"+entry.system, kind: "system", system: entry.system, title: systemTitles[entry.system], restoreKey: entry.key }, layout: entry.layout });
+          } else {
+            const existing = desktop.windows.find(win => !reused.has(win.id) && !win.session?.isPreview && win.session?.appId === entry.appId);
+            if (existing?.session) {
+              await api("/app-sessions/"+existing.session.id);
+              reused.add(existing.id);
+              dispatch({ type: "open", window: { ...existing, restoreKey: entry.key }, layout: entry.layout });
+            } else {
+              const session = await api<AppSessionView>("/app-sessions", "POST", { appId: entry.appId, expectedUserId: userId });
+              await attachSession(session, entry.layout, entry.key);
+            }
+          }
+          restored++;
+        } catch (e) {
+          failures.push((entry.kind==="system" ? systemTitles[entry.system] : entry.name ?? `인앱 ${index+1}`)+": "+errorMessage(e));
+        }
+      }
+      setMessage(`${restored}개 창을 복원했습니다.`);
+      if (failures.length) setError("복원하지 못한 창 — "+failures.join(" / ")+" 앱 동의와 공개 상태는 Store에서 확인하세요.");
+    });
   };
   const closeWindow = (win: DesktopWindow): void => {
     dispatch({ type: "close", id: win.id });
@@ -159,6 +207,8 @@ export function App(): React.JSX.Element {
       case "store": case "mine": return <Store {...common} mine={win.system === "mine"} onLaunch={launch} onLogin={() => openSystem("account")} />;
       case "developer": return <Developer {...common} onLogin={() => openSystem("account")} onLaunch={launch} />;
       case "operator": return user?.operator ? <Operator {...common} user={user} onLaunch={launch} /> : null;
+      case "workspace": return <WorkspaceSettings user={user} sync={sync} snapshot={snapshot} busy={busy} openWindowCount={saveable.length}
+        onSaveLayout={saveLayout} onRestoreLayout={restoreLayout} onLogin={()=>openSystem("account")}/>;
       case "account": return <Account {...common} testMode={testMode} mailboxUrl={mailboxUrl} onWithdraw={secret => {
         acceptUser(null); if (secret) setLookupSecret(secret);
       }} />;
@@ -166,6 +216,7 @@ export function App(): React.JSX.Element {
     }
   };
   return <Desktop state={desktop} dispatch={dispatch} user={user} ready={ready} busy={busy} testMode={testMode}
+    sync={sync} preferences={snapshot}
     onOpen={openSystem} onClose={closeWindow} renderWindow={renderWindow} onLogout={logout}
     notifications={<>
       {error && <div className="notice error" role="alert"><span>{error}</span><button aria-label="오류 안내 닫기" onClick={() => setError("")}>닫기</button></div>}

@@ -39,6 +39,11 @@ CREATE TABLE IF NOT EXISTS bundle_jobs (
 );
 CREATE TABLE IF NOT EXISTS my_apps (user_id uuid NOT NULL REFERENCES users(id), app_id uuid NOT NULL REFERENCES apps(id), PRIMARY KEY(user_id,app_id));
 CREATE TABLE IF NOT EXISTS hidden_default_apps (user_id uuid NOT NULL REFERENCES users(id), app_id uuid NOT NULL REFERENCES apps(id), PRIMARY KEY(user_id,app_id));
+CREATE TABLE IF NOT EXISTS workspaces (
+ user_id uuid PRIMARY KEY REFERENCES users(id), revision integer NOT NULL CHECK(revision>0),
+ data jsonb NOT NULL, last_request_id uuid NOT NULL, last_request_hash text NOT NULL,
+ updated_at timestamptz NOT NULL DEFAULT now()
+);
 CREATE TABLE IF NOT EXISTS app_users (id uuid PRIMARY KEY, user_id uuid NOT NULL REFERENCES users(id), app_id uuid NOT NULL REFERENCES apps(id), UNIQUE(user_id,app_id));
 CREATE TABLE IF NOT EXISTS consents (user_id uuid NOT NULL REFERENCES users(id), app_id uuid NOT NULL REFERENCES apps(id), fingerprint text NOT NULL, revoked_at timestamptz, PRIMARY KEY(user_id,app_id));
 CREATE TABLE IF NOT EXISTS app_sessions (

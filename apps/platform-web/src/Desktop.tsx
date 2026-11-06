@@ -3,9 +3,10 @@ import type { UserView } from "@zm/platform-contracts";
 import { fitRect, type DesktopAction, type DesktopState, type DesktopWindow, type Rect, type SystemApp } from "./desktop-state";
 import "./desktop.css";
 import { DesktopIcons } from "./DesktopIcons";
+import type { WorkspaceSync, WorkspaceSnapshot } from "./workspace-sync";
 
 export const systemTitles: Record<SystemApp, string> = {
-  store: "Store", mine: "내 앱", account: "내 계정", developer: "개발자 공간", operator: "운영 관리",
+  store: "Store", mine: "내 앱", account: "내 계정", workspace: "작업공간", developer: "개발자 공간", operator: "운영 관리",
 };
 const navigationTitles: Record<SystemApp, string> = { ...systemTitles, store: "앱 둘러보기" };
 function AppIcon({ app }: { app: SystemApp | "app" }): React.JSX.Element {
@@ -13,6 +14,7 @@ function AppIcon({ app }: { app: SystemApp | "app" }): React.JSX.Element {
     store: <><path d="M6 9h20l-2 19H8L6 9Z"/><path d="M11 10V7a5 5 0 0 1 10 0v3"/></>,
     mine: <><rect x="5" y="5" width="9" height="9" rx="2"/><rect x="19" y="5" width="9" height="9" rx="2"/><rect x="5" y="19" width="9" height="9" rx="2"/><rect x="19" y="19" width="9" height="9" rx="2"/></>,
     account: <><circle cx="16" cy="10" r="5"/><path d="M5 28v-3a11 11 0 0 1 22 0v3"/></>,
+    workspace: <><rect x="3" y="5" width="26" height="19" rx="2"/><path d="M10 29h12M16 24v5M3 10h26M12 10v14"/></>,
     developer: <><rect x="3" y="5" width="26" height="23" rx="3"/><path d="m8 12 5 5-5 5m9 0h7"/></>,
     operator: <><path d="m16 3 11 5v8c0 7-11 13-11 13S5 23 5 16V8l11-5Z"/><path d="m10 16 4 4 8-9"/></>,
     app: <><rect x="4" y="4" width="24" height="24" rx="5"/><path d="M10 10h12M10 16h12M10 22h7"/></>,
@@ -32,17 +34,18 @@ interface Props {
   renderWindow: (window: DesktopWindow) => ReactNode;
   onLogout: () => void;
   notifications: ReactNode;
+  sync: WorkspaceSync;
+  preferences: WorkspaceSnapshot;
 }
 
-export function Desktop({ state, dispatch, user, ready, busy, testMode, onOpen, onClose, renderWindow, onLogout, notifications }: Props): React.JSX.Element {
+export function Desktop({ state, dispatch, user, ready, busy, testMode, onOpen, onClose, renderWindow, onLogout, notifications, sync, preferences }: Props): React.JSX.Element {
   const workspace = useRef<HTMLDivElement>(null);
   const dragging = useRef<{ element: HTMLElement; finish: () => void } | null>(null);
   const [bounds, setBounds] = useState({ width: window.innerWidth, height: window.innerHeight - 52 });
   const [interacting, setInteracting] = useState(false);
   const [menu, setMenu] = useState(false);
-  const [wallpaper,setWallpaper] = useState<"sky"|"sand"|"night">("sky");
   const [now, setNow] = useState(() => new Date());
-  const apps: SystemApp[] = ["store", "mine", "account", "developer", ...(user?.operator ? ["operator" as const] : [])];
+  const apps: SystemApp[] = ["store", "mine", "account", "workspace", "developer", ...(user?.operator ? ["operator" as const] : [])];
   const compact = bounds.width < 720;
   useEffect(() => () => dragging.current?.finish(), []);
   useEffect(() => {
@@ -72,6 +75,7 @@ export function Desktop({ state, dispatch, user, ready, busy, testMode, onOpen, 
   const activate = (id: string): void => { setMenu(false); dispatch({ type: "focus", id }); };
   const position = (win: DesktopWindow): Rect => compact || win.maximized
     ? { x: 0, y: 0, width: bounds.width, height: bounds.height }
+    : win.snap ? { x: win.snap === "left" ? 0 : (bounds.width + 8) / 2, y: 0, width: (bounds.width - 8) / 2, height: bounds.height }
     : fitRect(win.rect, bounds.width, bounds.height);
   const gesture = (event: React.PointerEvent<HTMLElement>, win: DesktopWindow, resizing: boolean): void => {
     if (compact || win.maximized || event.button !== 0) return;
@@ -115,12 +119,13 @@ export function Desktop({ state, dispatch, user, ready, busy, testMode, onOpen, 
     dispatch({ type: "rect", id: win.id, rect: fitRect(rect, bounds.width, bounds.height) });
   };
 
-  return <main className={`os-desktop${interacting ? " os-interacting" : ""}`} data-wallpaper={wallpaper} aria-label="zm-os 데스크톱">
+  return <main className={`os-desktop${interacting ? " os-interacting" : ""}`} data-wallpaper={preferences.data.wallpaper} aria-label="zm-os 데스크톱">
     <h1 className="sr-only">zm-os 데스크톱</h1>
     <div className="os-workspace" ref={workspace}>
       <div className="os-wallpaper" onClick={() => setMenu(false)} aria-hidden="true" />
-      <DesktopIcons key={user?.id ?? "guest"} apps={apps} userKey={user?.id ?? "guest"} width={bounds.width} height={bounds.height} ready={ready}
-        title={title} icon={id=><AppIcon app={id}/>} onOpen={open} onWallpaper={setWallpaper} onShowDesktop={()=>dispatch({type:"desktop"})}/>
+      <DesktopIcons key={user?.id ?? "guest"} apps={apps} width={bounds.width} height={bounds.height} ready={ready}
+        preferences={preferences.data} editable={sync.canEdit()} onChange={value=>sync.edit(value)}
+        title={title} icon={id=><AppIcon app={id}/>} onOpen={open} onShowDesktop={()=>dispatch({type:"desktop"})}/>
       {testMode && <p className="os-environment">zm-os <span>로컬 시험 환경</span></p>}
       {!ready && <p className="os-connecting" role="status">서비스에 연결하고 있습니다…</p>}
       <div className="os-window-layer">
@@ -132,6 +137,7 @@ export function Desktop({ state, dispatch, user, ready, busy, testMode, onOpen, 
             <header className="os-window-titlebar" tabIndex={0} aria-label={`${win.title} 창 이동`} onPointerDown={event => gesture(event, win, false)} onKeyDown={event => keyboardGeometry(event, win, false)} onDoubleClick={event => { if (!(event.target as HTMLElement).closest("button")) dispatch({ type: "maximize", id: win.id }); }}>
               <AppIcon app={win.system ?? "app"}/><strong>{win.title}</strong>
               <div className="os-window-controls">
+                {!compact && <><button className="os-snap-control" aria-label={win.title+" 왼쪽 정렬"} title="왼쪽 절반에 정렬" onClick={()=>dispatch({type:"snap",id:win.id,side:"left"})}><span aria-hidden="true">◧</span></button><button className="os-snap-control" aria-label={win.title+" 오른쪽 정렬"} title="오른쪽 절반에 정렬" onClick={()=>dispatch({type:"snap",id:win.id,side:"right"})}><span aria-hidden="true">◨</span></button></>}
                 <button aria-label={`${win.title} 최소화`} title="최소화" onClick={() => dispatch({ type: "minimize", id: win.id })}><span aria-hidden="true">—</span></button>
                 {!compact && <button aria-label={`${win.title} ${win.maximized ? "이전 크기로" : "최대화"}`} title={win.maximized ? "이전 크기로" : "최대화"} onClick={() => dispatch({ type: "maximize", id: win.id })}><span aria-hidden="true">{win.maximized ? "❐" : "□"}</span></button>}
                 <button className="os-window-close" aria-label={win.kind === "app" ? "앱 종료" : `${win.title} 창 닫기`} title="닫기" disabled={busy && win.kind === "system"} onClick={() => onClose(win)}><span aria-hidden="true">×</span></button>
@@ -144,7 +150,11 @@ export function Desktop({ state, dispatch, user, ready, busy, testMode, onOpen, 
           </section>;
         })}
       </div>
-      <div className="os-notifications">{notifications}</div>
+      <div className="os-notifications">{notifications}
+      {user && preferences.phase !== "ready" && <button className="os-sync-notice" onClick={()=>open("workspace")} aria-label="작업공간 저장 상태">
+        {preferences.phase === "loading" ? "작업공간을 불러오는 중…" : preferences.phase === "saving" ? "작업공간 저장 중…" : preferences.phase === "conflict" ? "작업공간 설정 충돌 · 확인" : "작업공간 저장 확인 필요"}
+      </button>}
+      </div>
     </div>
     {menu && <div className="os-menu-scrim" onClick={() => setMenu(false)} aria-hidden="true" />}
     {menu && <nav className="os-start-menu" aria-label="시작 메뉴 앱">

@@ -110,6 +110,7 @@ export async function workOnce(db: Database, cfg: Config): Promise<boolean> {
       withdrawal.user_id,
     ]);
     await tx.query("DELETE FROM hidden_default_apps WHERE user_id=$1", [withdrawal.user_id]);
+    await tx.query("DELETE FROM workspaces WHERE user_id=$1", [withdrawal.user_id]);
     await tx.query("DELETE FROM consents WHERE user_id=$1", [
       withdrawal.user_id,
     ]);

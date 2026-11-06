@@ -255,6 +255,9 @@ export async function runRecovery() {
     const empty=await developer.ok(cloudPath,'POST',{method:'cloud.get',params:{key:'note'}});
     const savedRequest={method:'cloud.put',params:{key:'note',generation:empty.generation,expectedRevision:0,requestId:randomUUID(),schemaVersion:1,value:{text:'복원 후에도 같은 개인 메모'}}};
     const saved=await developer.ok(cloudPath,'POST',savedRequest);
+    const workspaceUser=await developer.ok('/me');
+    const workspaceRequest={expectedUserId:workspaceUser.id,revision:0,requestId:randomUUID(),workspace:{schemaVersion:1,wallpaper:'night',positions:{store:{column:2,row:1}},windows:[{key:randomUUID(),kind:'system',system:'store',layout:{rect:{x:10,y:20,width:800,height:600},minimized:false,maximized:false,snap:'left'}}]}};
+    const savedWorkspace=await developer.ok('/me/workspace','PUT',workspaceRequest);
     await developer.ok(cloudPath,'POST',{method:'cloud.remove',params:{key:'removed',generation:empty.generation,expectedRevision:0,requestId:randomUUID()}});
     await server.stop(); server = undefined; // Quiescence is an explicit fixture property, not a live-backup claim.
     const before = await databaseState(db); await db.close(); db = undefined;
@@ -287,6 +290,8 @@ export async function runRecovery() {
     const restoredNote=await developer.ok(cloudPath,'POST',{method:'cloud.get',params:{key:'note'}});
     assert.deepEqual(restoredNote,{...saved,value:{text:'복원 후에도 같은 개인 메모'}});
     assert.deepEqual(await developer.ok(cloudPath,'POST',savedRequest),saved);
+    assert.deepEqual(await developer.ok('/me/workspace?expectedUserId='+workspaceUser.id),savedWorkspace);
+    assert.deepEqual(await developer.ok('/me/workspace','PUT',workspaceRequest),savedWorkspace);
     const tombstone=await developer.ok(cloudPath,'POST',{method:'cloud.get',params:{key:'removed'}});
     assert.equal(tombstone.exists,false);assert.equal(tombstone.revision,1);assert.equal(tombstone.value,null);
     checks.push('개인 메모 본문·수정 번호·저장 세대·삭제 표식·동일 요청 재시도 결과 복원');

@@ -7,6 +7,7 @@ import { z } from "zod";
 import { validateZip } from "@zm/cli";
 import { TEST_LIMITS, appTypeSchema } from "@zm/platform-contracts";
 import { Database, one, audit } from "./db.js";
+import { readWorkspace, writeWorkspace } from "./workspace.js";
 import { EmailAuth, isEmailRoute } from "./email-auth.js";
 import { mailboxUrl } from "./mail.js";
 import { cloudRequest, clearCloud } from "./cloud.js";
@@ -546,6 +547,8 @@ export class Platform {
         z.object({ intent: z.literal("reauth") }).safeParse(body).success);
     const a = await actor(db, req, restrictedAllowed);
     if (method === "GET" && path === "/me") return userView(db, a);
+    if (method === "GET" && path === "/me/workspace") return readWorkspace(db, a.id, req.query.expectedUserId);
+    if (method === "PUT" && path === "/me/workspace") return writeWorkspace(db, a.id, body);
     if (method === "POST" && path === "/auth/native/prepare") {
       const data = z
         .object({
@@ -766,13 +769,11 @@ export class Platform {
         return { ok: true };
       }
     }
-    if (method === "POST" && path === "/app-sessions")
-      return launch(
-        db,
-        a,
-        z.object({ appId: idSchema }).strict().parse(body).appId,
-        this.cfg,
-      );
+    if (method === "POST" && path === "/app-sessions") {
+      const data = z.object({ appId: idSchema, expectedUserId: idSchema.optional() }).strict().parse(body);
+      ensure(!data.expectedUserId || data.expectedUserId === a.id, 409, "CURRENT_ACCOUNT_CHANGED", "로그인 계정이 바뀌어 앱을 실행하지 않았습니다.");
+      return launch(db, a, data.appId, this.cfg);
+    }
     if (method === "POST" && path === "/preview-sessions") {
       const data = z
         .object({ versionId: idSchema, confirmed: z.literal(true) })

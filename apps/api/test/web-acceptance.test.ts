@@ -1,13 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { randomBytes,createHash } from 'node:crypto';
+import { randomBytes,randomUUID,createHash } from 'node:crypto';
 import { readFile,mkdtemp,rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join,resolve,dirname } from 'node:path';
 import { spawn } from 'node:child_process';
 import pg from 'pg';
 import { createZip } from '@zm/cli';
-import { manifestSchema, type AppManifest, type AppView, type AppSessionView, type AppConsentView, type DeveloperProfileView, type UserView } from '@zm/platform-contracts';
+import { manifestSchema, defaultWorkspace, type WorkspaceView, type AppManifest, type AppView, type AppSessionView, type AppConsentView, type DeveloperProfileView, type UserView } from '@zm/platform-contracts';
 import { Database } from '../src/db.js';
 import { workOnce } from '../src/worker.js';
 import { secret } from '../src/common.js';
@@ -40,6 +40,47 @@ test('웹 인수 조건의 권한·동의 이력·공개·재승인 경계 (모�
   try{
     let ready=false;for(let n=0;n<60;n++){try{if((await guest.call('/health')).status===200){ready=true;break;}}catch{/* Owned API starting. */}await new Promise(r=>setTimeout(r,200));}assert.ok(ready,logs);
     const ownerUser=await owner.login('owner'),aliceUser=await alice.login('alice');await bob.login('bob');
+    const bobUser=await bob.ok<UserView>('/me');
+    const readWorkspace=(client:Client,id:string)=>client.ok<WorkspaceView>('/me/workspace?expectedUserId='+id);
+    const workspaceRequest=(userId:string,revision:number,wallpaper:'sky'|'sand'|'night')=>({expectedUserId:userId,revision,requestId:randomUUID(),workspace:{...defaultWorkspace(),wallpaper}});
+    await t.test('작업공간 계정 격리·CSRF·저장 확인·동일 요청 재사용',async()=>{
+      assert.equal((await guest.call('/me/workspace?expectedUserId='+aliceUser.id)).status,401);
+      assert.equal((await bob.call('/me/workspace?expectedUserId='+aliceUser.id)).status,409);
+      const empty=await readWorkspace(alice,aliceUser.id);assert.equal(empty.revision,0);
+      const request=workspaceRequest(aliceUser.id,0,'sand');
+      const missingCsrf=new Client(base);missingCsrf.cookie=alice.cookie;
+      assert.equal((await missingCsrf.call('/me/workspace','PUT',request)).status,403);
+      assert.equal((await bob.call('/me/workspace','PUT',request)).status,409);
+      const saved=await alice.ok<WorkspaceView>('/me/workspace','PUT',request);
+      assert.equal(saved.revision,1);assert.equal(saved.workspace.wallpaper,'sand');
+      assert.deepEqual(await alice.ok('/me/workspace','PUT',request),saved);
+      assert.equal((await alice.call('/me/workspace','PUT',{...request,workspace:defaultWorkspace()})).status,409);
+      assert.equal((await readWorkspace(bob,bobUser.id)).revision,0);
+    });
+    await t.test('작업공간 동시 변경은 한 요청만 반영·이전 수정 번호와 응답 소실 재시도',async()=>{
+      const another=new Client(base);await another.login('alice');
+      const requests=[workspaceRequest(aliceUser.id,1,'night'),workspaceRequest(aliceUser.id,1,'sky')];
+      const results=await Promise.all([alice.call('/me/workspace','PUT',requests[0]),another.call('/me/workspace','PUT',requests[1])]);
+      assert.deepEqual(results.map(x=>x.status).sort(),[200,409]);
+      const winning=results.findIndex(x=>x.status===200);
+      assert.deepEqual(await another.ok('/me/workspace','PUT',requests[winning]),results[winning]!.data);
+      assert.equal((await readWorkspace(alice,aliceUser.id)).revision,2);
+      assert.equal((await alice.call('/me/workspace','PUT',workspaceRequest(aliceUser.id,1,'sand'))).status,409);
+    });
+    await t.test('작업공간 저장 계약은 임의 URL·세션·잘못된 좌표·과다한 창을 거부',async()=>{
+      const request=workspaceRequest(bobUser.id,0,'sky');
+      const layout={rect:{x:0,y:0,width:800,height:600},minimized:false,maximized:false,snap:null};
+      for(const workspace of [
+        {...request.workspace,positions:{store:{column:-1,row:0}}},
+        {...request.workspace,sessionToken:'forbidden'},
+        {...request.workspace,windows:[{key:randomUUID(),kind:'app',appId:randomUUID(),layout,documentUrl:'https://example.test'}]},
+        {...request.workspace,windows:Array.from({length:25},()=>({key:randomUUID(),kind:'system',system:'store',layout}))},
+      ])assert.equal((await bob.call('/me/workspace','PUT',{...request,workspace})).status,400);
+      assert.equal((await readWorkspace(bob,bobUser.id)).revision,0);
+      await bob.ok('/me/workspace','PUT',{...request,workspace:{...request.workspace,windows:[{key:randomUUID(),kind:'system',system:'store',layout}]}});
+      await db.migrate();await db.migrate();
+      assert.equal((await readWorkspace(bob,bobUser.id)).workspace.windows.length,1);
+    });
     await t.test('유효 CSRF의 미승인 사용자 등록 거부·연락 이메일 비공개',async()=>{
       assert.deepEqual(await alice.ok('/developer/profile'),{status:'none',reason:''});
       assert.equal((await alice.call('/developer/apps','POST',{name:'승인 전 등록'})).status,403);
@@ -86,6 +127,7 @@ test('웹 인수 조건의 권한·동의 이력·공개·재승인 경계 (모�
       assert.ok(!JSON.stringify(await guest.ok('/store/apps')).includes('private-contact@example.test'));
       for(const path of ['/me/apps','/me/app-consents'])assert.equal((await guest.call(path)).status,401);
       assert.equal((await guest.call('/app-sessions','POST',{appId:app.id})).status,401);
+      assert.equal((await bob.call('/app-sessions','POST',{appId:app.id,expectedUserId:aliceUser.id})).status,409);
       assert.equal((await guest.call(`/me/apps/${app.id}`,'PUT',{})).status,401);
       assert.equal((await db.pool.query('SELECT count(*)::int AS n FROM app_sessions')).rows[0].n,0);
       assert.equal((await db.pool.query('SELECT count(*)::int AS n FROM my_apps')).rows[0].n,0);
@@ -243,6 +285,7 @@ test('웹 인수 조건의 권한·동의 이력·공개·재승인 경계 (모�
     await t.test('삭제 worker 전 재가입·새 계정 데이터 보존·외부 삭제 결과의 소유자 경계',async()=>{
       await availability('allowed');
       const oldUser=await bob.ok<UserView>('/me'),oldRun=await bob.ok<AppSessionView>('/app-sessions','POST',{appId:app.id});
+      assert.equal((await readWorkspace(bob,oldUser.id)).revision,1);
       await setType('default');await bob.ok(`/me/apps/${app.id}`,'DELETE');await setType('developer');
       assert.equal((await db.pool.query('SELECT count(*)::int AS n FROM hidden_default_apps WHERE user_id=$1',[oldUser.id])).rows[0].n,1);
       await db.pool.query("UPDATE web_sessions SET reauth_at=now()-interval '10 minutes' WHERE user_id=$1",[oldUser.id]);
@@ -253,10 +296,13 @@ test('웹 인수 조건의 권한·동의 이력·공개·재승인 경계 (모�
       const statusHeaders={Authorization:'Bearer '+receipt.lookupSecret};
       assert.equal((await guest.ok<{platformStatus:string}>('/withdrawal-status','GET',undefined,statusHeaders)).platformStatus,'queued');
       const next=await bob.login('bob');assert.notEqual(next.id,oldUser.id);
+      await bob.ok('/me/workspace','PUT',workspaceRequest(next.id,0,'night'));
       await consent(bob);await bob.ok(`/me/apps/${app.id}`,'PUT',{});
       const nextRun=await bob.ok<AppSessionView>('/app-sessions','POST',{appId:app.id});assert.notEqual(nextRun.appUserId,oldRun.appUserId);
       assert.equal(await workOnce(db,cfg),true);assert.equal(await workOnce(db,cfg),false);
       assert.equal((await db.pool.query('SELECT count(*)::int AS n FROM hidden_default_apps WHERE user_id=$1',[oldUser.id])).rows[0].n,0);
+      assert.equal((await db.pool.query('SELECT count(*)::int AS n FROM workspaces WHERE user_id=$1',[oldUser.id])).rows[0].n,0);
+      assert.equal((await readWorkspace(bob,next.id)).workspace.wallpaper,'night');
       assert.equal((await bob.ok<UserView>('/me')).id,next.id);
       assert.equal((await bob.ok<Array<{id:string}>>('/me/apps'))[0]!.id,app.id);
       assert.equal((await bob.ok<AppConsentView[]>('/me/app-consents'))[0]!.revokedAt,null);

@@ -8,7 +8,8 @@
     "build": "tsc --noEmit && vite build",
     "type-check": "tsc --noEmit",
     "preview": "vite preview --host 127.0.0.1 --port 4300 --strictPort",
-    "test:e2e": "node e2e/local-trial.mjs"
+    "test:e2e": "node e2e/local-trial.mjs",
+    "test": "tsx --test test/*.test.ts"
   },
   "dependencies": {
     "@zm/platform-contracts": "workspace:*",
@@ -22,6 +23,7 @@
     "@vitejs/plugin-react": "^5.0.4",
     "vite": "^7.1.9",
     "typescript": "^5.9.3",
+    "tsx": "^4.20.0",
     "playwright": "^1.60.0"
   }
 }

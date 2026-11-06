@@ -1,22 +1,9 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { SystemApp } from "./desktop-state";
+import type { WorkspaceData } from "@zm/platform-contracts";
 type Cell={column:number;row:number};
-type Wallpaper="sky"|"sand"|"night";
-interface Preferences {positions:Partial<Record<SystemApp,Cell>>;wallpaper:Wallpaper}
-const defaults:Preferences={positions:{},wallpaper:"sky"}, size=104, margin=16;
-function read(key:string):Preferences {
-  try {
-    const raw=JSON.parse(localStorage.getItem(key) ?? "null") as Preferences|null;
-    if(!raw || !["sky","sand","night"].includes(raw.wallpaper))return defaults;
-    const positions:Preferences["positions"]={};
-    for(const id of ["store","mine","account","developer","operator"] as SystemApp[]) {
-      const c=raw.positions?.[id];
-      if(c && Number.isInteger(c.column) && Number.isInteger(c.row) && c.column>=0 && c.row>=0 && c.column<1000 && c.row<1000)positions[id]=c;
-    }
-    return {positions,wallpaper:raw.wallpaper};
-  } catch {return defaults;}
-}
-function layout(apps:SystemApp[],saved:Preferences["positions"],width:number,height:number):Record<string,Cell> {
+const size=104, margin=16;
+function layout(apps:SystemApp[],saved:WorkspaceData["positions"],width:number,height:number):Record<string,Cell> {
   const rows=Math.max(1,Math.floor((height-margin*2)/size)),cols=Math.max(1,Math.floor((width-margin*2)/size));
   const used=new Set<string>(),result:Record<string,Cell>={};
   for(const id of apps) {
@@ -30,38 +17,37 @@ function layout(apps:SystemApp[],saved:Preferences["positions"],width:number,hei
   return result;
 }
 interface Props {
-  apps:SystemApp[];userKey:string;width:number;height:number;ready:boolean;
+  apps:SystemApp[];width:number;height:number;ready:boolean;
+  preferences:WorkspaceData;editable:boolean;onChange:(update:(current:WorkspaceData)=>WorkspaceData)=>void;
   title:(id:SystemApp)=>string;icon:(id:SystemApp)=>ReactNode;onOpen:(id:SystemApp)=>void;
-  onWallpaper:(value:Wallpaper)=>void;onShowDesktop:()=>void;
+  onShowDesktop:()=>void;
 }
-export function DesktopIcons({apps,userKey,width,height,ready,title,icon,onOpen,onWallpaper,onShowDesktop}:Props):React.JSX.Element {
-  const key="zm-os:desktop:v1:"+userKey;
-  const [preferences,setPreferences]=useState(()=>read(key)),[selected,setSelected]=useState<SystemApp[]>([]);
+export function DesktopIcons({apps,width,height,ready,preferences,editable,onChange,title,icon,onOpen,onShowDesktop}:Props):React.JSX.Element {
+  const [selected,setSelected]=useState<SystemApp[]>([]);
   const [menu,setMenu]=useState<{x:number;y:number;app?:SystemApp}|null>(null);
-  const [drag,setDrag]=useState<{id:SystemApp;x:number;y:number}|null>(null),[notice,setNotice]=useState("");
+  const [drag,setDrag]=useState<{id:SystemApp;x:number;y:number}|null>(null);
   const root=useRef<HTMLElement>(null),context=useRef<HTMLElement>(null),dragging=useRef<(()=>void)|null>(null),suppress=useRef(false);
   const positions=layout(apps,preferences.positions,width,height);
-  useEffect(()=>{onWallpaper(preferences.wallpaper);},[preferences.wallpaper,onWallpaper]);
   useEffect(()=>()=>dragging.current?.(),[]);
   useEffect(()=>{
     if(!menu)return;context.current?.querySelector<HTMLButtonElement>("button")?.focus();
     const close=(e:KeyboardEvent):void=>{if(e.key==="Escape"){setMenu(null);root.current?.querySelector<HTMLButtonElement>('[aria-pressed="true"]')?.focus();}};
     window.addEventListener("keydown",close);return()=>window.removeEventListener("keydown",close);
   },[menu]);
-  const save=(next:Preferences):void=>{
-    setPreferences(next);try{localStorage.setItem(key,JSON.stringify(next));setNotice("");}
-    catch{setNotice("이 브라우저에 배치를 저장하지 못했습니다. 현재 화면에서는 계속 사용할 수 있습니다.");}
-  };
+  const save=(update:(current:WorkspaceData)=>WorkspaceData):void=>{if(editable)onChange(update);};
   const move=(id:SystemApp,column:number,row:number):void=>{
     const rows=Math.max(1,Math.floor((height-margin*2)/size)),cols=Math.max(1,Math.floor((width-margin*2)/size));
     const target={column:Math.max(0,Math.min(cols-1,column)),row:Math.max(0,Math.min(rows-1,row))};
-    const occupied=apps.find(other=>other!==id && positions[other]?.column===target.column && positions[other]?.row===target.row);
-    const next={...preferences.positions,...positions,[id]:target};if(occupied)next[occupied]=positions[id]!;
-    save({...preferences,positions:next});
+    save(current=>{
+      const currentPositions=layout(apps,current.positions,width,height);
+      const occupied=apps.find(other=>other!==id && currentPositions[other]?.column===target.column && currentPositions[other]?.row===target.row);
+      const next={...current.positions,...currentPositions,[id]:target};if(occupied)next[occupied]=currentPositions[id]!;
+      return {...current,positions:next};
+    });
   };
   const select=(id:SystemApp,extend:boolean):void=>setSelected(previous=>extend ? previous.includes(id) ? previous.filter(item=>item!==id) : [...previous,id] : [id]);
   const pointer=(event:React.PointerEvent<HTMLButtonElement>,id:SystemApp):void=>{
-    if(event.button!==0 || !ready)return;dragging.current?.();suppress.current=false;
+    if(event.button!==0 || !ready || !editable)return;dragging.current?.();suppress.current=false;
     const element=event.currentTarget,startX=event.clientX,startY=event.clientY,initial=positions[id]!;
     let moved=false,currentX=startX,currentY=startY;element.setPointerCapture(event.pointerId);
     const moving=(next:PointerEvent):void=>{
@@ -102,7 +88,7 @@ export function DesktopIcons({apps,userKey,width,height,ready,title,icon,onOpen,
   };
   const sort=():void=>{
     const rows=Math.max(1,Math.floor((height-margin*2)/size)),sorted=[...apps].sort((a,b)=>title(a).localeCompare(title(b),"ko"));
-    save({...preferences,positions:Object.fromEntries(sorted.map((id,i)=>[id,{column:Math.floor(i/rows),row:i%rows}]))});setMenu(null);
+    save(current=>({...current,positions:Object.fromEntries(sorted.map((id,i)=>[id,{column:Math.floor(i/rows),row:i%rows}]))}));setMenu(null);
   };
   return <>
     <nav ref={root} className="os-desktop-icons os-arrangeable" aria-label="시스템 앱" onContextMenu={event=>contextMenu(event)} onClick={event=>{if(event.target===event.currentTarget){setSelected([]);setMenu(null);}}} aria-describedby="desktop-icon-help">
@@ -115,19 +101,18 @@ export function DesktopIcons({apps,userKey,width,height,ready,title,icon,onOpen,
         {icon(id)}<span>{title(id)}</span>
       </button>)}
     </nav>
-    {notice && <p role="status" className="os-preference-notice">{notice}</p>}
     {menu && <>
       <div className="os-context-scrim" onPointerDown={()=>setMenu(null)} onContextMenu={event=>{event.preventDefault();setMenu(null);}}/>
       <nav ref={context} className="os-context-menu" aria-label="바탕화면 메뉴" style={{left:Math.max(4,Math.min(menu.x,width-244)),top:Math.max(4,Math.min(menu.y,height-360))}}>
         {menu.app && <button onClick={()=>{onOpen(menu.app!);setMenu(null);}}>{title(menu.app)} 열기</button>}
-        <button onClick={sort}>아이콘 이름순 정렬</button>
-        <button onClick={()=>{save({...preferences,positions:{}});setMenu(null);}}>아이콘 배치 초기화</button>
+        <button disabled={!editable} onClick={sort}>아이콘 이름순 정렬</button>
+        <button disabled={!editable} onClick={()=>{save(current=>({...current,positions:{}}));setMenu(null);}}>아이콘 배치 초기화</button>
         <button onClick={()=>{onShowDesktop();setMenu(null);}}>모든 창 최소화</button>
         <hr/><p>바탕화면 배경</p>
-        {(["sky","sand","night"] as const).map((value,index)=><button key={value} aria-pressed={preferences.wallpaper===value} onClick={()=>{save({...preferences,wallpaper:value});setMenu(null);}}>
+        {(["sky","sand","night"] as const).map((value,index)=><button disabled={!editable} key={value} aria-pressed={preferences.wallpaper===value} onClick={()=>{save(current=>({...current,wallpaper:value}));setMenu(null);}}>
           <span className={"os-wallpaper-swatch "+value}/>{["하늘","모래","밤"][index]}{preferences.wallpaper===value ? " ✓" : ""}
         </button>)}
-        <small>배치는 계정별로 이 브라우저에 저장됩니다.</small>
+        <button onClick={()=>{onOpen("workspace");setMenu(null);}}>작업공간 설정과 창 복원</button>
       </nav>
     </>}
   </>;

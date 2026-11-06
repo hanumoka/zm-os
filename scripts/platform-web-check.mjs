@@ -29,6 +29,7 @@ const tests = {
   'email-auth': 'email-auth.mjs',
   'cloud-notes': 'cloud-notes.mjs',
   freedoom: 'freedoom.mjs',
+  workspace: 'workspace.mjs',
 };
 const mode = process.argv[2] ?? 'all';
 assert.ok(mode === 'all' || Object.hasOwn(tests, mode), '알려진 웹 인수 시험 이름만 지정하세요.');

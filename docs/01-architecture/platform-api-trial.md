@@ -12,6 +12,8 @@ API는 `/v1`, JSON을 반환한다. 오류는 `{code,message}`와 HTTP 400/401/4
 | POST /test/login | `{subject:'owner'|'alice'|'bob',provider:'google'|'github',ageConfirmed:true}` → UserView. loopback 시험 전용 |
 | GET /auth/:provider/start | OAuth로 이동. 실제 설정이 없으면 503 |
 | GET /me | UserView |
+| GET /me/workspace?expectedUserId= | 계정별 환경·저장한 창 배치·수정 번호. [상세 계약](workspace.md#http와-데이터) |
+| PUT /me/workspace | {expectedUserId,revision,requestId,workspace}. 충돌 409, 같은 마지막 요청 재시도는 같은 결과 |
 | POST /logout | `{}` → `{ok:true}` |
 | POST /auth/email/signup | `{email,ageConfirmed:true}` → `{message}`. 인증 전 계정 생성 없음 |
 | POST /auth/email/login | `{email,password}` → `{ok:true}`와 세션 쿠키 |
