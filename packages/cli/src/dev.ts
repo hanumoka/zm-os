@@ -44,7 +44,7 @@ start();
     if (!file) { response.writeHead(404).end(); return; }
     const contentType: Record<string, string> = { '.js': 'text/javascript', '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.json': 'application/json', '.wasm': 'application/wasm', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.woff2': 'font/woff2' };
     response.setHeader('Access-Control-Allow-Origin', '*');
-    response.setHeader('Content-Security-Policy', `default-src 'none'; script-src http://127.0.0.1:4322; style-src http://127.0.0.1:4322; img-src http://127.0.0.1:4322 data:; font-src http://127.0.0.1:4322; connect-src ${result.manifest.apiOrigins.join(' ') || "'none'"}; base-uri 'none'; form-action 'none'; frame-ancestors http://127.0.0.1:4321; sandbox allow-scripts`);
+    response.setHeader('Content-Security-Policy', `default-src 'none'; script-src http://127.0.0.1:4322 'wasm-unsafe-eval'; style-src http://127.0.0.1:4322; img-src http://127.0.0.1:4322 data:; font-src http://127.0.0.1:4322; connect-src ${result.manifest.apiOrigins.join(' ') || "'none'"}; base-uri 'none'; form-action 'none'; frame-ancestors http://127.0.0.1:4321; sandbox allow-scripts`);
     send(response, contentType[path.extname(url.pathname)] ?? 'application/octet-stream', file);
   });
   await new Promise<void>((resolve, reject) => { assets.once('error', reject); assets.listen(4322, '127.0.0.1', resolve); });

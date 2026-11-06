@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Freedoom · DOOM 엔진 체험</title><link rel="stylesheet" href="./app.css"></head>
+<body><main>
+<header><div><p class="eyebrow">DOOM ENGINE / FREEDOOM 0.13</p><h1>Freedoom <span>첫 번째 임무</span></h1></div><span class="edition">1인용 · 무음 체험판</span></header>
+<section class="screen" aria-label="게임 화면">
+<canvas id="game" width="320" height="200" tabindex="0" aria-label="Freedoom 게임. 방향키 이동, Ctrl 발사, Space 문 열기"></canvas>
+<div id="cover"><p class="eyebrow">EPISODE 01 · MAP 01</p><h2 id="cover-title">첫 번째 문 너머로.</h2><p id="cover-description">방향키로 이동하고, Ctrl로 발사하세요.<br>게임 창을 벗어나면 자동으로 일시 정지합니다.</p><button id="play" disabled>실행 권한 확인 중</button></div>
+</section>
+<div class="toolbar"><p id="status" role="status" aria-live="polite">zm-os에 연결하고 있습니다.</p><button id="pause" disabled>일시 정지</button><button id="restart" disabled>처음부터</button></div>
+<div class="controls"><p><kbd>↑ ↓</kbd> 이동 <kbd>← →</kbd> 회전 <kbd>Ctrl</kbd> 발사 <kbd>Space</kbd> 문 열기 <kbd>Shift</kbd> 달리기 <kbd>Esc</kbd> 메뉴</p><p>W·S 이동 / A·D 옆걸음 / 1–7 무기 선택</p>
+<div class="touch" aria-label="화면 조작 버튼"><button data-key="172" aria-label="왼쪽 회전">←</button><button data-key="173" aria-label="앞으로 이동">↑</button><button data-key="174" aria-label="오른쪽 회전">→</button><button data-key="175" aria-label="뒤로 이동">↓</button><button data-key="163">발사</button><button data-key="162">열기</button></div></div>
+<details id="about"><summary>이 체험판과 소스·라이선스</summary><p>상용 DOOM 게임이 아니라, 공개된 DOOM 엔진과 재배포 가능한 Freedoom 데이터를 결합한 변형 체험판입니다. E1M1 한 레벨을 제공하며 출구를 통과하면 같은 레벨로 돌아옵니다. 음향·멀티플레이·진행 상황 영구 저장은 없습니다. 게임 내 저장도 창을 닫으면 사라집니다.</p><p>엔진: doomgeneric (GPL-2.0-or-later). 게임 데이터: Freedoom 0.13.0 (BSD-3-Clause). 원저작자의 보증이나 후원을 뜻하지 않습니다. 아래에 배포한 엔진의 전체 C 소스·수정 코드·빌드 명령·라이선스·저작자 목록을 함께 제공합니다.</p><button id="load-source">소스·라이선스 열기</button><div id="source-panel" hidden><label for="source-file">파일 선택</label><select id="source-file"></select><textarea id="source-text" readonly rows="14" aria-label="선택한 소스 또는 라이선스 전문"></textarea><p>내용을 선택해 복사할 수 있습니다. BUILD.json에 고정된 원본과 재현 명령이 있습니다.</p></div></details>
+<footer>zm-os 개발자 배포 예제 · 외부 통신 없음 · 창을 닫으면 게임 종료</footer>
+</main><script src="./game-data.js"></script><script src="./engine.js"></script><script type="module" src="./app.js"></script></body></html>

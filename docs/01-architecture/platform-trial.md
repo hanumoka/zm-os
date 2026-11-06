@@ -1,5 +1,7 @@
 # 독립 앱 플랫폼 로컬 시험
 
+2026-11-06 추가: [Freedoom 게임 예제](../../examples/freedoom/README.md)로 일반 개발자 등록·검수·공개·사용자 플레이를 확인한다. 앱 격리를 유지하는 Wasm 실행 결정은 [ADR-0047](../02-decisions/0047-wasm-freedoom-store-example.md)을 따른다. 독립 게임 시험은 `node scripts/platform-web-check.mjs freedoom`이며 전체 웹 시험에도 포함된다.
+
 2026-11-05 추가: 메모 앱 1.1.0의 서버 저장·기존 로컬 메모 이전·여러 브라우저 확인은 [개인 저장 사용법](personal-storage.md)을 따른다. 플랫폼 PostgreSQL에 개인 데이터를 저장하며 별도 Google Drive 계정은 필요하지 않다.
 
 대상: 소유자와 구현 담당자. 마지막 검토: 2026-11-03. 제품 정책은 zm-docs가 정본이며 구현 선택은 [ADR-0042](../02-decisions/0042-platform-rebuild-local-trial.md)와 [이메일·바탕화면 ADR-0045](../02-decisions/0045-email-password-and-desktop-preferences.md), API는 [시험 계약](platform-api-trial.md)을 따른다.

@@ -38,7 +38,7 @@ export async function serveAssets(db: Database, cfg: Config): Promise<Server> {
         !equal(grant, documentGrant(session, cfg))
       )
         throw new Error("grant");
-      const csp = `default-src 'none'; script-src ${cfg.assetOrigin} 'unsafe-inline'; style-src ${cfg.assetOrigin} 'unsafe-inline'; img-src ${cfg.assetOrigin} data:; font-src ${cfg.assetOrigin}; media-src ${cfg.assetOrigin}; connect-src ${session.manifest.apiOrigins.join(" ") || "'none'"}; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'; frame-ancestors ${cfg.webOrigin}; sandbox allow-scripts`;
+      const csp = `default-src 'none'; script-src ${cfg.assetOrigin} 'unsafe-inline' 'wasm-unsafe-eval'; style-src ${cfg.assetOrigin} 'unsafe-inline'; img-src ${cfg.assetOrigin} data:; font-src ${cfg.assetOrigin}; media-src ${cfg.assetOrigin}; connect-src ${session.manifest.apiOrigins.join(" ") || "'none'"}; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'; frame-ancestors ${cfg.webOrigin}; sandbox allow-scripts`;
       res.set("Content-Security-Policy", csp);
       res.set(
         "Permissions-Policy",

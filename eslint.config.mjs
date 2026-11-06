@@ -29,6 +29,8 @@ export default tseslint.config(
       '**/e2e-out/**',
       '**/*.min.js',
       'apps/web/public/**',
+      'examples/freedoom/public/**', // Generated engine/data, reproducible via tools/build.py.
+      'examples/freedoom/.build-cache/**',
     ],
   },
 
