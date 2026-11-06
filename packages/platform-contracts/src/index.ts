@@ -1,5 +1,8 @@
 import { z } from "zod";
 
+export const appTypeSchema = z.enum(["default", "developer"]);
+export type AppType = z.infer<typeof appTypeSchema>;
+
 export const permissions = [
   "local-storage",
   "app-identity",
@@ -63,6 +66,7 @@ export interface UserView {
 }
 export interface AppView {
   id: string;
+  appType: AppType;
   name: string;
   description: string;
   category: string;

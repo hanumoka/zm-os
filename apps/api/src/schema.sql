@@ -26,6 +26,8 @@ CREATE TABLE IF NOT EXISTS apps (
  availability text NOT NULL DEFAULT 'allowed' CHECK(availability IN ('allowed','normal_suspended','emergency_suspended')),
  current_version_id uuid, revision integer NOT NULL DEFAULT 0, closure text NOT NULL DEFAULT 'open'
 );
+-- App provision is platform-owned metadata, never an app manifest field.
+ALTER TABLE apps ADD COLUMN IF NOT EXISTS app_type text NOT NULL DEFAULT 'developer' CHECK(app_type IN ('default','developer'));
 CREATE TABLE IF NOT EXISTS versions (
  id uuid PRIMARY KEY, app_id uuid NOT NULL REFERENCES apps(id), version text NOT NULL, manifest jsonb NOT NULL,
  hash text NOT NULL, consent_hash text NOT NULL, validation_status text NOT NULL DEFAULT 'pending', review_status text NOT NULL DEFAULT 'not_submitted',
@@ -36,6 +38,7 @@ CREATE TABLE IF NOT EXISTS bundle_jobs (
  lease_until timestamptz, revision integer NOT NULL DEFAULT 0, error text NOT NULL DEFAULT ''
 );
 CREATE TABLE IF NOT EXISTS my_apps (user_id uuid NOT NULL REFERENCES users(id), app_id uuid NOT NULL REFERENCES apps(id), PRIMARY KEY(user_id,app_id));
+CREATE TABLE IF NOT EXISTS hidden_default_apps (user_id uuid NOT NULL REFERENCES users(id), app_id uuid NOT NULL REFERENCES apps(id), PRIMARY KEY(user_id,app_id));
 CREATE TABLE IF NOT EXISTS app_users (id uuid PRIMARY KEY, user_id uuid NOT NULL REFERENCES users(id), app_id uuid NOT NULL REFERENCES apps(id), UNIQUE(user_id,app_id));
 CREATE TABLE IF NOT EXISTS consents (user_id uuid NOT NULL REFERENCES users(id), app_id uuid NOT NULL REFERENCES apps(id), fingerprint text NOT NULL, revoked_at timestamptz, PRIMARY KEY(user_id,app_id));
 CREATE TABLE IF NOT EXISTS app_sessions (

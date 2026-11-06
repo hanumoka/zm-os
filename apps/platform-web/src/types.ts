@@ -1,4 +1,4 @@
-import type { AppManifest } from "@zm/platform-contracts";
+import type { AppManifest, AppType } from "@zm/platform-contracts";
 export interface DeveloperApplication {
   id: string;
   userId: string;
@@ -10,6 +10,7 @@ export interface DeveloperApplication {
 }
 export interface ManagedApp {
   id: string;
+  appType: AppType;
   ownerId: string;
   name: string;
   published: boolean;
@@ -92,3 +93,4 @@ export const categories: Record<string, string> = {
   tools: "도구",
   games: "게임",
 };
+export const appTypes: Record<AppType, string> = { default: "기본앱", developer: "개발자 앱" };

@@ -397,7 +397,7 @@ try {
   await page.getByRole("button", { name: `${memo.name} 상세 보기` }).waitFor();
   await page.getByRole("button", { name: `${tool.name} 상세 보기` }).waitFor();
   await page
-    .getByRole("combobox", { name: "분류", exact: true })
+    .getByRole("combobox", { name: "카테고리", exact: true })
     .selectOption("tools");
   await page
     .getByRole("button", { name: `${memo.name} 상세 보기` })
@@ -416,7 +416,7 @@ try {
     .getByRole("button", { name: `${tool.name} 상세 보기` })
     .waitFor({ state: "hidden" });
   await page
-    .getByRole("combobox", { name: "분류", exact: true })
+    .getByRole("combobox", { name: "카테고리", exact: true })
     .selectOption("");
   await page.getByRole("searchbox").fill(memo.name);
   await page.getByRole("button", { name: `${memo.name} 상세 보기` }).click();

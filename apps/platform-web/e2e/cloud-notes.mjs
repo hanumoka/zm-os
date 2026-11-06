@@ -43,6 +43,19 @@ try{
   assert.ok(validated);await owner.request('/developer/versions/'+version.id+'/submit','POST',{});
   await owner.request('/operator/versions/'+version.id+'/decisions','POST',{decision:'approved',reason:'서버 저장 메모 동작 확인'});
   const apps=await owner.request('/developer/apps');await owner.request('/developer/apps/'+app.id+'/releases','POST',{versionId:version.id,revision:apps.find(x=>x.id===app.id).revision});
+  step='default-app';
+  await owner.page.goto(origin);await owner.page.getByRole('button',{name:'운영 관리',exact:true}).click();
+  await owner.page.getByRole('button',{name:'앱 운영',exact:true}).click();
+  const record=owner.page.locator('.record-list > li').filter({has:owner.page.getByText(app.id,{exact:true})});
+  await record.getByRole('combobox',{name:'앱 구분',exact:true}).selectOption('default');
+  await record.getByLabel('앱 구분 변경 사유',{exact:true}).fill('메모장을 모든 계정에 기본 제공');
+  await record.getByRole('button',{name:'앱 구분 변경',exact:true}).click();
+  await owner.page.getByText('앱 구분을 변경했습니다. 이용자의 데이터와 앱 소유권은 유지됩니다.',{exact:true}).waitFor();
+  for(const c of [a,b,other]){
+    const mine=await c.request('/me/apps');assert.equal(mine.find(x=>x.id===app.id)?.appType,'default');
+    assert.ok(!(await c.request('/me/app-consents')).some(x=>x.appId===app.id));
+  }
+  pass('운영 화면에서 기본앱 지정·별도 추가 없이 모든 계정에 표시·자동 동의 없음');
   async function open(c,checkConsent=false){
     await c.page.goto(origin);await c.page.getByRole('button',{name:'앱 둘러보기',exact:true}).click();
     await c.page.locator('.app-card').filter({has:c.page.getByRole('heading',{name:'나의 메모',exact:true})}).getByRole('button',{name:'앱 열기',exact:true}).click();
@@ -63,6 +76,32 @@ try{
   step='read-second';await open(b);await expectNote(b,'첫 번째 기기의 메모');
   await open(other);await expectNote(other,'');
   pass('독립 브라우저의 같은 계정은 서버 메모 공유·다른 계정은 빈 메모');
+  step='default-hide-restore';
+  await a.page.goto(origin);await a.page.getByRole('button',{name:'내 앱',exact:true}).click();
+  const defaultGroup=a.page.getByRole('region',{name:'기본앱',exact:true});
+  await defaultGroup.getByRole('heading',{name:'나의 메모',exact:true}).waitFor();
+  await a.page.getByRole('combobox',{name:'카테고리',exact:true}).selectOption('games');
+  await defaultGroup.waitFor({state:'detached'});
+  await a.page.getByRole('combobox',{name:'카테고리',exact:true}).selectOption('productivity');
+  await a.page.getByRole('combobox',{name:'앱 구분',exact:true}).selectOption('default');
+  await defaultGroup.getByRole('button',{name:'나의 메모 상세 보기',exact:true}).click();
+  await a.page.getByRole('button',{name:'내 앱에서 숨기기',exact:true}).click();
+  await a.page.getByText('기본앱을 숨겼습니다. 저장 데이터는 유지되며 Store에서 다시 표시할 수 있습니다.',{exact:true}).waitFor();
+  assert.ok(!(await b.request('/me/apps')).some(x=>x.id===app.id));
+  assert.ok((await other.request('/me/apps')).some(x=>x.id===app.id));
+  await a.page.goto(origin);await a.page.getByRole('button',{name:'앱 둘러보기',exact:true}).click();
+  await a.page.getByRole('button',{name:'나의 메모 상세 보기',exact:true}).click();
+  await a.page.getByRole('button',{name:'내 앱에 표시',exact:true}).click();
+  assert.ok((await b.request('/me/apps')).some(x=>x.id===app.id));
+  await a.page.goto(origin);await a.page.getByRole('button',{name:'내 앱',exact:true}).click();
+  await a.page.getByRole('region',{name:'기본앱',exact:true}).waitFor();
+  await a.page.setViewportSize({width:390,height:844});
+  await a.page.screenshot({path:join(out,'default-apps-mobile.png')});
+  assert.equal(await a.page.locator('.search-bar').evaluate(el=>el.scrollWidth>el.clientWidth),false);
+  await a.page.setViewportSize({width:1440,height:1000});
+  await a.page.screenshot({path:join(out,'default-apps-desktop.png')});
+  await open(a);await expectNote(a,'첫 번째 기기의 메모');
+  pass('기본앱·카테고리 결합 필터·계정별 숨김과 복원·기존 메모 보존·390px 필터 배치');
   step='conflict';
   await b.frame.locator('#note').fill('B가 작성 중인 내용');
   await a.frame.locator('#note').fill('A의 새 수정');await a.frame.locator('#save').click();

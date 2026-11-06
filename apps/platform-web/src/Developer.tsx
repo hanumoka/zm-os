@@ -6,6 +6,7 @@ import type {
 } from "@zm/platform-contracts";
 import { api, errorMessage } from "./api";
 import { Empty, Field, FormSection, SectionTitle, Status } from "./components";
+import { appTypes } from "./types";
 import type {
   AppVersion,
   DeletionRequest,
@@ -381,6 +382,10 @@ function ManagedAppEditor({
           <dd>
             <Status value={app.availability} />
           </dd>
+        </div>
+        <div>
+          <dt>앱 구분</dt>
+          <dd>{appTypes[app.appType]}</dd>
         </div>
         <div>
           <dt>공개 상태</dt>

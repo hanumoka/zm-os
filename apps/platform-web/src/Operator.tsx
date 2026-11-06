@@ -11,6 +11,7 @@ import type {
   RunAction,
 } from "./types";
 import { VersionPreview } from "./VersionPreview";
+import { appTypes } from "./types";
 interface Props {
   user: UserView;
   revision: number;
@@ -229,6 +230,17 @@ export function Operator({
                       </span>
                     </div>
                     <p className="muted">{app.id}</p>
+                    <form onSubmit={(event) => {
+                      event.preventDefault(); const form = new FormData(event.currentTarget);
+                      void run(() => api(`/operator/apps/${app.id}/app-type`, "PUT", { appType: form.get("appType"), reason: form.get("reason"), revision: app.revision }), "앱 구분을 변경했습니다. 이용자의 데이터와 앱 소유권은 유지됩니다.");
+                    }}>
+                      <p>기본앱은 모든 계정의 내 앱에 제공됩니다. 검수·공개·이용 동의는 별도로 적용합니다.</p>
+                      <div className="form-pair">
+                        <Field label="앱 구분"><select name="appType" defaultValue={app.appType} key={app.appType}>{Object.entries(appTypes).map(([key, name]) => <option key={key} value={key}>{name}</option>)}</select></Field>
+                        <Field label="앱 구분 변경 사유"><input name="reason" required minLength={3} maxLength={2000}/></Field>
+                      </div>
+                      <button type="submit" disabled={busy || app.closed}>앱 구분 변경</button>
+                    </form>
                     <p>
                       일반 중지는 새 실행을 막습니다. 긴급 중지는 기존 실행
                       권한도 차단합니다.

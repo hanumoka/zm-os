@@ -5,6 +5,7 @@ import type {
   AppManifest,
   AppSessionView,
   AppView,
+  AppType,
 } from "@zm/platform-contracts";
 import { z } from "zod";
 import { audit, one } from "./db.js";
@@ -21,6 +22,7 @@ export interface AppRow {
   current_version_id: string | null;
   revision: number;
   closure: string;
+  app_type: AppType;
 }
 export interface VersionRow {
   id: string;
@@ -97,17 +99,29 @@ export async function store(
   category = "",
   userId?: string,
   appId?: string,
+  appType = "",
 ): Promise<AppView[]> {
   const available =
     "(a.published AND a.availability='allowed' AND a.closure<>'closed' AND v.validation_status='passed' AND v.review_status='approved')";
   const rows = (
-    await db.query<{ id: string; manifest: AppManifest; available: boolean }>(
-      `SELECT a.id,v.manifest,${available} AS available FROM apps a JOIN versions v ON v.id=a.current_version_id WHERE ($3::uuid IS NOT NULL OR ${available}) AND ($1='' OR strpos(lower(v.manifest->>'name'),lower($1))>0 OR strpos(lower(v.manifest->>'description'),lower($1))>0) AND ($2='' OR v.manifest->>'category'=$2) AND ($3::uuid IS NULL OR EXISTS(SELECT 1 FROM my_apps m WHERE m.app_id=a.id AND m.user_id=$3)) AND ($4::uuid IS NULL OR a.id=$4) ORDER BY v.manifest->>'name' LIMIT 200`,
-      [q.slice(0, 100), category, userId ?? null, appId ?? null],
+    await db.query<{ id: string; app_type: AppType; manifest: AppManifest; available: boolean }>(
+      `SELECT a.id,a.app_type,v.manifest,${available} AS available
+       FROM apps a JOIN versions v ON v.id=a.current_version_id
+       WHERE ($3::uuid IS NOT NULL OR ${available})
+       AND ($1='' OR strpos(lower(v.manifest->>'name'),lower($1))>0 OR strpos(lower(v.manifest->>'description'),lower($1))>0)
+       AND ($2='' OR v.manifest->>'category'=$2)
+       AND ($3::uuid IS NULL OR EXISTS(SELECT 1 FROM my_apps m WHERE m.app_id=a.id AND m.user_id=$3)
+         OR (a.app_type='default' AND a.published AND a.closure<>'closed'
+             AND v.validation_status='passed' AND v.review_status='approved'
+             AND NOT EXISTS(SELECT 1 FROM hidden_default_apps h WHERE h.app_id=a.id AND h.user_id=$3)))
+       AND ($4::uuid IS NULL OR a.id=$4) AND ($5='' OR a.app_type=$5)
+       ORDER BY CASE WHEN a.app_type='default' THEN 0 ELSE 1 END,v.manifest->>'name',a.id LIMIT 200`,
+      [q.slice(0, 100), category, userId ?? null, appId ?? null, appType],
     )
   ).rows;
   return rows.map((r) => ({
     id: r.id,
+    appType: r.app_type,
     name: r.manifest.name,
     description: r.manifest.description,
     category: r.manifest.category,

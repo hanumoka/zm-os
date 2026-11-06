@@ -20,10 +20,11 @@ API는 `/v1`, JSON을 반환한다. 오류는 `{code,message}`와 HTTP 400/401/4
 | POST /me/email/link | `{email}` → `{message}`. 최근 재인증·동일 세션에서 연결 완료 |
 | POST /me/email/reauth | `{password}` → `{ok:true}` |
 | POST /me/email/password | `{password,newPassword}` → `{ok:true}`. 모든 기존 세션 철회 |
-| GET /store/apps?q=&category= | AppView[] |
+| GET /store/apps?q=&category=&appType= | AppView[]. appType은 default/developer, 카테고리와 교집합 |
 | GET /store/apps/:id | AppView |
-| GET /me/apps | AppView[] |
-| PUT 또는 DELETE /me/apps/:id | `{}` → `{ok:true}` |
+| GET /me/apps?q=&category=&appType= | AppView[]. 명시적 추가 + 숨기지 않은 기본앱 |
+| PUT /operator/apps/:id/app-type | 운영자만 {appType,reason,revision} → {ok:true}. 소유권·데이터 유지 |
+| PUT 또는 DELETE /me/apps/:id | `{}` → `{ok:true}`. 기본앱은 다시 표시/숨김, 개발자 앱은 추가/제거. 데이터·동의 유지 |
 | GET /apps/:id/consent | `{fingerprint,manifest,accepted:boolean}` |
 | GET /me/app-consents | 본인의 `AppConsentView[]`. 내 앱 추가 여부와 무관하며 공개 중단·종료·철회한 앱도 포함 |
 | PUT /me/app-consents/:id | `{fingerprint}` → `{ok:true}` |

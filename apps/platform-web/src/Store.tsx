@@ -8,7 +8,7 @@ import type {
 import { clearAppStorage } from "@zm/host-bridge";
 import { api, assertCurrentUser, errorMessage } from "./api";
 import { Empty, Field, Modal, SectionTitle } from "./components";
-import { categories, type RunAction } from "./types";
+import { categories, appTypes, type RunAction } from "./types";
 interface Consent {
   fingerprint: string;
   manifest: AppManifest;
@@ -46,6 +46,7 @@ export function Store({
   const [apps, setApps] = useState<AvailableApp[]>([]);
   const [q, setQ] = useState("");
   const [category, setCategory] = useState("");
+  const [appType, setAppType] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState("");
   const [selected, setSelected] = useState<AvailableApp | null>(null);
@@ -62,9 +63,7 @@ export function Store({
       return;
     }
     const timer = setTimeout(() => {
-      const path = mine
-        ? "/me/apps"
-        : `/store/apps?${new URLSearchParams({ q, category })}`;
+      const path = `${mine ? "/me/apps" : "/store/apps"}?${new URLSearchParams({ q, category, appType })}`;
       void api<AvailableApp[]>(path)
         .then((result) => {
           if (active) setApps(result);
@@ -80,7 +79,7 @@ export function Store({
       active = false;
       clearTimeout(timer);
     };
-  }, [mine, q, category, revision, userId]);
+  }, [mine, q, category, appType, revision, userId]);
   const prepareLaunch = (app: AvailableApp): void => {
     if (app.available === false || user?.requiresReauth) return;
     if (!user) {
@@ -113,11 +112,11 @@ export function Store({
         title={mine ? "내 앱" : "오늘, 어떤 앱이 필요한가요?"}
         description={
           mine
-            ? "같은 계정으로 로그인한 웹에서 내 앱 목록을 함께 사용합니다. 앱 내부의 기기 데이터는 동기화하지 않습니다."
-            : "설치 부담 없이 시작하는 작은 도구들. 앱의 기능과 이용 범위를 확인하고 열어 보세요."
+            ? "zm-os의 기본앱과 내가 추가한 개발자 앱입니다. 목록은 같은 계정에서 함께 사용하며, 앱별 데이터 저장 방식은 상세에서 확인하세요."
+            : "zm-os가 제공하는 기본앱과 개발자가 만든 앱을 찾아 작업공간에 추가하세요."
         }
       />
-      {!mine && (
+      {(!mine || user) && (
         <form className="search-bar" onSubmit={(e) => e.preventDefault()}>
           <label className="search-input">
             <span className="sr-only">앱 검색</span>
@@ -129,12 +128,19 @@ export function Store({
             />
           </label>
           <label>
-            <span className="sr-only">분류</span>
+            <span className="sr-only">앱 구분</span>
+            <select value={appType} onChange={(e) => setAppType(e.target.value)}>
+              <option value="">모든 앱 구분</option>
+              {Object.entries(appTypes).map(([key, name]) => <option key={key} value={key}>{name}</option>)}
+            </select>
+          </label>
+          <label>
+            <span className="sr-only">카테고리</span>
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
             >
-              <option value="">모든 분류</option>
+              <option value="">모든 카테고리</option>
               {Object.entries(categories).map(([key, name]) => (
                 <option key={key} value={key}>
                   {name}
@@ -157,12 +163,16 @@ export function Store({
       ) : apps.length === 0 ? (
         <Empty>
           {mine
-            ? "아직 추가한 앱이 없습니다. 앱 둘러보기에서 마음에 드는 앱을 추가해 보세요."
+            ? (q || category || appType ? "조건에 맞는 내 앱이 없습니다." : "표시할 앱이 없습니다. 앱 둘러보기에서 앱을 추가하거나 숨긴 기본앱을 다시 표시하세요.")
             : "조건에 맞는 공개 앱이 없습니다."}
         </Empty>
       ) : (
-        <div className="app-grid">
-          {apps.map((app) => (
+        <div className="app-groups">
+        {(["default", "developer"] as const).map((type) => apps.some(app => app.appType === type) ? (
+          <section className="app-group" key={type} aria-label={appTypes[type]}>
+          <h2 className="app-group-title">{appTypes[type]} <span>{apps.filter(app => app.appType === type).length}</span></h2>
+          <div className="app-grid">
+          {apps.filter(app => app.appType === type).map((app) => (
             <article className="app-card" key={app.id}>
               <button
                 className="app-detail-button"
@@ -181,7 +191,7 @@ export function Store({
                 <span className="app-category">
                   {categories[app.category] ?? app.category}
                 </span>
-                <h2>{app.name}</h2>
+                <h3>{app.name}</h3>
                 <p>{app.description}</p>
               </button>
               <div className="card-bottom">
@@ -201,6 +211,9 @@ export function Store({
               </div>
             </article>
           ))}
+          </div>
+          </section>
+        ) : null)}
         </div>
       )}
       {selected && (
@@ -227,6 +240,7 @@ export function Store({
             </button>
           </div>
           <h2 id="app-detail-title">{selected.name}</h2>
+          <p className="app-type-label">{appTypes[selected.appType]}{selected.appType === "default" ? " · zm-os에서 기본 제공" : ""}</p>
           <p>{selected.description}</p>
           <p className="muted">버전 {selected.version} · 무료</p>
           {selected.available === false && (
@@ -314,12 +328,12 @@ export function Store({
                         {},
                       ),
                     mine
-                      ? "내 앱 목록에서 제거했습니다. 저장 데이터는 유지됩니다."
+                      ? selected.appType === "default" ? "기본앱을 숨겼습니다. 저장 데이터는 유지되며 Store에서 다시 표시할 수 있습니다." : "내 앱 목록에서 제거했습니다. 저장 데이터는 유지됩니다."
                       : "내 앱에 추가했습니다.",
                   );
                 }}
               >
-                {mine ? "내 앱에서 제거" : "내 앱에 추가"}
+                {selected.appType === "default" ? mine ? "내 앱에서 숨기기" : "내 앱에 표시" : mine ? "내 앱에서 제거" : "내 앱에 추가"}
               </button>
             </div>
           )}

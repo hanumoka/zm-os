@@ -5,7 +5,7 @@ import type { PoolClient } from "pg";
 import type { Request, Response } from "express";
 import { z } from "zod";
 import { validateZip } from "@zm/cli";
-import { TEST_LIMITS } from "@zm/platform-contracts";
+import { TEST_LIMITS, appTypeSchema } from "@zm/platform-contracts";
 import { Database, one, audit } from "./db.js";
 import { EmailAuth, isEmailRoute } from "./email-auth.js";
 import { mailboxUrl } from "./mail.js";
@@ -479,6 +479,7 @@ export class Platform {
         db,
         String(req.query.q ?? ""),
         String(req.query.category ?? ""),
+        undefined, undefined, String(req.query.appType ?? ""),
       );
     if (
       method === "GET" &&
@@ -667,7 +668,7 @@ export class Platform {
         ...(!row.available ? { unavailableReason: "현재 새 실행을 할 수 없는 앱입니다." } : {}),
       }));
     }
-    if (method === "GET" && path === "/me/apps") return store(db, "", "", a.id);
+    if (method === "GET" && path === "/me/apps") return store(db, String(req.query.q ?? ""), String(req.query.category ?? ""), a.id, undefined, String(req.query.appType ?? ""));
     if (method === "POST" && segments[0] === "me" && segments[1] === "apps" && segments[3] === "cloud-clear" && segments.length === 4) {
       const data = z.object({ confirmed: z.literal(true), isPreview: z.boolean().default(false), expectedUserId: idSchema }).strict().parse(body);
       ensure(data.expectedUserId === a.id, 409, "CURRENT_ACCOUNT_CHANGED", "로그인 계정이 바뀌어 삭제하지 않았습니다.");
@@ -681,6 +682,7 @@ export class Platform {
       const appId = at(2);
       if (method === "PUT") {
         await currentVersion(db, await requireApp(db, appId), true);
+        await db.query("DELETE FROM hidden_default_apps WHERE user_id=$1 AND app_id=$2", [a.id, appId]);
         await db.query(
           "INSERT INTO my_apps(user_id,app_id) VALUES($1,$2) ON CONFLICT DO NOTHING",
           [a.id, appId],
@@ -688,6 +690,8 @@ export class Platform {
         return { ok: true };
       }
       if (method === "DELETE") {
+        const app = await requireApp(db, appId);
+        if (app.app_type === "default") await db.query("INSERT INTO hidden_default_apps(user_id,app_id) VALUES($1,$2) ON CONFLICT DO NOTHING", [a.id, appId]);
         await db.query("DELETE FROM my_apps WHERE user_id=$1 AND app_id=$2", [
           a.id,
           appId,
@@ -1157,6 +1161,14 @@ export class Platform {
         ...data,
         selfReview: app.owner_id === a.id,
       });
+      return { ok: true };
+    }
+    if (method === "PUT" && segments[0] === "operator" && segments[1] === "apps" && segments[3] === "app-type" && segments.length === 4) {
+      const data = z.object({ appType: appTypeSchema, reason: reasonSchema, revision: revisionSchema }).strict().parse(body);
+      const app = await requireApp(db, at(2));
+      ensure(app.revision === data.revision && app.closure !== "closed", 409, "REVISION_CONFLICT");
+      await db.query("UPDATE apps SET app_type=$1,revision=revision+1 WHERE id=$2", [data.appType, app.id]);
+      await audit(db, a.id, "app.type_changed", app.id, { ...data, previousAppType: app.app_type });
       return { ok: true };
     }
     if (method === "GET" && path === "/operator/apps")

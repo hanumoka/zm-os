@@ -7,7 +7,7 @@ import { join,resolve,dirname } from 'node:path';
 import { spawn } from 'node:child_process';
 import pg from 'pg';
 import { createZip } from '@zm/cli';
-import type { AppManifest,AppSessionView,AppConsentView,DeveloperProfileView,UserView } from '@zm/platform-contracts';
+import { manifestSchema, type AppManifest, type AppView, type AppSessionView, type AppConsentView, type DeveloperProfileView, type UserView } from '@zm/platform-contracts';
 import { Database } from '../src/db.js';
 import { workOnce } from '../src/worker.js';
 import { secret } from '../src/common.js';
@@ -89,6 +89,60 @@ test('웹 인수 조건의 권한·동의 이력·공개·재승인 경계 (모�
       assert.equal((await guest.call(`/me/apps/${app.id}`,'PUT',{})).status,401);
       assert.equal((await db.pool.query('SELECT count(*)::int AS n FROM app_sessions')).rows[0].n,0);
       assert.equal((await db.pool.query('SELECT count(*)::int AS n FROM my_apps')).rows[0].n,0);
+    });
+    async function setType(appType:'default'|'developer'){
+      await owner.ok(`/operator/apps/${app.id}/app-type`,'PUT',{appType,reason:'기본 제공 정책 시험',revision:(await state()).revision});
+    }
+    await t.test('기본앱 지정은 운영자만 허용·동시 변경 충돌·소유권과 공개 버전 유지',async()=>{
+      assert.equal((await guest.ok<AppView>(`/store/apps/${app.id}`)).appType,'developer');
+      assert.equal((await alice.call('/developer/apps','POST',{name:'구분 위조',appType:'default'})).status,400);
+      const manifest=(await db.pool.query('SELECT manifest FROM versions WHERE id=$1',[v1])).rows[0].manifest;
+      assert.equal(manifestSchema.safeParse(manifest).success,true);
+      assert.equal(manifestSchema.safeParse({...manifest,appType:'default'}).success,false);
+      const before=await state();
+      for(const client of [alice,bob])assert.equal((await client.call(`/operator/apps/${app.id}/app-type`,'PUT',{appType:'default',reason:'권한 없는 변경',revision:before.revision})).status,403);
+      await setType('default');
+      assert.equal((await owner.call(`/operator/apps/${app.id}/app-type`,'PUT',{appType:'developer',reason:'이전 revision',revision:before.revision})).status,409);
+      assert.equal((await state()).current_version_id,before.current_version_id);
+      assert.equal((await db.pool.query('SELECT owner_id FROM apps WHERE id=$1',[app.id])).rows[0].owner_id,aliceUser.id);
+      assert.equal((await db.pool.query("SELECT count(*)::int AS n FROM audit_events WHERE action='app.type_changed' AND target_id=$1",[app.id])).rows[0].n,1);
+    });
+    await t.test('기본 제공은 계정별 추가·동의·실행을 만들지 않음·구분과 카테고리 교집합',async()=>{
+      for(const client of [alice,bob]){
+        assert.equal((await client.ok<AppView[]>('/me/apps'))[0]!.appType,'default');
+        assert.equal((await client.call('/app-sessions','POST',{appId:app.id})).status,409);
+      }
+      for(const table of ['my_apps','app_users','app_sessions'])assert.equal((await db.pool.query(`SELECT count(*)::int AS n FROM ${table}`)).rows[0].n,0);
+      assert.deepEqual(await bob.ok('/me/app-consents'),[]);
+      const newcomer=new Client(base);
+      await newcomer.ok('/test/login','POST',{subject:'bob',provider:'github',ageConfirmed:true});
+      assert.equal((await newcomer.ok<AppView[]>('/me/apps'))[0]!.id,app.id);
+      assert.equal((await guest.ok<AppView[]>('/store/apps?appType=default&category=tools&q=메모'))[0]!.id,app.id);
+      assert.deepEqual(await guest.ok('/store/apps?appType=developer'),[]);
+      assert.deepEqual(await bob.ok('/me/apps?appType=default&category=games'),[]);
+    });
+    await t.test('기본앱 숨김은 계정에 유지·다른 계정과 분리·다시 표시와 지정 해제',async()=>{
+      await bob.ok(`/me/apps/${app.id}`,'DELETE');
+      await bob.login('bob');assert.deepEqual(await bob.ok('/me/apps'),[]);
+      assert.equal((await alice.ok<AppView[]>('/me/apps'))[0]!.id,app.id);
+      await bob.ok(`/me/apps/${app.id}`,'PUT',{});
+      assert.equal((await bob.ok<AppView[]>('/me/apps'))[0]!.id,app.id);
+      await setType('developer');
+      assert.equal((await bob.ok<AppView[]>('/me/apps'))[0]!.id,app.id);
+      assert.deepEqual(await alice.ok('/me/apps'),[]);
+      await bob.ok(`/me/apps/${app.id}`,'DELETE');
+    });
+    await t.test('기본앱도 미공개 목록 제외·중지 실행 거부·반복 마이그레이션 보존',async()=>{
+      await setType('default');
+      await alice.ok(`/developer/apps/${app.id}/publication`,'PUT',{published:false,revision:(await state()).revision});
+      assert.deepEqual(await bob.ok('/me/apps'),[]);
+      await alice.ok(`/developer/apps/${app.id}/publication`,'PUT',{published:true,revision:(await state()).revision});
+      await availability('normal_suspended');
+      assert.equal((await bob.ok<Array<AppView&{available:boolean}>>('/me/apps'))[0]!.available,false);
+      assert.equal((await bob.call('/app-sessions','POST',{appId:app.id})).status,403);
+      await db.migrate();await db.migrate();
+      assert.equal((await bob.ok<AppView[]>('/me/apps'))[0]!.appType,'default');
+      await availability('allowed');await setType('developer');
     });
     let running:AppSessionView;
     await t.test('공개 중단·내 앱 제거 뒤에도 본인 이용 이력과 철회 경로 유지',async()=>{
@@ -189,6 +243,8 @@ test('웹 인수 조건의 권한·동의 이력·공개·재승인 경계 (모�
     await t.test('삭제 worker 전 재가입·새 계정 데이터 보존·외부 삭제 결과의 소유자 경계',async()=>{
       await availability('allowed');
       const oldUser=await bob.ok<UserView>('/me'),oldRun=await bob.ok<AppSessionView>('/app-sessions','POST',{appId:app.id});
+      await setType('default');await bob.ok(`/me/apps/${app.id}`,'DELETE');await setType('developer');
+      assert.equal((await db.pool.query('SELECT count(*)::int AS n FROM hidden_default_apps WHERE user_id=$1',[oldUser.id])).rows[0].n,1);
       await db.pool.query("UPDATE web_sessions SET reauth_at=now()-interval '10 minutes' WHERE user_id=$1",[oldUser.id]);
       assert.equal((await bob.call('/me/withdrawal/prepare','POST',{})).status,403);
       await bob.ok('/test/reauth','POST',{provider:'google'});
@@ -200,6 +256,7 @@ test('웹 인수 조건의 권한·동의 이력·공개·재승인 경계 (모�
       await consent(bob);await bob.ok(`/me/apps/${app.id}`,'PUT',{});
       const nextRun=await bob.ok<AppSessionView>('/app-sessions','POST',{appId:app.id});assert.notEqual(nextRun.appUserId,oldRun.appUserId);
       assert.equal(await workOnce(db,cfg),true);assert.equal(await workOnce(db,cfg),false);
+      assert.equal((await db.pool.query('SELECT count(*)::int AS n FROM hidden_default_apps WHERE user_id=$1',[oldUser.id])).rows[0].n,0);
       assert.equal((await bob.ok<UserView>('/me')).id,next.id);
       assert.equal((await bob.ok<Array<{id:string}>>('/me/apps'))[0]!.id,app.id);
       assert.equal((await bob.ok<AppConsentView[]>('/me/app-consents'))[0]!.revokedAt,null);

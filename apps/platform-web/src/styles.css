@@ -344,11 +344,12 @@ label.field small {
 }
 .search-bar {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.8rem;
   margin-bottom: 2.2rem;
 }
 .search-input {
-  flex: 1;
+  flex: 1 1 220px;
 }
 .search-input input {
   padding-left: 1rem;
@@ -357,6 +358,23 @@ label.field small {
 .search-bar input,
 .search-bar select {
   height: 49px;
+}
+.app-groups {
+  display: grid;
+  gap: 2rem;
+}
+.app-group-title {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin: 0 0 1rem;
+  font-size: 1.1rem;
+}
+.app-group-title span,
+.app-type-label {
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 400;
 }
 .app-grid {
   display: grid;
@@ -387,7 +405,7 @@ label.field small {
 .app-detail-button:hover {
   background: #fbfcff;
 }
-.app-detail-button h2 {
+.app-detail-button h3 {
   margin: 0.4rem 0 0.6rem;
   font-size: 1.22rem;
 }
@@ -909,7 +927,8 @@ dd {
   }
   .search-bar select {
     min-width: 100px;
-    width: 110px;
+    width: auto;
+    flex: 1;
     font-size: 0.86rem;
     padding-left: 0.4rem;
   }
@@ -919,6 +938,7 @@ dd {
   }
   .search-input {
     min-width: 0;
+    flex-basis: 100%;
   }
   .app-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -931,7 +951,7 @@ dd {
   .app-detail-button {
     padding: 1rem 0.9rem 0.4rem;
   }
-  .app-detail-button h2 {
+  .app-detail-button h3 {
     font-size: 1.05rem;
   }
   .app-detail-button p {
