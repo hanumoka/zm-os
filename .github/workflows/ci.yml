@@ -74,7 +74,9 @@ jobs:
   web-flows:
     name: isolated web consent · deletion · moderation · runtime
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    # Linux 의존성 설치가 9분 40초 걸려 56개 검사 성공 뒤 정리 단계가 취소된 기록이 있다.
+    # 검사와 artifact·DB·캐시 정리까지 마치도록 여유를 둔다.
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
